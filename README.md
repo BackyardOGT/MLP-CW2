@@ -2,6 +2,26 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+
+## Usage
+
+You'll need python, flask and npm/yarn
+
+Change `api/run.sh` to instructions to load flask if you a virtualenv.
+If you don't use a virtualenv then just make it do `flask run` in that folder.
+
+#### `cd MLP_CW2`
+
+In one terminal, start the flask server (this will call `api/run.sh`)
+
+#### `yarn start-api`
+
+In another start the front end
+
+#### `yarn start`
+
+Should open a browser but if not then see below for url.
+
 ## Available Scripts
 
 In the project directory, you can run:
