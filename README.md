@@ -7,12 +7,12 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 You'll need python, flask and npm/yarn
 
-Change `api/run.sh` to instructions to load flask if you a virtualenv.
+It should work as it but you may need to change `onitama/run.sh` to instructions to load flask if you a virtualenv.
 If you don't use a virtualenv then just make it do `flask run` in that folder.
 
 #### `cd MLP_CW2`
 
-In one terminal, start the flask server (this will call `api/run.sh`)
+In one terminal, start the flask server (this will call `onitama/run.sh`)
 
 #### `yarn start-api`
 
