@@ -1,15 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { King, Pawn } from "./Pieces";
-import { bin } from "mathjs";
 import * as mathjs from "mathjs";
 
 export default function Board({
   state,
   bindSquares,
-  boardColours,
   setPieceSelected,
   currentPlayer,
   pieceSelected,
+  cardSelected,
 }) {
   // 5 x 5 grid of divs
   let i, j;
@@ -20,8 +19,10 @@ export default function Board({
         <Square
           key={i + ", " + j}
           pos={[i, j]}
-          colour={boardColours[i][j]}
+          pieceSelected={pieceSelected}
           bindSquares={bindSquares}
+          cardSelected={cardSelected}
+          currentPlayer={currentPlayer}
         />
       );
     }
@@ -78,28 +79,48 @@ export default function Board({
   );
 }
 
-export function getInitBoard() {
-  let initBoardColours = Array.from({ length: 5 }, () =>
-    Array.from({ length: 5 }, () => "transparent")
-  );
-  // chess board pattern
-  let i, j;
-  for (i = 0; i < 5; i++) {
-    for (j = 0; j < 5; j++) {
-      if ((i + j) % 2 === 0) {
-        // coloured squares
-        // +1 bc css grids are 1-indexed
-        initBoardColours[i][j] = "red";
-      }
-    }
-  }
-  return initBoardColours;
-}
+export function Square({
+  pos,
+  pieceSelected,
+  currentPlayer,
+  cardSelected,
+  bindSquares,
+}) {
+  const [i, j] = pos;
+  const initColour = (i + j) % 2 === 0 ? "red" : "transparent";
+  const [colour, setColour] = useState(initColour);
 
-export function Square({ pos, colour, bindSquares }) {
   const clickHandler = () => {
     if (bindSquares) bindSquares(pos);
   };
+
+  useEffect(() => {
+    const colourValidMove = () => {
+      let newColour = initColour;
+      const cardData = cardSelected.data;
+      // where on card is this wrt selected piece
+      const [iCard, jCard] = mathjs.subtract(
+        mathjs.add([i, j], [2, 2]),
+        pieceSelected.pos
+      );
+      // need to flip if other player
+      let iFlipped = currentPlayer === 2 ? 5 - iCard - 1 : iCard;
+      let jFlipped = currentPlayer === 2 ? 5 - jCard - 1 : jCard;
+      // card values are 1 and 0
+      if (0 <= iFlipped && iFlipped <= 4 && 0 <= jFlipped && jFlipped <= 4) {
+        if (cardData[iFlipped][jFlipped]) {
+          newColour = "orange";
+        }
+      }
+      setColour(newColour);
+    };
+
+    if (pieceSelected && cardSelected) {
+      colourValidMove();
+    } else {
+      setColour(initColour);
+    }
+  }, [initColour, pieceSelected, cardSelected, i, j, currentPlayer]);
 
   return (
     <div
