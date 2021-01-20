@@ -9,6 +9,7 @@ export default function Board({
   currentPlayer,
   pieceSelected,
   cardSelected,
+  playerData,
 }) {
   // 5 x 5 grid of divs
   let i, j;
@@ -23,6 +24,7 @@ export default function Board({
           bindSquares={bindSquares}
           cardSelected={cardSelected}
           currentPlayer={currentPlayer}
+          playerData={playerData}
         />
       );
     }
@@ -85,18 +87,34 @@ export function Square({
   currentPlayer,
   cardSelected,
   bindSquares,
+  playerData,
 }) {
   const [i, j] = pos;
   const initColour = (i + j) % 2 === 0 ? "red" : "transparent";
   const [colour, setColour] = useState(initColour);
+  const [validMove, setValidMove] = useState(false);
 
   const clickHandler = () => {
-    if (bindSquares) bindSquares(pos);
+    if (bindSquares && validMove) bindSquares(pos);
   };
 
   useEffect(() => {
-    const colourValidMove = () => {
-      let newColour = initColour;
+    const [i, j] = pos;
+
+    function isOccupied() {
+      // check king
+      if (pos.every((v, i) => v === playerData.king[i])) {
+        console.log(playerData.king, playerData.pawns, pos, true);
+        return true;
+      }
+      // otherwise occupied if any pawns are
+      return playerData.pawns.some((pawnPos) => {
+        return pos.every((v, i) => v === pawnPos[i]);
+      });
+    }
+
+    const updateValidMove = () => {
+      let valid = false;
       const cardData = cardSelected.data;
       // where on card is this wrt selected piece
       const [iCard, jCard] = mathjs.subtract(
@@ -104,23 +122,36 @@ export function Square({
         pieceSelected.pos
       );
       // need to flip if other player
-      let iFlipped = currentPlayer === 2 ? 5 - iCard - 1 : iCard;
-      let jFlipped = currentPlayer === 2 ? 5 - jCard - 1 : jCard;
+      let iFlipped = currentPlayer === 2 ? 4 - iCard : iCard;
+      let jFlipped = currentPlayer === 2 ? 4 - jCard : jCard;
       // card values are 1 and 0
       if (0 <= iFlipped && iFlipped <= 4 && 0 <= jFlipped && jFlipped <= 4) {
-        if (cardData[iFlipped][jFlipped]) {
-          newColour = "orange";
+        if (cardData[iFlipped][jFlipped] && !isOccupied()) {
+          valid = true;
         }
       }
-      setColour(newColour);
+      setValidMove(valid);
+      return valid;
     };
 
+    let newColour = initColour;
+
     if (pieceSelected && cardSelected) {
-      colourValidMove();
-    } else {
-      setColour(initColour);
+      updateValidMove();
+      if (validMove) {
+        newColour = "orange";
+      }
     }
-  }, [initColour, pieceSelected, cardSelected, i, j, currentPlayer]);
+    setColour(newColour);
+  }, [
+    validMove,
+    initColour,
+    pieceSelected,
+    cardSelected,
+    pos,
+    currentPlayer,
+    playerData,
+  ]);
 
   return (
     <div

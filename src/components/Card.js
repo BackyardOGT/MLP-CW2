@@ -27,10 +27,15 @@ export function CardSquare({ pos, player, data }) {
   );
 }
 
-export default function Card({ data, id, player, setCardSelected }) {
+export default function Card({
+  data,
+  id,
+  player,
+  currentPlayer,
+  setCardSelected,
+}) {
   const onClick = () => {
-    console.log("Card", id);
-    setCardSelected({ id, data });
+    if (player === currentPlayer) setCardSelected({ id, data });
   };
 
   // 5 x 5 grid of divs

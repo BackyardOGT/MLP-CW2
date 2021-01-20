@@ -1,19 +1,23 @@
-import time
-from flask import Flask, request, jsonify
-from board import Game
-import json
+from flask import Flask, request
+from game import Game
 
 app = Flask(__name__)
 
-board = Game()
+game = Game()
 
 
 @app.route('/getState')
 def get_current_state():
-    return board.get()
+    return game.get()
 
 
 @app.route('/sendMove', methods=['GET', 'POST'])
 def handle_move():
     data = request.json
-    return board.step(data)
+    return game.step(data)
+
+
+@app.route('/reset')
+def reset():
+    game.reset()
+    return game.get()

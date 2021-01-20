@@ -15,8 +15,8 @@ function Piece({
 }) {
   let [row, col] = pos;
   const clickHandler = () => {
-    console.log("Piece clicked", name, pos, currentPlayer, player);
     if (currentPlayer === player) {
+      console.log("Piece clicked", name, pos, currentPlayer, i, player);
       setPieceSelected({ name, player, i, pos });
     } else if (player !== currentPlayer) {
       // try to take

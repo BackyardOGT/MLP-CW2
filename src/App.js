@@ -15,7 +15,7 @@ function App() {
 
   const sendMove = (piece, card, pos) => {
     const move = { ...piece, id: card.id, pos };
-    console.log("move", move);
+    console.log(move);
     fetch("/sendMove", {
       method: "POST",
       headers: {
@@ -30,6 +30,14 @@ function App() {
       });
   };
 
+  const resetGame = () => {
+    fetch("/reset")
+      .then((res) => res.json())
+      .then((data) => {
+        setBoardState(data);
+      });
+  };
+
   useEffect(() => {
     if (!boardState) readApi();
   });
@@ -38,7 +46,12 @@ function App() {
     <div className="App">
       <header className="App-header">
         {boardState ? (
-          <Game state={boardState} readApi={readApi} sendMove={sendMove} />
+          <Game
+            state={boardState}
+            readApi={readApi}
+            sendMove={sendMove}
+            resetGame={resetGame}
+          />
         ) : (
           <></>
         )}
