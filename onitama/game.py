@@ -2,7 +2,6 @@ import copy
 
 import numpy as np
 
-
 class Piece:
     def __init__(self, name, state):
         self.name = name
@@ -47,6 +46,11 @@ card2 = [[0, 0, 0, 1, 0],
          [0, 0, 0, 0, 0],
          [0, 0, 0, 0, 0],
          [0, 0, 0, 0, 0], ]
+card3 = [[0, 0, 0, 0, 0],
+         [0, 1, 0, 0, 0],
+         [0, 1, 0, 0, 0],
+         [0, 1, 0, 0, 0],
+         [1, 0, 0, 0, 0], ]
 
 
 class Player:
@@ -107,10 +111,10 @@ class Game:
             return self.get()
 
         curP, otherP = self.get_current_players()
-        self.handle_take_pawn(otherP, move)
+        kingTaken = self.handle_take(otherP, move)
         newCards = self.handle_cards(curP, move)
         curP.step(move, newCards)
-        if self.check_win():
+        if self.reached_goal(curP) or kingTaken:
             print("Done")
             return self.get(done=True)
 
@@ -125,14 +129,17 @@ class Game:
         self.player2 = Player(False, p2CardsInit)
         self.isPlayer1 = True
 
-        self.spare_card = card1
+        self.spare_card = card3
 
     def check_valid_move(self, move):
         # TODO: can't move into check
         curP, otherP = self.get_current_players()
-        return self.check_unoccupied(curP, otherP, move) and self.check_move_on_card(curP, move)
+        return self.check_unoccupied(curP, move) and self.check_move_on_card(curP, move)
 
-    def check_unoccupied(self, player, otherPlayer, move):
+    def check_unoccupied(self, player, move):
+        """
+        Checks this is unoccupied by any of own pieces
+        """
         piece = move["name"]
         pos = move["pos"]
         if piece == "king":
@@ -146,14 +153,7 @@ class Game:
                     return False
             if np.all(pos == player.king.get()):
                 return False
-            # can't take other king, game should have ended checkmate
-            if np.all(pos == otherPlayer.king.get()):
-                return False
         return True
-
-    def check_win(self):
-        curP, otherP = self.get_current_players()
-        return self.reached_goal() or self.is_checkmate(curP, otherP)
 
     def handle_take_pawn(self, playerOther, move):
         pos = move["pos"]
@@ -183,63 +183,10 @@ class Game:
         other_player = self.player2 if self.isPlayer1 else self.player1
         return current_player, other_player
 
-    def reached_goal(self):
+    def reached_goal(self, player):
         # this is post move so check if king in goal
         goalPos = [0, 2] if self.isPlayer1 else [4, 2]
-        player, _ = self.get_current_players()
         return np.all(player.king.get() == goalPos)
-
-    def is_checkmate(self, curP, otherP):
-        """
-        :param curP: move just taken
-        :param otherP: who could be in check
-        """
-        # called after move of currentP
-        # try all possible moves of otherP
-        for move in self.get_valid_moves(otherP, curP):
-            curPSim, otherPSim = self.simulate_step(curP, otherP, move)
-            if not self.in_check(curPSim, otherPSim):
-                return False
-        return True
-
-    def get_valid_moves(self, curP, otherP):
-        # TODO: test this line
-        for cardId, card in enumerate(curP.cards):
-            moves = []
-            for p in np.reshape(np.where(card), [2, -1]).T:
-                # king
-                boardPos = self.card_to_board(curP.king.get(), p)
-                move = {"name": "king", "pos": boardPos, "id": cardId}
-                if self.check_unoccupied(curP, otherP, move):
-                    moves.append(move)
-                for i, pawnPos in enumerate(curP.pawns.get()):
-                    boardPos = self.card_to_board(pawnPos, p)
-                    move = {"name": "pawn", "pos": boardPos, "i": i, "id": cardId}
-                    # since we got these moves from card we only need check they;re unoccupied now
-                    if self.check_unoccupied(curP, otherP, move):
-                        moves.append(move)
-        return moves
-
-    def card_to_board(self, piecePos, cardPos):
-        return np.subtract(np.add(cardPos, piecePos), [2, 2])
-
-    def in_check(self, currentP, otherP):
-        """
-        :param currentP: player who moved
-        :param otherP: player who is in potential check
-        """
-        for move in self.get_valid_moves(currentP, otherP):
-            # if any moves could take the king
-            if np.all(move["pos"] == otherP.king.get()):
-                return True
-        return False
-
-    def simulate_step(self, currentP, otherP, move):
-        currentPSim = copy.deepcopy(currentP)
-        otherPSim = copy.deepcopy(otherP)
-        currentPSim.step(move, self.spare_card)
-        self.handle_take_pawn(otherPSim, move)
-        return currentPSim, otherPSim
 
     def handle_cards(self, curP, move):
         """
@@ -249,3 +196,18 @@ class Game:
         card = self.spare_card
         self.spare_card = curP.cards[cardId]
         return card
+
+    def handle_take(self, otherP, move):
+        """
+        Returns true if king taken -> game is won
+        """
+        self.handle_take_pawn(otherP, move)
+        return self.handle_take_king(otherP, move)
+
+    def handle_take_king(self, otherP, move):
+        """
+        Takes king if can, return True if so as game won
+        """
+        if np.all(move["pos"] == otherP.king.get()):
+            return True
+        return False

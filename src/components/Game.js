@@ -4,9 +4,10 @@ import Board from "./Board";
 import * as mathjs from "mathjs";
 
 /*
- *  TODO: check and return win
- *   TODO: can't take a king - block move
+ *  TODO: taking king is winning move it's not like chess
  *  TODO: change cards each turn and display preview card
+ *  TODO: corner case: It is possible that you will find that you cannot use any of your cards to make a legal move. If this happens - and only then - you must pass your turn.
+ *    None of your pawns will move. But like the river that constantly flows, you cannot remain unchanged: you must still choose one of the two cards in front of you, place it to the left of the playmat and rotate it, then take the card from the right side of the board.
  */
 
 export default function Game({ state, sendMove, resetGame }) {
@@ -125,6 +126,7 @@ export default function Game({ state, sendMove, resetGame }) {
           justifyContent: "space-around",
         }}
       >
+        <Card data={state.spare_card} player={1} id={-1} currentPlayer={1} />
         <button onClick={resetGame}>Reset</button>
       </div>
     </div>
