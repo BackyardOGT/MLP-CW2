@@ -113,7 +113,7 @@ export function Square({
       });
     }
 
-    const updateValidMove = () => {
+    const isValidMove = () => {
       let valid = false;
       const cardData = cardSelected.data;
       // where on card is this wrt selected piece
@@ -130,15 +130,15 @@ export function Square({
           valid = true;
         }
       }
-      setValidMove(valid);
       return valid;
     };
 
     let newColour = initColour;
 
     if (pieceSelected && cardSelected) {
-      updateValidMove();
-      if (validMove) {
+      const valid = isValidMove();
+      setValidMove(valid);
+      if (valid) {
         newColour = "orange";
       }
     }

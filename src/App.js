@@ -27,6 +27,9 @@ function App() {
       .then((res) => res.json())
       .then((data) => {
         setBoardState(data);
+        if (data.done) {
+          alert("Game over");
+        }
       });
   };
 

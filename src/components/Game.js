@@ -5,6 +5,7 @@ import * as mathjs from "mathjs";
 
 /*
  *  TODO: check and return win
+ *   TODO: can't take a king - block move
  *  TODO: change cards each turn and display preview card
  */
 
