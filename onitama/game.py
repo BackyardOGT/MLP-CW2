@@ -35,7 +35,6 @@ class Pawns(Piece):
         self.state.remove(item)
 
 
-# TODO: properly
 card1 = [[0, 0, 0, 0, 0],
          [0, 0, 1, 0, 0],
          [0, 1, 0, 1, 0],

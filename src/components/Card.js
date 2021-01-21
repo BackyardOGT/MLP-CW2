@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { set } from "mathjs/lib/esm/utils/object";
 
 export function CardSquare({ pos, player, data }) {
   const [i, j] = pos;
@@ -10,9 +11,10 @@ export function CardSquare({ pos, player, data }) {
     // server is row, col
     if (data[player === 2 ? 5 - i - 1 : i][player === 2 ? 5 - j - 1 : j]) {
       setColour("blue");
-    }
-    if (i === j && i === 2) {
+    } else if (i === j && i === 2) {
       setColour("green");
+    } else {
+      setColour(initColour);
     }
   }, [data, player, i, j]);
 
@@ -35,7 +37,8 @@ export default function Card({
   setCardSelected,
 }) {
   const onClick = () => {
-    if (player === currentPlayer) setCardSelected({ id, data });
+    if (player === currentPlayer && id !== "spare")
+      setCardSelected({ id, data });
   };
 
   // 5 x 5 grid of divs
@@ -72,7 +75,7 @@ export default function Card({
       >
         {squares}
       </div>
-      Player {player}
+      Card {id}
     </div>
   );
 }
