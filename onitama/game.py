@@ -131,7 +131,6 @@ class Game:
         self.spare_card = card3
 
     def check_valid_move(self, move):
-        # TODO: can't move into check
         curP, otherP = self.get_current_players()
         return self.check_unoccupied(curP, move) and self.check_move_on_card(curP, move)
 
