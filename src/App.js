@@ -6,7 +6,7 @@ function App() {
   const [boardState, setBoardState] = useState(null);
 
   const readApi = () => {
-    fetch("/getState")
+    fetch("http://localhost:5000/getState")
       .then((res) => res.json())
       .then((data) => {
         setBoardState(data);
@@ -16,7 +16,7 @@ function App() {
   const sendMove = (piece, card, pos) => {
     const move = { ...piece, id: card.id, pos };
     console.log(move);
-    fetch("/sendMove", {
+    fetch("http://localhost:5000/sendMove", {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -34,7 +34,7 @@ function App() {
   };
 
   const resetGame = () => {
-    fetch("/reset")
+    fetch("http://localhost:5000/reset")
       .then((res) => res.json())
       .then((data) => {
         setBoardState(data);

@@ -1,7 +1,10 @@
 from flask import Flask, request
 from game import Game
+from flask_cors import CORS
+
 
 app = Flask(__name__)
+CORS(app)
 
 game = Game()
 

@@ -38,5 +38,6 @@
     ]
   },
   "proxy": "http://localhost:5000",
-  "devDependencies": {}
+  "devDependencies": {},
+  "homepage": "./"
 }
