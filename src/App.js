@@ -9,6 +9,7 @@ function App() {
     fetch("http://localhost:5000/getState")
       .then((res) => res.json())
       .then((data) => {
+        console.log(data)
         setBoardState(data);
       });
   };

@@ -88,3 +88,9 @@ all_cards = [tiger, dragon, frog, rabbit,
             crab, elephant, goose, rooster,
             monkey, mantis, horse, ox,
             crane, boar, eel, cobra]
+
+
+def get_init_cards():
+    return ([all_cards[0], all_cards[1]],
+            [all_cards[2], all_cards[3]],
+            [all_cards[4]])

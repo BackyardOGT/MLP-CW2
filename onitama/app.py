@@ -17,7 +17,7 @@ def get_current_state():
 @app.route('/sendMove', methods=['GET', 'POST'])
 def handle_move():
     data = request.json
-    return game.step(data)
+    return game.stepApi(data)
 
 
 @app.route('/reset')

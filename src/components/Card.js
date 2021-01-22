@@ -5,7 +5,7 @@ export function CardSquare({ pos, player, data }) {
   const [i, j] = pos;
   const initColour = (i + j) % 2 === 0 ? "red" : "transparent";
   const [colour, setColour] = useState(initColour);
-
+  console.log(pos, player, data)
   useEffect(() => {
     // if it's valid then blue
     // server is row, col
