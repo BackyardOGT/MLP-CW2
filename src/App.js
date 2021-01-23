@@ -9,7 +9,6 @@ function App() {
     fetch("http://localhost:5000/getState")
       .then((res) => res.json())
       .then((data) => {
-        console.log(data)
         setBoardState(data);
       });
   };
@@ -57,7 +56,7 @@ function App() {
             resetGame={resetGame}
           />
         ) : (
-          <></>
+          <>No board state, check Flask backend</>
         )}
       </header>
     </div>

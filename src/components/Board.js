@@ -66,17 +66,19 @@ export default function Board({
   placePlayer(state.player2, 2);
 
   return (
-    <div
-      style={{
-        width: 500,
-        height: 500,
-        display: "grid",
-        gridTemplateRows: "1fr ".repeat(5),
-        gridTemplateColumns: "1fr ".repeat(5),
-      }}
-    >
-      {squares}
-      {pieces}
+    <div>
+      <div
+        style={{
+          width: 600,
+          height: 600,
+          display: "grid",
+          gridTemplateRows: "20% ".repeat(5),
+          gridTemplateColumns: "20% ".repeat(5),
+        }}
+      >
+        {squares}
+        {pieces}
+      </div>
     </div>
   );
 }
@@ -90,7 +92,7 @@ export function Square({
   playerData,
 }) {
   const [i, j] = pos;
-  const initColour = (i + j) % 2 === 0 ? "red" : "transparent";
+  const initColour = (i + j) % 2 === 0 ? "var(--light)" : "transparent";
   const [colour, setColour] = useState(initColour);
   const [validMove, setValidMove] = useState(false);
 
@@ -139,7 +141,7 @@ export function Square({
       const valid = isValidMove();
       setValidMove(valid);
       if (valid) {
-        newColour = "orange";
+        newColour = "var(--validMove)";
       }
     }
     setColour(newColour);

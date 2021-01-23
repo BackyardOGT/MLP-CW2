@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import Card from "./Card";
-import Board from "./Board";
+import Board, { Square } from "./Board";
 import * as mathjs from "mathjs";
-
+import "./Game.css";
 /*
  * TODO: clean up and comment
  *  TODO: corner case: It is possible that you will find that you cannot use any of your cards to make a legal move. If this happens - and only then - you must pass your turn.
@@ -65,7 +65,7 @@ export default function Game({ state, sendMove, resetGame }) {
   return (
     <div
       style={{
-        position: "absolute",
+        marginTop: 25,
         display: "flex",
         flexDirection: "column",
         height: "100%",
@@ -80,20 +80,25 @@ export default function Game({ state, sendMove, resetGame }) {
           justifyContent: "space-around",
         }}
       >
-        <Card
-          data={state.player1.cards[0]}
-          player={1}
-          id={0}
-          setCardSelected={setCardSelected}
-          currentPlayer={currentPlayer}
-        />
-        <Card
-          data={state.player1.cards[1]}
-          player={1}
-          id={1}
-          setCardSelected={setCardSelected}
-          currentPlayer={currentPlayer}
-        />
+        <div className="cardDiv">
+          <h2>Player 1</h2>
+          <Card
+            data={state.player1.cards[0]}
+            player={1}
+            id={0}
+            setCardSelected={setCardSelected}
+            currentPlayer={currentPlayer}
+            cardSelected={cardSelected}
+          />
+          <Card
+            data={state.player1.cards[1]}
+            player={1}
+            id={1}
+            setCardSelected={setCardSelected}
+            currentPlayer={currentPlayer}
+            cardSelected={cardSelected}
+          />
+        </div>
         <Board
           state={state}
           bindSquares={bindSquares}
@@ -103,30 +108,47 @@ export default function Game({ state, sendMove, resetGame }) {
           cardSelected={cardSelected}
           playerData={playerData}
         />
-        <Card
-          data={state.player2.cards[0]}
-          player={2}
-          id={0}
-          setCardSelected={setCardSelected}
-          currentPlayer={currentPlayer}
-        />
-        <Card
-          data={state.player1.cards[1]}
-          player={2}
-          id={1}
-          setCardSelected={setCardSelected}
-          currentPlayer={currentPlayer}
-        />
+        <div className="cardDiv">
+          <h2>Player 2</h2>
+          <Card
+            data={state.player2.cards[0]}
+            player={2}
+            id={0}
+            setCardSelected={setCardSelected}
+            currentPlayer={currentPlayer}
+            cardSelected={cardSelected}
+          />
+          <Card
+            data={state.player1.cards[1]}
+            player={2}
+            id={1}
+            setCardSelected={setCardSelected}
+            currentPlayer={currentPlayer}
+            cardSelected={cardSelected}
+          />
+        </div>
       </div>
       <div
         style={{
           display: "flex",
-          width: "100%",
+          margin: "0 auto",
+          marginTop: 25,
+          width: "50%",
           justifyContent: "space-around",
         }}
       >
-        <Card data={state.spare_card} player={1} currentPlayer={1} id="spare" />
-        <button onClick={resetGame}>Reset</button>
+        <Card data={state.spare_card} player={1} currentPlayer={1} id="next" />
+        <div
+          style={{
+            margin: 10,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+          }}
+        >
+          <button onClick={resetGame}>Reset</button>
+          <p>Turn: Player {currentPlayer}</p>
+        </div>
       </div>
     </div>
   );

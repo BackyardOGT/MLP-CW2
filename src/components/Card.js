@@ -1,22 +1,24 @@
 import React, { useEffect, useState } from "react";
 import { set } from "mathjs/lib/esm/utils/object";
 
-export function CardSquare({ pos, player, data }) {
+export function CardSquare({ pos, player, data, thisCardSelected }) {
   const [i, j] = pos;
-  const initColour = (i + j) % 2 === 0 ? "red" : "transparent";
+  const initColour = (i + j) % 2 === 0 ? "var(--light)" : "transparent";
   const [colour, setColour] = useState(initColour);
-  console.log(pos, player, data)
+  console.log(pos, player, data);
   useEffect(() => {
     // if it's valid then blue
     // server is row, col
     if (data[player === 2 ? 5 - i - 1 : i][player === 2 ? 5 - j - 1 : j]) {
-      setColour("blue");
+      setColour("var(--cardValid");
+      if (thisCardSelected) setColour("var(--cardValidHighlight");
     } else if (i === j && i === 2) {
-      setColour("green");
+      setColour("var(--cardCenter");
+      if (thisCardSelected) setColour("var(--cardCenterHighlight");
     } else {
       setColour(initColour);
     }
-  }, [data, player, i, j]);
+  }, [initColour, thisCardSelected, data, player, i, j]);
 
   return (
     <div
@@ -35,9 +37,10 @@ export default function Card({
   player,
   currentPlayer,
   setCardSelected,
+  cardSelected,
 }) {
   const onClick = () => {
-    if (player === currentPlayer && id !== "spare")
+    if (player === currentPlayer && id !== "next")
       setCardSelected({ id, data });
   };
 
@@ -52,6 +55,9 @@ export default function Card({
           pos={[i, j]}
           player={player}
           data={data}
+          thisCardSelected={
+            cardSelected && cardSelected.id === id && currentPlayer === player
+          }
         />
       );
     }
@@ -65,8 +71,8 @@ export default function Card({
     >
       <div
         style={{
-          width: 300,
-          height: 300,
+          width: 200,
+          height: 200,
           display: "grid",
           gridTemplateRows: "1fr ".repeat(5),
           gridTemplateColumns: "1fr ".repeat(5),
@@ -75,7 +81,7 @@ export default function Card({
       >
         {squares}
       </div>
-      Card {id}
+      {id === "next" ? "Next card" : null}
     </div>
   );
 }
