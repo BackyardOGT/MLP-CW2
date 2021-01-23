@@ -3,13 +3,9 @@ import Card from "./Card";
 import Board, { Square } from "./Board";
 import * as mathjs from "mathjs";
 import "./Game.css";
-/*
- * TODO: clean up and comment
- *  TODO: corner case: It is possible that you will find that you cannot use any of your cards to make a legal move. If this happens - and only then - you must pass your turn.
- *    None of your pawns will move. But like the river that constantly flows, you cannot remain unchanged: you must still choose one of the two cards in front of you, place it to the left of the playmat and rotate it, then take the card from the right side of the board.
- */
 
-export default function Game({ state, sendMove, resetGame }) {
+
+export default function Game({ state, sendMove, resetGame, toggleGameMode }) {
   const [pieceSelected, setPieceSelected] = useState(null);
   const [cardSelected, setCardSelected] = useState(null);
   const currentPlayer = state.player;
@@ -119,7 +115,7 @@ export default function Game({ state, sendMove, resetGame }) {
             cardSelected={cardSelected}
           />
           <Card
-            data={state.player1.cards[1]}
+            data={state.player2.cards[1]}
             player={2}
             id={1}
             setCardSelected={setCardSelected}
@@ -147,7 +143,9 @@ export default function Game({ state, sendMove, resetGame }) {
           }}
         >
           <button onClick={resetGame}>Reset</button>
+          <button onClick={toggleGameMode}>Toggle game mode</button>
           <p>Turn: Player {currentPlayer}</p>
+          <p>Move: {state.mode}</p>
         </div>
       </div>
     </div>

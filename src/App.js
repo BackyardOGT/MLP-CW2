@@ -15,7 +15,6 @@ function App() {
 
   const sendMove = (piece, card, pos) => {
     const move = { ...piece, id: card.id, pos };
-    console.log(move);
     fetch("http://localhost:5000/sendMove", {
       method: "POST",
       headers: {
@@ -27,14 +26,22 @@ function App() {
       .then((res) => res.json())
       .then((data) => {
         setBoardState(data);
-        if (data.done) {
-          alert("Game over");
+        if (data.winner !== 0) {
+          alert("Winner is player " + data.winner);
         }
       });
   };
 
   const resetGame = () => {
     fetch("http://localhost:5000/reset")
+      .then((res) => res.json())
+      .then((data) => {
+        setBoardState(data);
+      });
+  };
+
+  const toggleGameMode = () => {
+    fetch("http://localhost:5000/toggleGameMode")
       .then((res) => res.json())
       .then((data) => {
         setBoardState(data);
@@ -54,6 +61,7 @@ function App() {
             readApi={readApi}
             sendMove={sendMove}
             resetGame={resetGame}
+            toggleGameMode={toggleGameMode}
           />
         ) : (
           <>No board state, check Flask backend</>

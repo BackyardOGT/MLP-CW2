@@ -1,9 +1,11 @@
 import numpy as np
 
 from cards import get_init_cards
-
+from agents import RandomAgent
 
 KING_ID = -1
+
+
 # Pawn ids = [0, 4]
 
 class Piece:
@@ -22,11 +24,15 @@ class Move:
     """
     Parses json to move object
     """
+
     def __init__(self, json):
         self.pos = json["pos"]  # [row, col]
         self.isKing = json["name"] == "king"  # T/F
         self.i = -1 if self.isKing else int(json["i"])  # [0-4] for pawn, KING_ID for king
         self.cardId = int(json["id"])  # 0 / 1 for card
+
+    def __str__(self):
+        return "Move : pos {}, isKing {}, i {}, cardId {}".format(self.pos, self.isKing, self.i, self.cardId)
 
 
 class Player:
@@ -40,7 +46,7 @@ class Player:
         self.cards = cards
         # init pieces
         self.king = Piece([row, 2], KING_ID)
-        self.pawns = [Piece([row, i],  i) for i in range(5) if i != 2]
+        self.pawns = [Piece([row, i], i) for i in range(5) if i != 2]
 
     def to_dict(self):
         return {self.player: {"king": self.king.get(), "pawns": [p.get() for p in self.pawns], "cards": self.cards}}
@@ -57,11 +63,12 @@ class Player:
         self.cards[int(move.cardId)] = card
 
 
-class Game:
+class PvP:
     def __init__(self):
         self.reset()
+        self.mode = "PvP"
 
-    def get(self, done=False):
+    def get(self):
         """
         Returns dict with positions in [row, col], zero-indexed
         In API format for front end, for each player:
@@ -74,7 +81,8 @@ class Game:
                 **self.player2.to_dict(),
                 "player": 1 if self.isPlayer1 else 2,
                 "spare_card": self.spare_card,
-                "done": done}
+                "winner": self.winner,
+                "mode": self.mode}
 
     def stepApi(self, moveJson):
         move = Move(moveJson)
@@ -100,7 +108,8 @@ class Game:
         curP.step(move, newCards)
         if self.reached_goal(curP) or kingTaken:
             print("Done")
-            return self.get(done=True)
+            self.winner = 1 if self.isPlayer1 else 2
+            return self.get()
 
         self.isPlayer1 = not self.isPlayer1
         return self.get()
@@ -114,9 +123,17 @@ class Game:
 
         self.spare_card = spare_card
 
+        # 0 for none, 1 for player 1, 2 for player 2
+        self.winner = 0
+
     def check_valid_move(self, move):
         curP, otherP = self.get_current_players()
-        return self.check_unoccupied(curP, move) and self.check_move_on_card(curP, move)
+        return self.check_on_board(move) \
+               and self.check_unoccupied(curP, move) \
+               and self.check_move_on_card(curP, move)
+
+    def check_on_board(self, move):
+        return np.all(np.greater_equal(move.pos, 0)) and np.all(np.less_equal(move.pos, 4))
 
     def check_unoccupied(self, player, move):
         """
@@ -124,14 +141,13 @@ class Game:
         """
         if move.isKing:
             for pawn in player.pawns:
-                if np.all(move.pos == pawn.get()):
+                if np.array_equal(move.pos, pawn.get()):
                     return False
         else:
-            i = int(move.i)
             for j, pawn in enumerate(player.pawns):
-                if np.all(move.pos == pawn.get) and i != j:
+                if np.array_equal(move.pos, pawn.get) and move.i != j:
                     return False
-            if np.all(move.pos == player.king.get()):
+            if np.array_equal(move.pos, player.king.get()):
                 return False
         return True
 
@@ -139,14 +155,16 @@ class Game:
         if move.isKing:
             piecePos = player.king.get()
         else:  # pawn
-            i = int(move.i)
-            piecePos = player.pawns[i].get()
-        posOnCard = np.subtract(np.add(move.pos, [2, 2]), piecePos)
-        if not self.isPlayer1:
-            posOnCard = np.subtract([4, 4], posOnCard)
-        if np.all(posOnCard >= 0) and np.all(posOnCard <= 4):
+            piecePos = player.pawns[move.i].get()
+        posOnCard = self.board_to_card(move.pos, piecePos)
+        if np.all(np.greater_equal(posOnCard, 0)) and np.all(np.less_equal(posOnCard, 4)):
             if player.cards[move.cardId][posOnCard[0]][posOnCard[1]]:  # 1s and 0s so T/F
                 return True
+        print("Move not on card {}".format(move.cardId))
+        print("Move {}".format(move.pos))
+        print("Piece {}".format(piecePos))
+        print("Card {}".format(posOnCard))
+        print(player.cards[move.cardId])
         return False
 
     def get_current_players(self):
@@ -162,7 +180,7 @@ class Game:
         Called post movement so check if king in goal
         """
         goalPos = [0, 2] if self.isPlayer1 else [4, 2]
-        return np.all(player.king.get() == goalPos)
+        return np.array_equal(player.king.get(), goalPos)
 
     def handle_cards(self, curP, move):
         """
@@ -181,14 +199,65 @@ class Game:
         return self.check_take_king(otherP, move)
 
     def handle_take_pawn(self, playerOther, move):
-        for pawn in playerOther.pawns:
-            if np.all(move.pos == pawn.get()):
-                playerOther.pawns.taken(pawn.get())
+        for i, pawn in enumerate(playerOther.pawns):
+            if np.array_equal(move.pos, pawn.get()):
+                playerOther.pawns.pop(i)  # drop this pawn
 
     def check_take_king(self, otherP, move):
         """
          If move takes king, return True, game is won
         """
-        if np.all(move.pos == otherP.king.get()):
+        if np.array_equal(move.pos, otherP.king.get()):
             return True
         return False
+
+    def get_valid_moves(self, curP):
+        moves = []
+        for cardId, card in enumerate(curP.cards):
+            for p in np.reshape(np.where(card), [2, -1]).T:
+                # king
+                boardPos = self.card_to_board(curP.king.get(), p)
+                # since we got these moves from card we only need check they;re unoccupied now and on board
+                move = Move({"name": "king", "pos": boardPos, "id": cardId})
+                if self.check_unoccupied(curP, move) and self.check_on_board(move):
+                    moves.append(move)
+                for i, pawn in enumerate(curP.pawns):
+                    boardPos = self.card_to_board(pawn.get(), p)
+                    move = Move({"name": "pawn", "pos": boardPos, "id": cardId, "i": i})
+                    if self.check_unoccupied(curP, move) and self.check_on_board(move):
+                        moves.append(move)
+        return moves
+
+    def card_to_board(self, piecePos, cardPos):
+        """
+        Returns np array (note need to convert to list for json)
+        """
+        if self.isPlayer1:
+            return np.add(np.subtract(piecePos, [2, 2]), cardPos).tolist()
+        else:
+            return np.add(np.subtract(piecePos, cardPos), [2, 2]).tolist()
+
+    def board_to_card(self, boardPos, piecePos):
+        """
+        Returns np array (note need to convert to list for json)
+        """
+        if self.isPlayer1:
+            return np.subtract(np.add(boardPos, [2, 2]), piecePos).tolist()
+        else:
+            return np.subtract(np.add([2, 2], piecePos), boardPos).tolist()
+
+
+class VsBot(PvP):
+    def __init__(self):
+        super().__init__()
+        self.agent = RandomAgent()
+        self.mode = "VsBot"
+
+    def stepApi(self, moveJson):
+        move = Move(moveJson)
+        state = self.step(move)
+        # bot turn
+        if not self.winner:
+            agentMove = self.agent.get_action(self)
+            state = self.step(agentMove)
+        return state
