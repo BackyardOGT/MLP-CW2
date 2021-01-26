@@ -34,10 +34,13 @@ Then open `react/build/index.html` in a browser.
 
 #### Higher priority
 
-* Make FE display intermediate state between user and agent move
+* Test observations
+* What actions should env accept? How to pass and encode the legal moves into agent?
 * Corner case: It is possible that you will find that you cannot use any of your cards to make a legal move. If this happens - and only then - you must pass your turn. 
 <br/>None of your pawns will move. But like the river that constantly flows, you cannot remain unchanged: you must still choose one of the two cards in front of you, place it to the left of the playmat and rotate it, then take the card from the right side of the board.
 * Wrap flask app into a class instead of globals
+* Make FE display intermediate state between user and agent move
+* FE display bot vs bot
   
 #### General
 

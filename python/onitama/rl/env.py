@@ -1,4 +1,4 @@
-from onitama.game import VsBot, State
+from onitama.game import VsBot, State, Move
 from onitama.rl import RandomAgent
 import gym
 import numpy as np
@@ -29,7 +29,9 @@ class OnitamaEnv(gym.Env):
         self.game = VsBot(agent_type())
 
     def step(self, ac):
-        pass
+        move = self.get_move(ac)
+        self.game.step(move)
+        return self.get_obs()
 
     def reset(self):
         self.game.reset()
@@ -39,6 +41,9 @@ class OnitamaEnv(gym.Env):
         pass
 
     def get_obs(self):
+        """
+        Returns (5, 5, 9) see above
+        """
         # see game class for API
         game_state = State(self.game.get())
         obs = []
@@ -50,7 +55,13 @@ class OnitamaEnv(gym.Env):
         obs.append(game_state.spare_card)
         # board
         pawns_p1, king_p1 = get_board_state(game_state.player1_dict)
-        obs.append([pawns_p1, king_p1])
+        obs.append(pawns_p1)
+        obs.append(king_p1)
         pawns_p2, king_p2 = get_board_state(game_state.player2_dict)
-        obs.append([pawns_p2, king_p2])
-        return np.hstack(obs)
+        obs.append(pawns_p2)
+        obs.append(king_p2)
+        return np.stack(obs, -1)
+
+    def get_move(self, ac):
+        # TODO: see readme
+        raise NotImplementedError
