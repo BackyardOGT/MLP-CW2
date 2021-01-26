@@ -1,25 +1,34 @@
 
-## Update
-
-Need to install onitama now
-
-
-```
-cd python
-pip install -e .
-```
-
-
 ## Usage
 
 ```
+git clone ....
+cd MLP-CW2
+```
+
+#### Python
+
+See above, then
+
+Install the python library
+
+```
 cd python
 pip install -e .
+```
+
+#### UI
+
+See above, then
+
+To use backed for browser, run flask
+
+```
 cd flask
 flask run
 ```
 
-Then open `build/index.html` in a browser.
+Then open `react/build/index.html` in a browser.
 
 ## TODOs
 
