@@ -2,4 +2,4 @@
 source "/usr/local/bin/virtualenvwrapper.sh" && workon mlp && cd onitama && flask run
 
 # if you have no venv and just system installed python libraries, try this
-# cd onitama && flask run
+# cd flask && flask run

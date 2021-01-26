@@ -1,7 +1,6 @@
 import numpy as np
 
-from cards import get_init_cards
-from agents import RandomAgent
+from onitama.game.cards import get_init_cards
 
 KING_ID = -1
 
@@ -33,6 +32,26 @@ class Move:
 
     def __str__(self):
         return "Move : pos {}, isKing {}, i {}, cardId {}".format(self.pos, self.isKing, self.i, self.cardId)
+
+
+class State:
+    """
+    Parses JSON sent to FE to object for easier handling
+    """
+
+    def __init__(self, json):
+        self.player1_dict = json["player1"]
+        self.player2_dict = json["player2"]
+        self.current_player = json["player"]
+        self.spare_card = json["spare_card"]
+        self.winner = json["winner"]
+        self.mode = json["mode"]
+
+    def __str__(self):
+        return "State : current player {}, winner: {}, mode: {}\n" \
+               "spare_card: {}\nplayer 1: {}\nplayer2: {}".format(self.current_player, self.winner,
+                                                                  self.mode, self.spare_card, self.player1_dict,
+                                                                  self.player2_dict)
 
 
 class Player:
@@ -76,6 +95,7 @@ class PvP:
         player: 1 / 2        // which player
         spare_card: [5 x 5]  // card data
         done: false / true   // when game done
+        winner: 0 for none yet, 1 for p1, 2 for p2
         """
         return {**self.player1.to_dict(),
                 **self.player2.to_dict(),
@@ -248,9 +268,9 @@ class PvP:
 
 
 class VsBot(PvP):
-    def __init__(self):
+    def __init__(self, agent):
         super().__init__()
-        self.agent = RandomAgent()
+        self.agent = agent
         self.mode = "VsBot"
 
     def stepApi(self, moveJson):

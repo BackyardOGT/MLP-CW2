@@ -1,8 +1,21 @@
 
+## Update
+
+Need to install onitama now
+
+
+```
+cd python
+pip install -e .
+```
+
+
 ## Usage
 
 ```
-cd onimtama
+cd python
+pip install -e .
+cd flask
 flask run
 ```
 
