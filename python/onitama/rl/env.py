@@ -1,14 +1,14 @@
-from onitama.game import VsBot, State, Move
+from onitama.game import VsBot, State, get_move
 from onitama.rl import RandomAgent
 import gym
 import numpy as np
 
 
 def get_board_state(player_dict):
-    pawns = np.zeros((5, 5))
-    king = np.zeros((5, 5))
-    for (i, j) in player_dict["pawns"]:
-        pawns[i][j] = 1
+    pawns = np.zeros((5, 5, 4))
+    king = np.zeros((5, 5, 1))
+    for k, (i, j) in enumerate(player_dict["pawns"]):
+        pawns[i][j][k] = 1
     k, l = player_dict["king"]
     king[k][l] = 1
     return pawns, king
@@ -16,20 +16,26 @@ def get_board_state(player_dict):
 
 class OnitamaEnv(gym.Env):
     """
-    Observations:
-        (5 x 5 x 6) cards - 2 current and 1 next for each player
-        (5 x 5 x 4) board - kings and pawns for each player
-    Actions:
-        (5 x 5 x 25) board spaces x number of moves - each filter is the probability of picking a piece
-        from this board location, filter dimesnions are 25 (5 x 5) possible moves to move to. S
-        oftmax over this and zero out invalid moves.
+    Defaults to player 1
+    See README for obs and ac space definitions
     """
-    def __init__(self, agent_type=RandomAgent):
+    def __init__(self, agent_type=RandomAgent, player=1):
         super(OnitamaEnv, self).__init__()
         self.game = VsBot(agent_type())
+        self.observation_space = gym.spaces.Box(np.zeros((5, 5, 65)), np.ones((5, 5, 65)))
+        self.action_space =  gym.spaces.Box(np.zeros(1250), np.ones(1250))
+        self.thisPlayer = player
 
-    def step(self, ac):
-        move = self.get_move(ac)
+    def step(self, ac_flat):
+        # TODO: get from flat ac
+        # TODO: is this ok - np and tf reshapes same?
+        ac = np.reshape(ac_flat, (5, 5, 5, 5, 2))
+        ac_chosen = [i[0] for i in np.where(ac)]  # one hot and True = 1
+        piece_pos = ac_chosen[:2]  # pr of picking a piece at this location
+        isKing, i = self.get_piece(piece_pos)
+        pos = ac_chosen[2:4]  # and moving to here
+        cardId = ac_chosen[4]
+        move = get_move(pos, isKing, cardId, i)
         self.game.step(move)
         return self.get_obs()
 
@@ -42,17 +48,22 @@ class OnitamaEnv(gym.Env):
 
     def get_obs(self):
         """
-        Returns (5, 5, 9) see above
+        Observation and mask for valid actions
+        :return:
+        """
+        return np.concatenate([self._get_obs(), self.get_mask()], -1)
+
+    def _get_obs(self):
+        """
+        Returns (5, 5, 9) see above for observation format
         """
         # see game class for API
         game_state = State(self.game.get())
         obs = []
         # cards
-        for card in game_state.player1_dict["cards"]:
-            obs.append(card)
-        for card in game_state.player2_dict["cards"]:
-            obs.append(card)
-        obs.append(game_state.spare_card)
+        obs.append(np.stack(game_state.player1_dict["cards"], -1))
+        obs.append(np.stack(game_state.player2_dict["cards"], -1))
+        obs.append(np.expand_dims(game_state.spare_card, -1))
         # board
         pawns_p1, king_p1 = get_board_state(game_state.player1_dict)
         obs.append(pawns_p1)
@@ -60,8 +71,30 @@ class OnitamaEnv(gym.Env):
         pawns_p2, king_p2 = get_board_state(game_state.player2_dict)
         obs.append(pawns_p2)
         obs.append(king_p2)
-        return np.stack(obs, -1)
+        [print(np.shape(o)) for o in obs]
+        return np.concatenate(obs, -1)
 
-    def get_move(self, ac):
-        # TODO: see readme
-        raise NotImplementedError
+    def get_mask(self):
+        """
+        (5 x 5 x 50) (same shape as agent output)
+        Returns the mask over valid moves
+        Binary tensor.
+        """
+        # TODO
+        return np.ones((5, 5, 50))
+
+    def get_piece(self, piece_pos):
+        """
+        :return: isKing, i
+        """
+        if self.thisPlayer == 1:
+            return self._get_piece(piece_pos, self.game.player1)
+        else:
+            return self._get_piece(piece_pos, self.game.player2)
+
+    def _get_piece(self, piece_pos, player):
+        if np.array_equal(piece_pos, player.king.get()):
+            return True, -1
+        for i, pawn in enumerate(player.pawns):
+            if np.array_equal(piece_pos, pawn.get()):
+                return False, i

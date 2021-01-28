@@ -30,6 +30,24 @@ flask run
 
 Then open `react/build/index.html` in a browser.
 
+## RL
+
+Observations:
+(5 x 5 x 65) of::
+    (5 x 5 x 5) cards - 2 current and 1 next for each player
+    (5 x 5 x 10) board - kings and pawns for each player
+and
+    (5 x 5 x 50) (50 = 25 (board) x 2 (cards)) mask of valid moves
+Actions:
+    (5 x 5 x 25 x 2) board spaces x number of moves x number cards - each filter is the probability of picking a piece
+    from this board location, filter dimesnions are 25 (5 x 5) possible moves to move to.
+    Mask by the mask obsercation from env.
+    Flatten
+    Softmax to get move
+    Return a 1250 (2 x 5 x 5 x 25 flat) one hot action
+
+
+
 ## TODOs
 
 #### Higher priority

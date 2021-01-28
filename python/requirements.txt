@@ -2,4 +2,7 @@ flask
 flask_cors
 numpy
 gym
-# stable-baselines
+stable-baselines
+# commented out for tf or tf-gpu
+# tensorflow>=1.8.0,<2.0.0
+# tensorflow-gpu>=1.8.0,<2.0.0

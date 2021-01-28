@@ -34,6 +34,15 @@ class Move:
         return "Move : pos {}, isKing {}, i {}, cardId {}".format(self.pos, self.isKing, self.i, self.cardId)
 
 
+def get_move(pos, isKing, cardId, i):
+    return Move({
+        "pos": pos,
+        "name": "king" if isKing else "pawn",
+        "i": i,
+        "id": cardId
+    })
+
+
 class State:
     """
     Parses JSON sent to FE to object for easier handling
