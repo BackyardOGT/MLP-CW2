@@ -1,7 +1,8 @@
 import numpy as np
-from stable_baselines.common.policies import ActorCriticPolicy
+from stable_baselines.deepq.policies import DQNPolicy
 from stable_baselines.common.tf_layers import conv, linear, conv_to_fc
 import tensorflow as tf
+import tensorflow.contrib.layers as tf_layers
 
 
 class RandomAgent:
@@ -13,12 +14,14 @@ class RandomAgent:
         return ac
 
 
-def apply_mask(activations, mask):
-    print(np.shape(activations))
+def apply_mask(activations, scaled_images, n_obs=9):
+    # get mask from obs and flatten
+    mask = scaled_images[:, :, :, n_obs:]
+    mask = conv_to_fc(mask)
     return activations * mask
 
 
-def cnn_extractor_onitama(scaled_images, n_obs=10, n_filters_out=50, filter_size=5, **kwargs):
+def cnn_extractor_onitama(scaled_images, n_obs=9, n_filters_out=50, filter_size=5, **kwargs):
     """
     CNN with 5 x 5 x 50 (50 = 25 x 2) outputs, that is masked by 2nd half of inputs
     :param scaled_images: (TensorFlow Tensor) Image input placeholder (Batch size x Obs shape)
@@ -29,9 +32,6 @@ def cnn_extractor_onitama(scaled_images, n_obs=10, n_filters_out=50, filter_size
     activ = tf.nn.relu
     # split into mask and
     obs = scaled_images[:, :, :, :n_obs]
-    mask = scaled_images[:, :, :, n_obs:]
-    print(np.shape(obs))
-    print(np.shape(mask))
     layer_1 = activ(
         conv(obs, 'c1', n_filters=32, filter_size=filter_size, stride=1, pad='SAME', init_scale=np.sqrt(2), **kwargs))
     layer_2 = activ(
@@ -40,14 +40,12 @@ def cnn_extractor_onitama(scaled_images, n_obs=10, n_filters_out=50, filter_size
     layer_3 = activ(conv(layer_2, 'c3', n_filters=n_filters_out, filter_size=filter_size, stride=1, pad='SAME',
                          init_scale=np.sqrt(2), **kwargs))
     layer_3_flat = conv_to_fc(layer_3)
-    mask_flat = conv_to_fc(mask)
-    layer_3_flat_masked = apply_mask(layer_3_flat, mask_flat)
-    return layer_3_flat_masked
+    return layer_3_flat
 
 
-class MaskedCNNPolicy(ActorCriticPolicy):
+class MaskedCNNPolicy(DQNPolicy):
     """
-    Policy object that implements actor critic, using a CNN.
+    Policy object that implements a DQN policy, using a feed forward neural network.
     Uses part of inputs to mask the output action probability distribution.
 
     :param sess: (TensorFlow session) The current TensorFlow session
@@ -57,56 +55,88 @@ class MaskedCNNPolicy(ActorCriticPolicy):
     :param n_steps: (int) The number of steps to run for each environment
     :param n_batch: (int) The number of batch to run (n_envs * n_steps)
     :param reuse: (bool) If the policy is reusable or not
-    :param layers: ([int]) (deprecated, use net_arch instead) The size of the Neural network for the policy
-        (if None, default to [64, 64])
-    :param net_arch: (list) Specification of the actor-critic policy network architecture (see mlp_extractor
-        documentation for details).
-    :param act_fun: (tf.func) the activation function to use in the neural network.
+    :param layers: ([int]) The size of the Neural network for the policy (if None, default to [64, 64])
     :param cnn_extractor: (function (TensorFlow Tensor, ``**kwargs``): (TensorFlow Tensor)) the CNN feature extraction
     :param feature_extraction: (str) The feature extraction type ("cnn" or "mlp")
-    :param kwargs: (dict) Extra keyword arguments for the CNN feature extraction
+    :param obs_phs: (TensorFlow Tensor, TensorFlow Tensor) a tuple containing an override for observation placeholder
+        and the processed observation placeholder respectively
+    :param layer_norm: (bool) enable layer normalisation
+    :param dueling: (bool) if true double the output MLP to compute a baseline for action scores
+    :param act_fun: (tf.func) the activation function to use in the neural network.
+    :param kwargs: (dict) Extra keyword arguments for the nature CNN feature extraction
     """
-
-    def __init__(self, sess, ob_space, ac_space, n_env, n_steps, n_batch, reuse=False, layers=None, net_arch=None,
-                 act_fun=tf.tanh, cnn_extractor=cnn_extractor_onitama, feature_extraction="cnn", **kwargs):
-        super(MaskedCNNPolicy, self).__init__(sess, ob_space, ac_space, n_env, n_steps, n_batch, reuse=reuse,
-                                              scale=(feature_extraction == "cnn"))
+    def __init__(self, sess, ob_space, ac_space, n_env, n_steps, n_batch, reuse=False, layers=None,
+                 cnn_extractor=cnn_extractor_onitama, feature_extraction="cnn",
+                 obs_phs=None, layer_norm=False, dueling=False, act_fun=tf.nn.relu, **kwargs):
+        super(MaskedCNNPolicy, self).__init__(sess, ob_space, ac_space, n_env, n_steps,
+                                                n_batch, dueling=dueling, reuse=reuse,
+                                                scale=(feature_extraction == "cnn"), obs_phs=obs_phs)
 
         self._kwargs_check(feature_extraction, kwargs)
 
-        if layers is not None:
-            warnings.warn("Usage of the `layers` parameter is deprecated! Use net_arch instead "
-                          "(it has a different semantics though).", DeprecationWarning)
-            if net_arch is not None:
-                warnings.warn("The new `net_arch` parameter overrides the deprecated `layers` parameter!",
-                              DeprecationWarning)
-
-        if net_arch is None:
-            if layers is None:
-                layers = [64, 64]
-            net_arch = [dict(vf=layers, pi=layers)]
+        if layers is None:
+            layers = [64, 64]
 
         with tf.variable_scope("model", reuse=reuse):
-            pi_latent = vf_latent = cnn_extractor(self.processed_obs, **kwargs)
+            with tf.variable_scope("action_value"):
+                extracted_features = cnn_extractor(self.processed_obs, **kwargs)
+                action_out = extracted_features
 
-            self._value_fn = linear(vf_latent, 'vf', 1)
+                # relu bc we want +ve values for softmax
+                action_scores = tf_layers.fully_connected(action_out, num_outputs=self.n_actions, activation_fn=tf.nn.relu)
+                action_scores = apply_mask(action_scores, self.processed_obs)
 
-            self._proba_distribution, self._policy, self.q_value = \
-                self.pdtype.proba_distribution_from_latent(pi_latent, vf_latent, init_scale=0.01)
+            # TODO: not setup for masking
+            if self.dueling:
+                raise NotImplementedError("Not setup masking for dueling")
+                # with tf.variable_scope("state_value"):
+                #     state_out = extracted_features
+                #     for layer_size in layers:
+                #         state_out = tf_layers.fully_connected(state_out, num_outputs=layer_size, activation_fn=None)
+                #         if layer_norm:
+                #             state_out = tf_layers.layer_norm(state_out, center=True, scale=True)
+                #         state_out = act_fun(state_out)
+                #     state_score = tf_layers.fully_connected(state_out, num_outputs=1, activation_fn=None)
+                # action_scores_mean = tf.reduce_mean(action_scores, axis=1)
+                # action_scores_centered = action_scores - tf.expand_dims(action_scores_mean, axis=1)
+                # q_out = state_score + action_scores_centered
+            else:
+                q_out = action_scores
 
+
+        self.q_values = q_out
         self._setup_init()
 
-    def step(self, obs, state=None, mask=None, deterministic=False):
+    def step(self, obs, state=None, mask=None, deterministic=True):
+        """
+        Returns the actions, q_values, states for a single step
+
+        :param obs: (np.ndarray float or int) The current observation of the environment
+        :param state: (np.ndarray float) The last states (used in recurrent policies)
+        :param mask: (np.ndarray float) The last masks (used in recurrent policies)
+        :param deterministic: (bool) Whether or not to return deterministic actions.
+        :return: (np.ndarray int, np.ndarray float, np.ndarray float) actions, q_values, states
+        """
+        q_values, actions_proba = self.sess.run([self.q_values, self.policy_proba], {self.obs_ph: obs})
         if deterministic:
-            action, value, neglogp = self.sess.run([self.deterministic_action, self.value_flat, self.neglogp],
-                                                   {self.obs_ph: obs})
+            actions = np.argmax(q_values, axis=1)
         else:
-            action, value, neglogp = self.sess.run([self.action, self.value_flat, self.neglogp],
-                                                   {self.obs_ph: obs})
-        return action, value, self.initial_state, neglogp
+            # Unefficient sampling
+            # TODO: replace the loop
+            # maybe with Gumbel-max trick ? (http://amid.fish/humble-gumbel)
+            actions = np.zeros((len(obs),), dtype=np.int64)
+            for action_idx in range(len(obs)):
+                actions[action_idx] = np.random.choice(self.n_actions, p=actions_proba[action_idx])
+
+        return actions, q_values, None
 
     def proba_step(self, obs, state=None, mask=None):
-        return self.sess.run(self.policy_proba, {self.obs_ph: obs})
+        """
+        Returns the action probability for a single step
 
-    def value(self, obs, state=None, mask=None):
-        return self.sess.run(self.value_flat, {self.obs_ph: obs})
+        :param obs: (np.ndarray float or int) The current observation of the environment
+        :param state: (np.ndarray float) The last states (used in recurrent policies)
+        :param mask: (np.ndarray float) The last masks (used in recurrent policies)
+        :return: (np.ndarray float) the action probability
+        """
+        return self.sess.run(self.policy_proba, {self.obs_ph: obs})

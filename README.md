@@ -33,9 +33,9 @@ Then open `react/build/index.html` in a browser.
 ## RL
 
 Observations:
-(5 x 5 x 65) of::
+(5 x 5 x 59) of::
     (5 x 5 x 5) cards - 2 current and 1 next for each player
-    (5 x 5 x 10) board - kings and pawns for each player
+    (5 x 5 x 4) board - kings and pawns for each player
 and
     (5 x 5 x 50) (50 = 25 (board) x 2 (cards)) mask of valid moves
 Actions:
@@ -52,10 +52,17 @@ Actions:
 
 #### Higher priority
 
-* Test observations
-* What actions should env accept? How to pass and encode the legal moves into agent?
+* Change obs to pawn, king, pawn, king not x 10
+* Heuristic agent see onitama.rl.agents.RandomAgent (need to define XXX.get_action())
+* Reward see onitama.rl.env OnitamaEnv.get_reward()
+* Masking for actions
+* Test RL with env
+* Gather data for behaviour clone from good github heuristic bot
 * Corner case: It is possible that you will find that you cannot use any of your cards to make a legal move. If this happens - and only then - you must pass your turn. 
-<br/>None of your pawns will move. But like the river that constantly flows, you cannot remain unchanged: you must still choose one of the two cards in front of you, place it to the left of the playmat and rotate it, then take the card from the right side of the board.
+  <br/>None of your pawns will move. But like the river that constantly flows, you cannot remain unchanged: you must still choose one of the two cards in front of you, place it to the left of the playmat and rotate it, then take the card from the right side of the board.
+
+#### Lower
+
 * Wrap flask app into a class instead of globals
 * Make FE display intermediate state between user and agent move
 * FE display bot vs bot

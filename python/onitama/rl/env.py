@@ -5,10 +5,10 @@ import numpy as np
 
 
 def get_board_state(player_dict):
-    pawns = np.zeros((5, 5, 4))
+    pawns = np.zeros((5, 5, 1))
     king = np.zeros((5, 5, 1))
-    for k, (i, j) in enumerate(player_dict["pawns"]):
-        pawns[i][j][k] = 1
+    for i, j in player_dict["pawns"]:
+        pawns[i][j] = 1
     k, l = player_dict["king"]
     king[k][l] = 1
     return pawns, king
@@ -22,8 +22,8 @@ class OnitamaEnv(gym.Env):
     def __init__(self, agent_type=RandomAgent, player=1):
         super(OnitamaEnv, self).__init__()
         self.game = VsBot(agent_type())
-        self.observation_space = gym.spaces.Box(np.zeros((5, 5, 65)), np.ones((5, 5, 65)))
-        self.action_space =  gym.spaces.Box(np.zeros(1250), np.ones(1250))
+        self.observation_space = gym.spaces.Box(np.zeros((5, 5, 59)), np.ones((5, 5, 59)))
+        self.action_space =  gym.spaces.Discrete(5 * 5 * 25 * 2)
         self.thisPlayer = player
 
     def step(self, ac_flat):
@@ -98,3 +98,21 @@ class OnitamaEnv(gym.Env):
         for i, pawn in enumerate(player.pawns):
             if np.array_equal(piece_pos, pawn.get()):
                 return False, i
+
+    def get_reward(self):
+        # TODO
+        # can get game state by eg.
+        # self.game.player1
+
+        reward_weights = {
+            "move_forwards": 0.1,
+            "win": 1.0,
+        }
+        reward_dict = {
+            "move_forwards": move_forwards,
+            "win": reward_win
+        }
+        reward = 0
+        for k, r in reward_dict.items():
+            reward += r * reward_weights[k]
+        return reward
