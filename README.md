@@ -52,11 +52,9 @@ Actions:
 
 #### Higher priority
 
-* Change obs to pawn, king, pawn, king not x 10
 * Heuristic agent see onitama.rl.agents.RandomAgent (need to define XXX.get_action())
 * Reward see onitama.rl.env OnitamaEnv.get_reward()
-* Masking for actions
-* Test RL with env
+* Masking for actions - masking allowing invalid moves - see tests
 * Gather data for behaviour clone from good github heuristic bot
 * Corner case: It is possible that you will find that you cannot use any of your cards to make a legal move. If this happens - and only then - you must pass your turn. 
   <br/>None of your pawns will move. But like the river that constantly flows, you cannot remain unchanged: you must still choose one of the two cards in front of you, place it to the left of the playmat and rotate it, then take the card from the right side of the board.

@@ -26,18 +26,11 @@ class OnitamaEnv(gym.Env):
         self.action_space =  gym.spaces.Discrete(5 * 5 * 25 * 2)
         self.thisPlayer = player
 
-    def step(self, ac_flat):
-        # TODO: get from flat ac
-        # TODO: is this ok - np and tf reshapes same?
-        ac = np.reshape(ac_flat, (5, 5, 5, 5, 2))
-        ac_chosen = [i[0] for i in np.where(ac)]  # one hot and True = 1
-        piece_pos = ac_chosen[:2]  # pr of picking a piece at this location
-        isKing, i = self.get_piece(piece_pos)
-        pos = ac_chosen[2:4]  # and moving to here
-        cardId = ac_chosen[4]
-        move = get_move(pos, isKing, cardId, i)
+    def step(self, ac):
+        # action is index into 5 x 5 x 50
+        move = self.actionToMove(np.unravel_index(ac, (5, 5, 50)))
         self.game.step(move)
-        return self.get_obs()
+        return self.get_obs(), self.get_reward(), self.game.winner > 0, {}
 
     def reset(self):
         self.game.reset()
@@ -71,7 +64,6 @@ class OnitamaEnv(gym.Env):
         pawns_p2, king_p2 = get_board_state(game_state.player2_dict)
         obs.append(pawns_p2)
         obs.append(king_p2)
-        [print(np.shape(o)) for o in obs]
         return np.concatenate(obs, -1)
 
     def get_mask(self):
@@ -80,8 +72,13 @@ class OnitamaEnv(gym.Env):
         Returns the mask over valid moves
         Binary tensor.
         """
-        # TODO
-        return np.ones((5, 5, 50))
+        # TODO: test
+        mask = np.zeros((5, 5, 50))
+        player = self.game.player1 if self.thisPlayer == 1 else self.game.player2
+        for move in self.game.get_valid_moves(player):
+            ac = self.moveToMask(move, player)
+            mask[ac] = 1
+        return mask
 
     def get_piece(self, piece_pos):
         """
@@ -103,6 +100,8 @@ class OnitamaEnv(gym.Env):
         # TODO
         # can get game state by eg.
         # self.game.player1
+        move_forwards = 0
+        reward_win = 0
 
         reward_weights = {
             "move_forwards": 0.1,
@@ -116,3 +115,36 @@ class OnitamaEnv(gym.Env):
         for k, r in reward_dict.items():
             reward += r * reward_weights[k]
         return reward
+
+    def actionToMove(self, ac_chosen):
+        """
+        :param ac_chosen: reshaped action (piece pos i, piece pos j, board x card data)
+        :return: Move() object
+        """
+        piece_pos = ac_chosen[:2]  # pr of picking a piece at this location
+        isKing, i = self.get_piece(piece_pos)
+        cardBoard = ac_chosen[2]
+        if cardBoard >= 25:
+            cardId = 1
+            cardBoard -= 25
+        else:
+            cardId = 0
+        pos_i = cardBoard // 5
+        pos_j = cardBoard % 5
+        move = get_move([pos_i, pos_j], isKing, cardId, i)
+        return move
+
+    def moveToMask(self, move, player):
+        """
+        :return: (a, b, c) tuple the indices of the action for mask = 1
+        """
+        # TODO: test this equals actionToMove
+        # 5 x 5 grid is pr(pickup piece here)
+        piecePos = player.king.get() if move.isKing else player.pawns[move.i].get()
+        # the next is 5 x 5 spaces x 2 cards
+        # card id is 0 or 1
+        placePos = move.pos[0] * 5 + move.pos[1] + 25 * move.cardId
+        # TODO: reverse of actionToMove
+        ind = move.cardId
+        return (piecePos[0], piecePos[1], placePos)
+

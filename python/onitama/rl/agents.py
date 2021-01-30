@@ -14,13 +14,6 @@ class RandomAgent:
         return ac
 
 
-def apply_mask(activations, scaled_images, n_obs=9):
-    # get mask from obs and flatten
-    mask = scaled_images[:, :, :, n_obs:]
-    mask = conv_to_fc(mask)
-    return activations * mask
-
-
 def cnn_extractor_onitama(scaled_images, n_obs=9, n_filters_out=50, filter_size=5, **kwargs):
     """
     CNN with 5 x 5 x 50 (50 = 25 x 2) outputs, that is masked by 2nd half of inputs
@@ -74,38 +67,44 @@ class MaskedCNNPolicy(DQNPolicy):
 
         self._kwargs_check(feature_extraction, kwargs)
 
+        self.n_obs = 9
+
         if layers is None:
             layers = [64, 64]
 
         with tf.variable_scope("model", reuse=reuse):
             with tf.variable_scope("action_value"):
-                extracted_features = cnn_extractor(self.processed_obs, **kwargs)
+                extracted_features = cnn_extractor(self.processed_obs, n_obs=self.n_obs)
                 action_out = extracted_features
 
-                # relu bc we want +ve values for softmax
-                action_scores = tf_layers.fully_connected(action_out, num_outputs=self.n_actions, activation_fn=tf.nn.relu)
-                action_scores = apply_mask(action_scores, self.processed_obs)
+                action_scores = tf_layers.fully_connected(action_out, num_outputs=self.n_actions)
 
-            # TODO: not setup for masking
             if self.dueling:
-                raise NotImplementedError("Not setup masking for dueling")
-                # with tf.variable_scope("state_value"):
-                #     state_out = extracted_features
-                #     for layer_size in layers:
-                #         state_out = tf_layers.fully_connected(state_out, num_outputs=layer_size, activation_fn=None)
-                #         if layer_norm:
-                #             state_out = tf_layers.layer_norm(state_out, center=True, scale=True)
-                #         state_out = act_fun(state_out)
-                #     state_score = tf_layers.fully_connected(state_out, num_outputs=1, activation_fn=None)
-                # action_scores_mean = tf.reduce_mean(action_scores, axis=1)
-                # action_scores_centered = action_scores - tf.expand_dims(action_scores_mean, axis=1)
-                # q_out = state_score + action_scores_centered
+                with tf.variable_scope("state_value"):
+                    state_out = extracted_features
+                    for layer_size in layers:
+                        state_out = tf_layers.fully_connected(state_out, num_outputs=layer_size, activation_fn=None)
+                        if layer_norm:
+                            state_out = tf_layers.layer_norm(state_out, center=True, scale=True)
+                        state_out = act_fun(state_out)
+                    state_score = tf_layers.fully_connected(state_out, num_outputs=1, activation_fn=None)
+                action_scores_mean = tf.reduce_mean(action_scores, axis=1)
+                action_scores_centered = action_scores - tf.expand_dims(action_scores_mean, axis=1)
+                q_out = state_score + action_scores_centered
             else:
                 q_out = action_scores
 
-
-        self.q_values = q_out
+        # TODO: should be applied before q or after (ie. right before softmax)?
+        masked_q = self.apply_mask(q_out, self.processed_obs)
+        self.q_values = masked_q
         self._setup_init()
+
+    def apply_mask(self, values, obs):
+        # TODO: more efficient way?
+        mask = obs[:, :, :, self.n_obs:]
+        mask = conv_to_fc(mask)
+        masked = tf.where(mask > 0, values, tf.ones_like(values) * tf.float32.min)
+        return masked
 
     def step(self, obs, state=None, mask=None, deterministic=True):
         """

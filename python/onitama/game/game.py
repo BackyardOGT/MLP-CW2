@@ -93,6 +93,7 @@ class Player:
 
 class PvP:
     def __init__(self):
+        self.winner = 0
         self.reset()
         self.mode = "PvP"
 
