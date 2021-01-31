@@ -83,10 +83,15 @@ class Player:
         """
         Updates piece and card objects, validation etc. done in Game class
         """
+        #Store the last position of the most recently moved piece
         if move.isKing:
+            self.last_pos = self.king.get()
             self.king.move(move.pos)
         else:  # it's pawn
+            self.last_pos = self.pawn[move.i].get()
             self.pawns[move.i].move(move.pos)
+        #Store the most recent move
+        self.last_move = move
         # swap card
         self.cards[int(move.cardId)] = card
 
