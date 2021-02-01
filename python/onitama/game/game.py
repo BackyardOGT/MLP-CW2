@@ -251,7 +251,7 @@ class PvP:
             for p in np.reshape(np.where(card), [2, -1]).T:
                 # king
                 boardPos = self.card_to_board(curP.king.get(), p)
-                # since we got these moves from card we only need check they;re unoccupied now and on board
+                # since we got these moves from card we only need check they're unoccupied now and on board
                 move = Move({"name": "king", "pos": boardPos, "id": cardId})
                 if self.check_unoccupied(curP, move) and self.check_on_board(move):
                     moves.append(move)
