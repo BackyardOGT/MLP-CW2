@@ -59,16 +59,18 @@ Actions:
 
 #### Higher priority
 
-* Reward doesn't pass its test
-* Implement pick which player starts
-* Try person and rand vs the heuristic agent
-* View init RL vs rand and heuristic agents
-* FE display bot vs bot and cmd line evaluation # wins, reward etc
-* Corner case: It is possible that you will find that you cannot use any of your cards to make a legal move. If this happens - and only then - you must pass your turn. 
+* G - agent doesn't work when used in flask + front end
+* T - Reward doesn't pass own test
+  
+* T - Implement pick which player starts
+* ? - Try person and rand vs the heuristic agent
+* ? - View init RL vs rand and heuristic agents
+* ? - FE display bot vs bot and cmd line evaluation # wins, reward etc
+* G - Corner case: It is possible that you will find that you cannot use any of your cards to make a legal move. If this happens - and only then - you must pass your turn. 
   <br/>None of your pawns will move. But like the river that constantly flows, you cannot remain unchanged: you must still choose one of the two cards in front of you, place it to the left of the playmat and rotate it, then take the card from the right side of the board.
   * Remove assertion in env and handle no valid moves
   * Try and make a test case
-* Masking for exploration
+* O - Masking for exploration
   Works without exploration but explotation comes after masking so breaks the actions
   Could allow invalid but return the current state and don't step the game. But this won't learn legal moves
   as the masking will zero the gradient back to the network. Would have to remove masking completely to learn valid moves.
