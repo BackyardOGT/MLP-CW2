@@ -108,6 +108,19 @@ class OnitamaEnv(gym.Env):
         move_forwards = 0
         reward_win = 0
 
+        state = State(self.game.get())
+        reward_win = state.winner == self.thisPlayer
+
+        player = self.game.player1  if self.thisPlayer == 1 else self.game.player2 
+
+        #Get number of rows moved
+        rows_moved = player.last_move.pos[0] - player.last_pos[0]
+
+        row_orientation = 1 if self.thisPlayer == 2 else -1
+
+        move_forwards = max(0,rows_moved * row_orientation)
+
+
         reward_weights = {
             "move_forwards": 0.1,
             "win": 1.0,

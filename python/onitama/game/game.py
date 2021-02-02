@@ -92,10 +92,15 @@ class Player:
         """
         Updates piece and card objects, validation etc. done in Game class
         """
+        #Store the last position of the most recently moved piece
         if move.isKing:
+            self.last_pos = self.king.get()
             self.king.move(move.pos)
         else:  # it's pawn
+            self.last_pos = self.pawn[move.i].get()
             self.pawns[move.i].move(move.pos)
+        #Store the most recent move
+        self.last_move = move
         # swap card
         self.cards[int(move.cardId)] = card
 
@@ -257,7 +262,7 @@ class PvP:
             for p in np.reshape(np.where(card), [2, -1]).T:
                 # king
                 boardPos = self.card_to_board(curP.king.get(), p)
-                # since we got these moves from card we only need check they;re unoccupied now and on board
+                # since we got these moves from card we only need check they're unoccupied now and on board
                 move = Move({"name": "king", "pos": boardPos, "id": cardId})
                 if self.check_unoccupied(curP, move) and self.check_on_board(move):
                     moves.append(move)
