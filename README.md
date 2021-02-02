@@ -13,7 +13,14 @@ See above, then
 Install the python library
 
 ```
-cd python
+cd python/onitama-py
+pip install -e .
+```
+
+And install stable baselines locally
+
+```
+cd python/stable-baselines-master
 pip install -e .
 ```
 
@@ -52,22 +59,26 @@ Actions:
 
 #### Higher priority
 
+* Reward doesn't pass its test
 * Implement pick which player starts
-* Try person against the heuristic agent and random bot
+* Try person and rand vs the heuristic agent
+* View init RL vs rand and heuristic agents
 * FE display bot vs bot and cmd line evaluation # wins, reward etc
 * Corner case: It is possible that you will find that you cannot use any of your cards to make a legal move. If this happens - and only then - you must pass your turn. 
   <br/>None of your pawns will move. But like the river that constantly flows, you cannot remain unchanged: you must still choose one of the two cards in front of you, place it to the left of the playmat and rotate it, then take the card from the right side of the board.
   * Remove assertion in env and handle no valid moves
   * Try and make a test case
-* Masking for actions - need to mask exploration and remove the if statement in step()
-  Currently we allow invalid but return the current state and don't step the game. But this won't learn legal moves
+* Masking for exploration
+  Works without exploration but explotation comes after masking so breaks the actions
+  Could allow invalid but return the current state and don't step the game. But this won't learn legal moves
   as the masking will zero the gradient back to the network. Would have to remove masking completely to learn valid moves.
   So will have to overwrite more of their stuff to mask exploration.
-  * OR can we use parameter noise for now    
+  Can't just use param noise as this also uses eps greedy still
 * Work on reward and heuristic agent?
 
 #### Lower
 
+* Check masking not making gradients explode / vanish? 
 * 5 x 5 filter with 5 x 5 input and output 
 * Gather data for behaviour clone from good github heuristic bot
 * Wrap flask app into a class instead of globals
