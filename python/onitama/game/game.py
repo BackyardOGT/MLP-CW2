@@ -33,6 +33,12 @@ class Move:
     def __str__(self):
         return "Move : pos {}, isKing {}, i {}, cardId {}".format(self.pos, self.isKing, self.i, self.cardId)
 
+    def __repr__(self):
+        return self.__str__()
+
+    def __eq__(self, other):
+        return self.pos == other.pos and self.isKing == other.isKing \
+               and self.i == other.i and self.cardId == other.cardId
 
 def get_move(pos, isKing, cardId, i):
     return Move({
@@ -75,6 +81,9 @@ class Player:
         # init pieces
         self.king = Piece([row, 2], KING_ID)
         self.pawns = [Piece([row, i], i) for i in range(5) if i != 2]
+
+    def __str__(self):
+        return str(self.to_dict())
 
     def to_dict(self):
         return {self.player: {"king": self.king.get(), "pawns": [p.get() for p in self.pawns], "cards": self.cards}}
@@ -137,7 +146,7 @@ class PvP:
         newCards = self.handle_cards(curP, move)
         curP.step(move, newCards)
         if self.reached_goal(curP) or kingTaken:
-            print("Done")
+            print("{} won: ".format(curP.player) + ("reached end" if self.reached_goal(curP) else "king taken"))
             self.winner = 1 if self.isPlayer1 else 2
             return self.get()
 
@@ -181,7 +190,7 @@ class PvP:
                 return False
         return True
 
-    def check_move_on_card(self, player, move):
+    def check_move_on_card(self, player, move, verbose=False):
         if move.isKing:
             piecePos = player.king.get()
         else:  # pawn
@@ -190,11 +199,12 @@ class PvP:
         if np.all(np.greater_equal(posOnCard, 0)) and np.all(np.less_equal(posOnCard, 4)):
             if player.cards[move.cardId][posOnCard[0]][posOnCard[1]]:  # 1s and 0s so T/F
                 return True
-        print("Move not on card {}".format(move.cardId))
-        print("Move {}".format(move.pos))
-        print("Piece {}".format(piecePos))
-        print("Card {}".format(posOnCard))
-        print(player.cards[move.cardId])
+        if verbose:
+            print("Move not on card {}".format(move.cardId))
+            print("Move {}".format(move.pos))
+            print("Piece {}".format(piecePos))
+            print("Card {}".format(posOnCard))
+            print(player.cards[move.cardId])
         return False
 
     def get_current_players(self):
@@ -286,8 +296,12 @@ class VsBot(PvP):
     def stepApi(self, moveJson):
         move = Move(moveJson)
         state = self.step(move)
+        return state
+
+    def step(self, move):
+        state = super(VsBot, self).step(move)
         # bot turn
         if not self.winner:
             agentMove = self.agent.get_action(self)
-            state = self.step(agentMove)
+            state = super(VsBot, self).step(agentMove)
         return state

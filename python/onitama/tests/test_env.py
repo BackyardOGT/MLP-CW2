@@ -34,7 +34,7 @@ class EnvTest(unittest.TestCase):
         # note all pieces in orig positions, for p1 it's [4, *], king at [4, 2]
         move = get_move([1, 1], True, 0, -1)
         mask = env.moveToMask(move, env.game.player1)
-        ac= np.zeros((5, 5, 50))
+        ac = np.zeros((5, 5, 50))
         ac[mask] = 1
         move2 = env.actionToMove([i[0] for i in np.where(ac)])
         assert move.pos == move2.pos, "pos Orig : {}\nNew : {}".format(move, move2)
@@ -53,6 +53,14 @@ class EnvTest(unittest.TestCase):
         assert move.isKing == move2.isKing, "isKing Orig : {}\nNew : {}".format(move, move2)
         assert move.i == move2.i, "i Orig : {}\nNew : {}".format(move, move2)
         assert move.cardId == move2.cardId, "CardID Orig : {}\nNew : {}".format(move, move2)
+
+    def test_valid_moves(self):
+        env = OnitamaEnv()
+        env.reset()
+        valid_moves = env.game.get_valid_moves(env.game.player1)
+        env.game.step(valid_moves[0])
+        for move in env.game.get_valid_moves(env.game.player1):
+            assert env.game.check_valid_move(move), "Found incorrect valid move {}".format(move)
 
 
 if __name__ == "__main__":

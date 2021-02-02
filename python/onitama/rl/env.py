@@ -25,12 +25,17 @@ class OnitamaEnv(gym.Env):
         self.observation_space = gym.spaces.Box(np.zeros((5, 5, 59)), np.ones((5, 5, 59)))
         self.action_space =  gym.spaces.Discrete(5 * 5 * 25 * 2)
         self.thisPlayer = player
+        self.invalid_move_reward = -100
 
     def step(self, ac):
+        ac = np.squeeze(ac)
         # action is index into 5 x 5 x 50
-        move = self.actionToMove(np.unravel_index(ac, (5, 5, 50)))
-        self.game.step(move)
-        return self.get_obs(), self.get_reward(), self.game.winner > 0, {}
+        ac = np.unravel_index(ac, (5, 5, 50))
+        move = self.actionToMove(ac)
+        if move and self.game.check_valid_move(move):
+            self.game.step(move)
+            return self.get_obs(), self.get_reward(), self.game.winner > 0, {}
+        return self.get_obs(), self.invalid_move_reward, self.game.winner > 0, {}
 
     def reset(self):
         self.game.reset()
@@ -72,9 +77,9 @@ class OnitamaEnv(gym.Env):
         Returns the mask over valid moves
         Binary tensor.
         """
-        # TODO: test
         mask = np.zeros((5, 5, 50))
         player = self.game.player1 if self.thisPlayer == 1 else self.game.player2
+        assert len(self.game.get_valid_moves(player)) > 0, "No valid moves for masking"
         for move in self.game.get_valid_moves(player):
             ac = self.moveToMask(move, player)
             mask[ac] = 1
@@ -121,30 +126,25 @@ class OnitamaEnv(gym.Env):
         :param ac_chosen: reshaped action (piece pos i, piece pos j, board x card data)
         :return: Move() object
         """
-        piece_pos = ac_chosen[:2]  # pr of picking a piece at this location
-        isKing, i = self.get_piece(piece_pos)
-        cardBoard = ac_chosen[2]
-        if cardBoard >= 25:
-            cardId = 1
-            cardBoard -= 25
-        else:
-            cardId = 0
-        pos_i = cardBoard // 5
-        pos_j = cardBoard % 5
-        move = get_move([pos_i, pos_j], isKing, cardId, i)
+        ac_ravel = np.ravel_multi_index(ac_chosen, (5, 5, 50))
+        (piece_pos_i, piece_pos_j, pos_i, pos_j, card_id) = np.unravel_index(ac_ravel, (5, 5, 5, 5, 2))
+        piece = self.get_piece([piece_pos_i, piece_pos_j])
+        if not piece:
+            return None
+        isKing, i = piece
+        move = get_move([pos_i, pos_j], isKing, card_id, i)
         return move
 
     def moveToMask(self, move, player):
         """
         :return: (a, b, c) tuple the indices of the action for mask = 1
         """
-        # TODO: test this equals actionToMove
         # 5 x 5 grid is pr(pickup piece here)
         piecePos = player.king.get() if move.isKing else player.pawns[move.i].get()
         # the next is 5 x 5 spaces x 2 cards
         # card id is 0 or 1
-        placePos = move.pos[0] * 5 + move.pos[1] + 25 * move.cardId
-        # TODO: reverse of actionToMove
-        ind = move.cardId
-        return (piecePos[0], piecePos[1], placePos)
+        placePos = np.ravel_multi_index((move.pos[0], move.pos[1], move.cardId), (5, 5, 2))
+        move_ravel = np.ravel_multi_index((piecePos[0], piecePos[1], move.pos[0], move.pos[1], move.cardId), (5, 5, 5, 5, 2))
+        mask = np.unravel_index(move_ravel, (5, 5, 50))
+        return mask
 
