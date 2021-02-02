@@ -52,18 +52,23 @@ Actions:
 
 #### Higher priority
 
-* Heuristic agent see onitama.rl.agents.RandomAgent (need to define XXX.get_action())
-* Reward see onitama.rl.env OnitamaEnv.get_reward()
-* Masking for actions - masking allowing invalid moves - see tests
-* Gather data for behaviour clone from good github heuristic bot
+* Try person against the heuristic agent
+* Masking for actions - need to mask exploration and remove the if statement in step()
+  Currently we allow invalid but return the current state and don't step the game. But this won't learn legal moves
+  as the masking will zero the gradient back to the network. Would have to remove masking completely to learn valid moves.
+  So will have to overwrite more of their stuff to mask exploration.
 * Corner case: It is possible that you will find that you cannot use any of your cards to make a legal move. If this happens - and only then - you must pass your turn. 
   <br/>None of your pawns will move. But like the river that constantly flows, you cannot remain unchanged: you must still choose one of the two cards in front of you, place it to the left of the playmat and rotate it, then take the card from the right side of the board.
+  * Remove assertion in env and handle no valid moves 
+* FE display bot vs bot
+* Work on reward and heuristic agent?
 
 #### Lower
 
+* 5 x 5 filter with 5 x 5 input and output 
+* Gather data for behaviour clone from good github heuristic bot
 * Wrap flask app into a class instead of globals
 * Make FE display intermediate state between user and agent move
-* FE display bot vs bot
   
 #### General
 
