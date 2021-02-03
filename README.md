@@ -65,7 +65,9 @@ Actions:
 * T - Implement pick which player starts
 * ? - Try person and rand vs the heuristic agent
 * ? - View init RL vs rand and heuristic agents
-* ? - FE display bot vs bot and cmd line evaluation # wins, reward etc
+* ? - Bot vs bot show win
+* ? - FE display bot vs bot 
+* ? - Cmd line evaluation # wins, reward etc, return info of winner when done
 * G - Corner case: It is possible that you will find that you cannot use any of your cards to make a legal move. If this happens - and only then - you must pass your turn. 
   <br/>None of your pawns will move. But like the river that constantly flows, you cannot remain unchanged: you must still choose one of the two cards in front of you, place it to the left of the playmat and rotate it, then take the card from the right side of the board.
   * Remove assertion in env and handle no valid moves
@@ -84,7 +86,6 @@ Actions:
 * 5 x 5 filter with 5 x 5 input and output 
 * Gather data for behaviour clone from good github heuristic bot
 * Wrap flask app into a class instead of globals
-* Make FE display intermediate state between user and agent move
   
 #### General
 

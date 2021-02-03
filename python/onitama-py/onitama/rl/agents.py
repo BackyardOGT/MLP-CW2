@@ -6,11 +6,16 @@ import tensorflow.contrib.layers as tf_layers
 
 
 class RandomAgent:
-    def __init__(self):
+    def __init__(self, isPlayer1=False):
+        """
+        Assumes player 2 as this is normal
+        """
+        self.isPlayer1 = isPlayer1
         np.random.seed(1123)
 
     def get_action(self, state):
-        ac = np.random.choice(state.get_valid_moves(state.player2))
+        player = state.player1 if self.isPlayer1 else state.player2
+        ac = np.random.choice(state.get_valid_moves(player))
         return ac
 
 
@@ -79,9 +84,6 @@ class SimpleAgent:
 
     no attempt made to avoid enemy king winning by reaching our home
     '''
-
-
-
 
 
 

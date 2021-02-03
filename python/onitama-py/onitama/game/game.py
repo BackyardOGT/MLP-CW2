@@ -109,7 +109,7 @@ class PvP:
     def __init__(self):
         self.winner = 0
         self.reset()
-        self.mode = "PvP"
+        self.mode = "P vs P"
 
     def get(self):
         """
@@ -293,21 +293,56 @@ class PvP:
             return np.subtract(np.add([2, 2], piecePos), boardPos).tolist()
 
 
-class VsBot(PvP):
+class PvBot(PvP):
     def __init__(self, agent):
         super().__init__()
         self.agent = agent
-        self.mode = "VsBot"
+        self.mode = "P vs Bot"
 
     def stepApi(self, moveJson):
+        """
+        API call for step()
+        """
         move = Move(moveJson)
         state = self.step(move)
         return state
 
     def step(self, move):
-        state = super(VsBot, self).step(move)
-        # bot turn
+        """
+        Steps player only (stepBot for bot)
+        """
+        state = super(PvBot, self).step(move)
+        return state
+
+    def stepBot(self):
+        """
+        Steps the bot
+        """
+        state = self.get()
         if not self.winner:
             agentMove = self.agent.get_action(self)
-            state = super(VsBot, self).step(agentMove)
+            state = super(PvBot, self).step(agentMove)
+        return state
+
+
+class BotVsBot(PvP):
+    def __init__(self, agent1, agent2):
+        super().__init__()
+        self.agent1 = agent1
+        self.agent2 = agent2
+        self.mode = "Bot vs Bot"
+
+    def step(self, move):
+        """
+        Does nothing here
+        """
+        return self.get()
+
+    def stepBot(self):
+        """
+        Steps the bot
+        """
+        agent = self.agent1 if self.isPlayer1 else self.agent2
+        agentMove = agent.get_action(self)
+        state = super(BotVsBot, self).step(agentMove)
         return state

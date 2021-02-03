@@ -1,4 +1,4 @@
-from onitama.game import VsBot, State, get_move
+from onitama.game import PvBot, State, get_move
 from onitama.rl import RandomAgent
 import gym
 import numpy as np
@@ -21,7 +21,7 @@ class OnitamaEnv(gym.Env):
     """
     def __init__(self, agent_type=RandomAgent, player=1):
         super(OnitamaEnv, self).__init__()
-        self.game = VsBot(agent_type())
+        self.game = PvBot(agent_type())
         self.observation_space = gym.spaces.Box(np.zeros((5, 5, 59)), np.ones((5, 5, 59)))
         self.action_space =  gym.spaces.Discrete(5 * 5 * 25 * 2)
         self.thisPlayer = player
@@ -32,6 +32,7 @@ class OnitamaEnv(gym.Env):
         ac = np.unravel_index(ac, (5, 5, 50))
         move = self.actionToMove(ac)
         self.game.step(move)
+        self.game.stepBot()
         return self.get_obs(), self.get_reward(), self.game.winner > 0, {}
 
     def reset(self):
