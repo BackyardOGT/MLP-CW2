@@ -59,7 +59,7 @@ Actions:
 
 #### Higher priority
 
-* T - Reward doesn't pass own test
+* Idea files pushed
 
 * T - Implement random card picking and pick which player starts - see onitama rules
     In game.reset() (called before game starts)

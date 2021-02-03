@@ -39,23 +39,23 @@ class SimpleAgent:
         opponent_moves = state.get_valid_moves(state.player1)
 
         # Agent king, opponent king, and opponent pawn positions
-        king = state.get()["player2"]["king"] # [r,c]
-        opp_king = state.get()["player1"]["king"] # [r,c]
-        opp_pawns = state.get()["player1"]["pawns"] # [[r,c]]
+        king = state.player2.king # [r,c]
+        opp_king = state.player1.king # [r,c]
+        opp_pawns = state.player1.pawns # [[r,c]]
 
         # Winning moves
         winning_moves = [move for move in all_moves if move.isKing and move.pos == [0,2]
-                                                    or move.pos == opp_king]
+                                                    or move.pos == opp_king.pos]
 
         # Safe moves are moves which end up on a square not attackable by an opponents piece
         safe_moves = [move for move in all_moves if move.pos not in [opp_move.pos for opp_move in opponent_moves]]
 
         # Safe captures are safe moves where a pawn is captured
-        safe_captures = [move for move in safe_moves if move.pos in opp_pawns]
+        safe_captures = [move for move in safe_moves if move.pos in [opp_pawn.pos for opp_pawn in opp_pawns]]
 
         if len(winning_moves) > 0:
             return winning_moves[0]
-        elif king in opponent_moves:
+        elif king.pos in [opponent_move.pos for opponent_move in opponent_moves]:
             king_moves = [move for move in safe_moves if move.isKing]
             if len(king_moves) > 0:
                 return np.random.choice(king_moves)
