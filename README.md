@@ -59,8 +59,7 @@ Actions:
 
 #### Higher priority
 
-* Idea files pushed
-
+* ? - Try person and rand vs the heuristic agent, also testing env for any bugs
 * T - Implement random card picking and pick which player starts - see onitama rules
     In game.reset() (called before game starts)
     Can set isPlayer1 flag for whose turn starts
@@ -81,7 +80,6 @@ Actions:
         If masking here move masking q values? But then where to mask deterministic actions
 
 * ? - Cmd line evaluation # wins, reward etc, return info of winner when done
-* ? - Try person and rand vs the heuristic agent, also testing env for any bugs
 * ? - View init RL vs rand and heuristic agents
 
 * ? - Maybe add square highlighting before move to show
