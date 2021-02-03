@@ -59,7 +59,12 @@ Actions:
 
 #### Higher priority
 
-* ? - Try person and rand vs the heuristic agent, also testing env for any bugs
+* All - Try person and rand vs the heuristic agent, also testing env for any bugs
+* T - Add reward
+     Negative for lose pawn (negative reward, positive weight)
+     Positive for take pawn 
+     Negative reward for lose 
+     Check weighting 
 * T - Implement random card picking and pick which player starts - see onitama rules
     In game.reset() (called before game starts)
     Can set isPlayer1 flag for whose turn starts
