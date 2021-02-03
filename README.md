@@ -59,32 +59,41 @@ Actions:
 
 #### Higher priority
 
-* G - agent doesn't work when used in flask + front end
 * T - Reward doesn't pass own test
-  
-* T - Implement pick which player starts
-* ? - Try person and rand vs the heuristic agent
-* ? - View init RL vs rand and heuristic agents
-* ? - FE display bot vs bot and cmd line evaluation # wins, reward etc
+
+* T - Implement random card picking and pick which player starts - see onitama rules
+    In game.reset() (called before game starts)
+    Can set isPlayer1 flag for whose turn starts
 * G - Corner case: It is possible that you will find that you cannot use any of your cards to make a legal move. If this happens - and only then - you must pass your turn. 
   <br/>None of your pawns will move. But like the river that constantly flows, you cannot remain unchanged: you must still choose one of the two cards in front of you, place it to the left of the playmat and rotate it, then take the card from the right side of the board.
   * Remove assertion in env and handle no valid moves
   * Try and make a test case
 * O - Masking for exploration
-  Works without exploration but explotation comes after masking so breaks the actions
+  Works without exploration but exploration comes after masking so breaks the actions
   Could allow invalid but return the current state and don't step the game. But this won't learn legal moves
   as the masking will zero the gradient back to the network. Would have to remove masking completely to learn valid moves.
   So will have to overwrite more of their stuff to mask exploration.
   Can't just use param noise as this also uses eps greedy still
+        random_actions = tf.random_uniform(tf.stack([batch_size]), minval=0, maxval=n_actions, dtype=tf.int64)
+        How to use mask in this function? 
+            policy.q_value so use policy.mask
+            tf.random.categorical on mask itself?
+        If masking here move masking q values? But then where to mask deterministic actions
+
+* ? - Cmd line evaluation # wins, reward etc, return info of winner when done
+* ? - Try person and rand vs the heuristic agent, also testing env for any bugs
+* ? - View init RL vs rand and heuristic agents
+
+* ? - Maybe add square highlighting before move to show
 * Work on reward and heuristic agent?
 
 #### Lower
 
+* Say what bots are playing
 * Check masking not making gradients explode / vanish? 
 * 5 x 5 filter with 5 x 5 input and output 
 * Gather data for behaviour clone from good github heuristic bot
 * Wrap flask app into a class instead of globals
-* Make FE display intermediate state between user and agent move
   
 #### General
 

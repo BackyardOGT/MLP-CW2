@@ -76,6 +76,7 @@ class EnvTest(unittest.TestCase):
         env.reset()
         valid_moves = env.game.get_valid_moves(env.game.player1)
         env.game.step(valid_moves[0])
+        env.game.stepBot()
         for move in env.game.get_valid_moves(env.game.player1):
             assert env.game.check_valid_move(move), "Found incorrect valid move {}".format(move)
 

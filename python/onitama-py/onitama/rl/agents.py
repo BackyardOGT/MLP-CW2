@@ -6,11 +6,16 @@ import tensorflow.contrib.layers as tf_layers
 
 
 class RandomAgent:
-    def __init__(self):
+    def __init__(self, isPlayer1=False):
+        """
+        Assumes player 2 as this is normal
+        """
+        self.isPlayer1 = isPlayer1
         np.random.seed(1123)
 
     def get_action(self, state):
-        ac = np.random.choice(state.get_valid_moves(state.player2))
+        player = state.player1 if self.isPlayer1 else state.player2
+        ac = np.random.choice(state.get_valid_moves(player))
         return ac
 
 
@@ -82,12 +87,8 @@ class SimpleAgent:
 
 
 
-
-
-
-def apply_mask(activations, scaled_images, n_obs=9):
+def apply_mask(activations, mask):
     # get mask from obs and flatten
-    mask = scaled_images[:, :, :, n_obs:]
     mask = conv_to_fc(mask)
     return activations * mask
 
@@ -173,7 +174,8 @@ class MaskedCNNPolicy(DQNPolicy):
                 q_out = action_scores
 
         # TODO: should be applied before q or after (ie. right before softmax)?
-        masked_q = self.apply_mask(q_out, self.processed_obs)
+        self.mask = self.process_obs[:, :, :, self.n_obs:]
+        masked_q = self.apply_mask(q_out, self.mask)
         self.q_values = masked_q
         self._setup_init()
 
