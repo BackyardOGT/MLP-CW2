@@ -295,7 +295,7 @@ class PvP:
 
 class PvBot(PvP):
     def __init__(self, agent):
-        super(PvBot).__init__()
+        super(PvBot, self).__init__()
         self.agent = agent
         self.mode = "P vs Bot"
 
@@ -327,7 +327,7 @@ class PvBot(PvP):
 
 class BotVsBot(PvP):
     def __init__(self, agent1, agent2):
-        super(BotVsBot).__init__()
+        super(BotVsBot, self).__init__()
         self.agent1 = agent1
         self.agent2 = agent2
         self.mode = "Bot vs Bot"
