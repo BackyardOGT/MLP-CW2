@@ -18,8 +18,9 @@ class EnvTest(unittest.TestCase):
                     "id": 0}
 
         move = Move(moveJson)
+
         env.game.player2.step(move, None)
-        self.assertEqual(env.get_reward, 0.2)
+        self.assertEqual(env.get_reward(), 0.2)
 
     def test_error(self):
         env = OnitamaEnv()

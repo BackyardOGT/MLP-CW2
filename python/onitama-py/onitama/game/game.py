@@ -81,7 +81,8 @@ class Player:
         # init pieces
         self.king = Piece([row, 2], KING_ID)
         self.pawns = [Piece([row, i], i) for i in range(5) if i != 2]
-
+        
+        
     def __str__(self):
         return str(self.to_dict())
 
