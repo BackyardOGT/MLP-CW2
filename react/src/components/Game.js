@@ -105,7 +105,7 @@ export default function Game({state, sendMove, resetGame, toggleGameMode, stepBo
                     playerData={playerData}
                 />
                 <div className="cardDiv">
-                    <h2>Player 2</h2>
+                    <h2 style={{background: "#eeeeee", color: "black"}}>Player 2</h2>
                     <Card
                         data={state.player2.cards[0]}
                         player={2}

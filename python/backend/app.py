@@ -8,7 +8,7 @@ CORS(app)
 
 twoPlayer = PvP()
 againstBot = PvBot(RandomAgent())
-botVsBot = BotVsBot(RandomAgent(isPlayer1=True), SimpleAgent())
+botVsBot = BotVsBot(RandomAgent(isPlayer1=True), RandomAgent())
 game = twoPlayer
 games = [twoPlayer, againstBot, botVsBot]
 game_id = 0

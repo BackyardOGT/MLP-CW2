@@ -190,7 +190,7 @@ class PvP:
                     return False
         else:
             for j, pawn in enumerate(player.pawns):
-                if np.array_equal(move.pos, pawn.get) and move.i != j:
+                if np.array_equal(move.pos, pawn.get()) and move.i != j:
                     return False
             if np.array_equal(move.pos, player.king.get()):
                 return False
@@ -295,7 +295,7 @@ class PvP:
 
 class PvBot(PvP):
     def __init__(self, agent):
-        super().__init__()
+        super(PvBot).__init__()
         self.agent = agent
         self.mode = "P vs Bot"
 
@@ -327,7 +327,7 @@ class PvBot(PvP):
 
 class BotVsBot(PvP):
     def __init__(self, agent1, agent2):
-        super().__init__()
+        super(BotVsBot).__init__()
         self.agent1 = agent1
         self.agent2 = agent2
         self.mode = "Bot vs Bot"

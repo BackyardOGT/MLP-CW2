@@ -87,9 +87,8 @@ class SimpleAgent:
 
 
 
-def apply_mask(activations, scaled_images, n_obs=9):
+def apply_mask(activations, mask):
     # get mask from obs and flatten
-    mask = scaled_images[:, :, :, n_obs:]
     mask = conv_to_fc(mask)
     return activations * mask
 
@@ -175,7 +174,8 @@ class MaskedCNNPolicy(DQNPolicy):
                 q_out = action_scores
 
         # TODO: should be applied before q or after (ie. right before softmax)?
-        masked_q = self.apply_mask(q_out, self.processed_obs)
+        self.mask = self.process_obs[:, :, :, self.n_obs:]
+        masked_q = self.apply_mask(q_out, self.mask)
         self.q_values = masked_q
         self._setup_init()
 

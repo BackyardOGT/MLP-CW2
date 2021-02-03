@@ -53,6 +53,9 @@ function App() {
             .then((res) => res.json())
             .then((data) => {
                 setBoardState(data);
+                if (data.winner !== 0) {
+                    alert("Winner is player " + data.winner);
+                }
             });
     };
 
