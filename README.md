@@ -61,6 +61,8 @@ Actions:
 
 * All - Try person and rand vs the heuristic agent, also testing env for any bugs
 * O - View init RL vs rand and heuristic agents
+* O - Test train run
+* O - Think masking for exploration works, worth checking / testing more
 * T - Add reward
      Negative for lose pawn (negative reward, positive weight)
      Positive for take pawn 
@@ -73,7 +75,6 @@ Actions:
   <br/>None of your pawns will move. But like the river that constantly flows, you cannot remain unchanged: you must still choose one of the two cards in front of you, place it to the left of the playmat and rotate it, then take the card from the right side of the board.
   * Remove assertion in env and handle no valid moves
   * Try and make a test case
-* O - Think masking for exploration works, worth checking / testing more
 
 * ? - Add square highlighting before move to show bot vs bot
 

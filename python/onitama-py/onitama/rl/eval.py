@@ -2,7 +2,7 @@ from onitama.rl import OnitamaEnv, MaskedCNNPolicy, SimpleAgent
 from stable_baselines.deepq import DQN
 from stable_baselines.common.evaluation import evaluate_policy
 import numpy as np
-
+import argparse
 
 class EvalCB:
     def __init__(self):
@@ -19,7 +19,7 @@ class EvalCB:
     def print(self):
         print("Won {} / {}".format(self.n_wins, self.n_eps))
 
-def evaluate_rl():
+def evaluate_rl(policy, env):
     eval_cb = EvalCB()
     episode_rewards, episode_lengths = evaluate_policy(policy, env, callback=eval_cb.eval_cb, return_episode_rewards=True)
     print("Mean reward: {}".format(np.mean(episode_rewards)))
@@ -32,7 +32,8 @@ def evaluate_rl():
     print("Max episode length: {}".format(np.max(episode_rewards)))
     eval_cb.print()
 
+
 if __name__ == "__main__":
     env = OnitamaEnv(SimpleAgent, verbose=False)
     policy = DQN(MaskedCNNPolicy, env)
-    evaluate_rl()
+    evaluate_rl(policy, env)
