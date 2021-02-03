@@ -86,13 +86,6 @@ class SimpleAgent:
     '''
 
 
-
-def apply_mask(activations, mask):
-    # get mask from obs and flatten
-    mask = conv_to_fc(mask)
-    return activations * mask
-
-
 def cnn_extractor_onitama(scaled_images, n_obs=9, n_filters_out=50, filter_size=5, **kwargs):
     """
     CNN with 5 x 5 x 50 (50 = 25 x 2) outputs, that is masked by 2nd half of inputs
@@ -174,16 +167,19 @@ class MaskedCNNPolicy(DQNPolicy):
                 q_out = action_scores
 
         # TODO: should be applied before q or after (ie. right before softmax)?
-        self.mask = self.process_obs[:, :, :, self.n_obs:]
-        masked_q = self.apply_mask(q_out, self.mask)
+        mask_inp = self.processed_obs[:, :, :, self.n_obs:]
+        mask_flat = conv_to_fc(mask_inp)
+        # get a mask as tf.float32.min for invalid and 1s for valid
+        self.mask = self.apply_mask(tf.ones_like(mask_flat), mask_flat)
+        # get masked q values
+        masked_q = self.apply_mask(q_out, mask_flat)
         self.q_values = masked_q
         self._setup_init()
 
-    def apply_mask(self, values, obs):
+    def apply_mask(self, values, mask_flat):
         # TODO: more efficient way?
-        mask = obs[:, :, :, self.n_obs:]
-        mask = conv_to_fc(mask)
-        masked = tf.where(mask > 0, values, tf.ones_like(values) * tf.float32.min)
+        # if it's masked, tf.float32.min, if it's valid then 1, to sample only valid
+        masked = tf.where(mask_flat > 0, values, tf.ones_like(values) * tf.float32.min)
         return masked
 
     def step(self, obs, state=None, mask=None, deterministic=True):

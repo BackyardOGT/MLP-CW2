@@ -47,13 +47,13 @@ class RLTest(unittest.TestCase):
     def test_with_env(self):
         env = OnitamaEnv()
         env.reset()
-        dqn = DQN(MaskedCNNPolicy, env, learning_starts=10, exploration_initial_eps=0.0, exploration_final_eps=0.0)
+        dqn = DQN(MaskedCNNPolicy, env, learning_starts=10)
         dqn.learn(total_timesteps=100)
 
     def test_with_env_learn(self):
         env = OnitamaEnv()
         env.reset()
-        dqn = DQN(MaskedCNNPolicy, env, learning_starts=10, exploration_initial_eps=0.0, exploration_final_eps=0.0)
+        dqn = DQN(MaskedCNNPolicy, env, learning_starts=10)
         dqn.learn(total_timesteps=100)
 
     def test_mask_with_env(self):

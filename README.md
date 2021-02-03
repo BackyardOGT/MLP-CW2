@@ -60,6 +60,7 @@ Actions:
 #### Higher priority
 
 * All - Try person and rand vs the heuristic agent, also testing env for any bugs
+* O - View init RL vs rand and heuristic agents
 * T - Add reward
      Negative for lose pawn (negative reward, positive weight)
      Positive for take pawn 
@@ -72,23 +73,11 @@ Actions:
   <br/>None of your pawns will move. But like the river that constantly flows, you cannot remain unchanged: you must still choose one of the two cards in front of you, place it to the left of the playmat and rotate it, then take the card from the right side of the board.
   * Remove assertion in env and handle no valid moves
   * Try and make a test case
-* O - Masking for exploration
-  Works without exploration but exploration comes after masking so breaks the actions
-  Could allow invalid but return the current state and don't step the game. But this won't learn legal moves
-  as the masking will zero the gradient back to the network. Would have to remove masking completely to learn valid moves.
-  So will have to overwrite more of their stuff to mask exploration.
-  Can't just use param noise as this also uses eps greedy still
-        random_actions = tf.random_uniform(tf.stack([batch_size]), minval=0, maxval=n_actions, dtype=tf.int64)
-        How to use mask in this function? 
-            policy.q_value so use policy.mask
-            tf.random.categorical on mask itself?
-        If masking here move masking q values? But then where to mask deterministic actions
+* O - Think masking for exploration works, worth checking / testing more
 
-* ? - Cmd line evaluation # wins, reward etc, return info of winner when done
-* ? - View init RL vs rand and heuristic agents
+* ? - Add square highlighting before move to show bot vs bot
 
-* ? - Maybe add square highlighting before move to show
-* Work on reward and heuristic agent?
+* Work on reward and heuristic agent
 
 #### Lower
 

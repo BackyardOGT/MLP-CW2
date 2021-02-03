@@ -19,9 +19,9 @@ class OnitamaEnv(gym.Env):
     Defaults to player 1
     See README for obs and ac space definitions
     """
-    def __init__(self, agent_type=RandomAgent, player=1):
+    def __init__(self, agent_type=RandomAgent, player=1, verbose=True):
         super(OnitamaEnv, self).__init__()
-        self.game = PvBot(agent_type())
+        self.game = PvBot(agent_type(), verbose=verbose)
         self.observation_space = gym.spaces.Box(np.zeros((5, 5, 59)), np.ones((5, 5, 59)))
         self.action_space =  gym.spaces.Discrete(5 * 5 * 25 * 2)
         self.thisPlayer = player
@@ -33,7 +33,8 @@ class OnitamaEnv(gym.Env):
         move = self.actionToMove(ac)
         self.game.step(move)
         self.game.stepBot()
-        return self.get_obs(), self.get_reward(), self.game.winner > 0, {}
+        info = {} if self.game.winner == 0 else {"winner": self.game.winner}
+        return self.get_obs(), self.get_reward(), self.game.winner > 0, info
 
     def reset(self):
         self.game.reset()
