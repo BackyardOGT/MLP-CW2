@@ -28,8 +28,8 @@ def evaluate_rl(policy, env):
     print("Max reward: {}".format(np.max(episode_rewards)))
     print("Mean episode length: {}".format(np.mean(episode_lengths)))
     print("Std episode length: {}".format(np.std(episode_lengths)))
-    print("Min episode length: {}".format(np.min(episode_rewards)))
-    print("Max episode length: {}".format(np.max(episode_rewards)))
+    print("Min episode length: {}".format(np.min(episode_lengths)))
+    print("Max episode length: {}".format(np.max(episode_lengths)))
     eval_cb.print()
 
 
