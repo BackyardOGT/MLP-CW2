@@ -53,16 +53,30 @@ Actions:
     Softmax to get move
     Return a 1250 (2 x 5 x 5 x 25 flat) one hot action
 
+## Notes
 
+Heuristic agent seems good to me when I played it with UI. 
+
+Init RL (ie. no training) against heuristic agent looks good:
+
+Mean reward: 0.51
+Std reward: 0.10440306508910549
+Min reward: 0.4
+Max reward: 0.7
+Mean episode length: 5.5
+Std episode length: 1.6278820596099706
+Min episode length: 4
+Max episode length: 9
+Won 0 / 10
+
+Ran training code for a bit and it ran without error
 
 ## TODOs
 
 #### Higher priority
 
 * All - Try person and rand vs the heuristic agent, also testing env for any bugs
-* O - View init RL vs rand and heuristic agents
-* O - Test train run
-* O - Think masking for exploration works, worth checking / testing more
+* ? - Get running on cloud  
 * T - Add reward
      Negative for lose pawn (negative reward, positive weight)
      Positive for take pawn 
@@ -76,7 +90,8 @@ Actions:
   * Remove assertion in env and handle no valid moves
   * Try and make a test case
 
-* ? - Add square highlighting before move to show bot vs bot
+* O - Think masking for exploration works, worth checking / testing more
+* O - Add square highlighting before move to show bot vs bot
 
 * Work on reward and heuristic agent
 
