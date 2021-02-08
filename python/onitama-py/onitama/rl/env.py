@@ -140,9 +140,12 @@ class OnitamaEnv(gym.Env):
         reward_win = 0
 
         state = State(self.game.get())
-        reward_win = state.winner == self.thisPlayer
+
+        #Set reward win to 1 if agent wins, else set reward to 0 for no winner, and -1 for opponent wins.
+        reward_win = 1 if state.winner == self.thisPlayer else -int(state.winner>0)
 
         player = self.game.player1  if self.thisPlayer == 1 else self.game.player2 
+        opponent = self.game.player2 if self.thisPlayer == 1 else self.game.player1 
 
         #Get number of rows moved
         rows_moved = player.last_move.pos[0] - player.last_pos[0]
@@ -151,12 +154,17 @@ class OnitamaEnv(gym.Env):
 
         move_forwards = max(0,rows_moved * row_orientation)
 
+        pawns_taken = 1 if opponent.lost_pawn_last_move else -1 if player.lost_pawn_last_move else 0
+        
+        #Discuss weights assigned to each reward with team
         reward_weights = {
-            "move_forwards": 0.1,
+            "move_forwards": 0.01,
+            "take_pawn":0.1,
             "win": 1.0,
         }
         reward_dict = {
             "move_forwards": move_forwards,
+            "take_pawn":pawns_taken,
             "win": reward_win
         }
         reward = 0

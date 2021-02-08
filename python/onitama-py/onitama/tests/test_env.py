@@ -19,7 +19,21 @@ class EnvTest(unittest.TestCase):
         move = Move(moveJson)
 
         env.game.player2.step(move, None)
-        self.assertEqual(env.get_reward(), 0.2)
+        self.assertEqual(env.get_reward(), 0.02)
+
+    def testPlayer2TakePawn(self):
+        # Test Player1 taking Player2s pawn at location [0,0]
+        # NOTE: This test will only pass if the move is NOT checked to be a valid move
+        env = OnitamaEnv(player=1)
+        moveJson = {"pos": [0, 0],
+                    "name": "pawn",
+                    "i": 0,
+                    "id": 0}
+        move = Move(moveJson)
+
+        env.game.step(move)
+        
+        self.assertEqual(env.get_reward(), 0.1+4*0.01)
 
     def test_error(self):
         env = OnitamaEnv()

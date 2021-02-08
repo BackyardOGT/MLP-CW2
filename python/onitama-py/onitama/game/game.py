@@ -82,7 +82,8 @@ class Player:
         # init pieces
         self.king = Piece([row, 2], KING_ID)
         self.pawns = [Piece([row, i], i) for i in range(5) if i != 2]
-        
+        self.lost_pawn_last_move = False
+
         
     def __str__(self):
         return str(self.to_dict())
@@ -108,11 +109,13 @@ class Player:
 
 
 class PvP:
-    def __init__(self, verbose=True):
+    def __init__(self, verbose=True,startingPlayer=1):
         self.winner = 0
+        self.playerStart=startingPlayer
         self.reset()
         self.mode = "P vs P"
         self.verbose = verbose
+        
 
     def get(self):
         """
@@ -147,6 +150,8 @@ class PvP:
         """
         curP, otherP = self.get_current_players()
 
+        otherP.lost_pawn_last_move = False
+
         if not self.check_valid_move(move):
             print("Invalid move: ", move)
             print("Valid moves: ", self.get_valid_moves(curP))
@@ -170,7 +175,7 @@ class PvP:
 
         self.player1 = Player(True, p1CardsInit)
         self.player2 = Player(False, p2CardsInit)
-        self.isPlayer1 = True
+        self.isPlayer1 = self.playerStart == 1 
 
         self.spare_card = spare_card
 
@@ -251,10 +256,11 @@ class PvP:
         self.handle_take_pawn(otherP, move)
         return self.check_take_king(otherP, move)
 
-    def handle_take_pawn(self, playerOther, move):
+    def handle_take_pawn(self, playerOther, move):      
         for i, pawn in enumerate(playerOther.pawns):
             if np.array_equal(move.pos, pawn.get()):
-                playerOther.pawns.pop(i)  # drop this pawn
+                playerOther.pawns.pop(i)  # drop this pawn                
+                playerOther.lost_pawn_last_move = True
 
     def check_take_king(self, otherP, move):
         """

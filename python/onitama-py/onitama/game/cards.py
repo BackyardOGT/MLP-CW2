@@ -1,3 +1,5 @@
+from random import shuffle
+
 blank =    [[0,0,0,0,0],
             [0,0,0,0,0],
             [0,0,0,0,0],
@@ -91,6 +93,7 @@ all_cards = [tiger, dragon, frog, rabbit,
 
 
 def get_init_cards():
-    return ([all_cards[0], all_cards[1]],
-            [all_cards[2], all_cards[3]],
-            [all_cards[4]])
+      shuffle(all_cards)
+      return ([all_cards[0], all_cards[1]],
+          [all_cards[2], all_cards[3]],
+           [all_cards[4]])
