@@ -1,6 +1,5 @@
-from onitama.rl import OnitamaEnv
-from onitama.game import *
-from onitama.game import get_move
+from onitama.rl import OnitamaEnv, actionToMove, moveToMask
+from onitama.game import Move, get_move
 import numpy as np
 import unittest
 
@@ -32,8 +31,8 @@ class EnvTest(unittest.TestCase):
         # ac has to be a piece
         # note all pieces in orig positions, for p1 it's [4, *], king at [4, 2]
         ac[4, 2, 29] = 1
-        move = env.actionToMove([i[0] for i in np.where(ac)])
-        mask = env.moveToMask(move, env.game.player1)
+        move = actionToMove([i[0] for i in np.where(ac)], env.game, env.thisPlayer)
+        mask = moveToMask(move, env.game.player1)
         assert np.all([a[0] == m for a, m in zip(np.where(ac), mask)]), "Ac : {}\nMask : {}".format(np.where(ac), mask)
 
     def test_move_to_mask_pawn(self):
@@ -42,18 +41,18 @@ class EnvTest(unittest.TestCase):
         # ac has to be a piece
         # note all pieces in orig positions, for p1 it's [4, *], king at [4, 2]
         ac[4, 1, 29] = 1
-        move = env.actionToMove([i[0] for i in np.where(ac)])
-        mask = env.moveToMask(move, env.game.player1)
+        move = actionToMove([i[0] for i in np.where(ac)], env.game, env.thisPlayer)
+        mask = moveToMask(move, env.game.player1)
         assert np.all([a[0] == m for a, m in zip(np.where(ac), mask)]), "Ac : {}\nMask : {}".format(np.where(ac), mask)
 
     def test_mask_to_move(self):
         env = OnitamaEnv()
         # note all pieces in orig positions, for p1 it's [4, *], king at [4, 2]
         move = get_move([1, 1], True, 0, -1)
-        mask = env.moveToMask(move, env.game.player1)
+        mask = moveToMask(move, env.game.player1)
         ac = np.zeros((5, 5, 50))
         ac[mask] = 1
-        move2 = env.actionToMove([i[0] for i in np.where(ac)])
+        move2 = actionToMove([i[0] for i in np.where(ac)], env.game, env.thisPlayer)
         assert move.pos == move2.pos, "pos Orig : {}\nNew : {}".format(move, move2)
         assert move.isKing == move2.isKing, "isKing Orig : {}\nNew : {}".format(move, move2)
         assert move.i == move2.i, "i Orig : {}\nNew : {}".format(move, move2)
@@ -62,10 +61,10 @@ class EnvTest(unittest.TestCase):
     def test_mask_to_move_pawn(self):
         env = OnitamaEnv()
         move = get_move([1, 1], False, 0, 1)
-        mask = env.moveToMask(move, env.game.player1)
+        mask = moveToMask(move, env.game.player1)
         ac = np.zeros((5, 5, 50))
         ac[mask] = 1
-        move2 = env.actionToMove([i[0] for i in np.where(ac)])
+        move2 = actionToMove([i[0] for i in np.where(ac)], env.game, env.thisPlayer)
         assert move.pos == move2.pos, "pos Orig : {}\nNew : {}".format(move, move2)
         assert move.isKing == move2.isKing, "isKing Orig : {}\nNew : {}".format(move, move2)
         assert move.i == move2.i, "i Orig : {}\nNew : {}".format(move, move2)

@@ -53,14 +53,35 @@ Actions:
     Softmax to get move
     Return a 1250 (2 x 5 x 5 x 25 flat) one hot action
 
+## Notes
 
+Heuristic agent seems good to me when I played it with UI. 
+
+Init RL (ie. no training) against heuristic agent looks good:
+
+Mean reward: 0.51
+Std reward: 0.10440306508910549
+Min reward: 0.4
+Max reward: 0.7
+Mean episode length: 5.5
+Std episode length: 1.6278820596099706
+Min episode length: 4
+Max episode length: 9
+Won 0 / 10
+
+Ran training code for a bit and it ran without error
 
 ## TODOs
 
 #### Higher priority
 
-* Idea files pushed
-
+* All - Try person and rand vs the heuristic agent, also testing env for any bugs
+* ? - Get running on cloud  
+* T - Add reward
+     Negative for lose pawn (negative reward, positive weight)
+     Positive for take pawn 
+     Negative reward for lose 
+     Check weighting 
 * T - Implement random card picking and pick which player starts - see onitama rules
     In game.reset() (called before game starts)
     Can set isPlayer1 flag for whose turn starts
@@ -68,24 +89,11 @@ Actions:
   <br/>None of your pawns will move. But like the river that constantly flows, you cannot remain unchanged: you must still choose one of the two cards in front of you, place it to the left of the playmat and rotate it, then take the card from the right side of the board.
   * Remove assertion in env and handle no valid moves
   * Try and make a test case
-* O - Masking for exploration
-  Works without exploration but exploration comes after masking so breaks the actions
-  Could allow invalid but return the current state and don't step the game. But this won't learn legal moves
-  as the masking will zero the gradient back to the network. Would have to remove masking completely to learn valid moves.
-  So will have to overwrite more of their stuff to mask exploration.
-  Can't just use param noise as this also uses eps greedy still
-        random_actions = tf.random_uniform(tf.stack([batch_size]), minval=0, maxval=n_actions, dtype=tf.int64)
-        How to use mask in this function? 
-            policy.q_value so use policy.mask
-            tf.random.categorical on mask itself?
-        If masking here move masking q values? But then where to mask deterministic actions
 
-* ? - Cmd line evaluation # wins, reward etc, return info of winner when done
-* ? - Try person and rand vs the heuristic agent, also testing env for any bugs
-* ? - View init RL vs rand and heuristic agents
+* O - Think masking for exploration works, worth checking / testing more
+* O - Add square highlighting before move to show bot vs bot
 
-* ? - Maybe add square highlighting before move to show
-* Work on reward and heuristic agent?
+* Work on reward and heuristic agent
 
 #### Lower
 

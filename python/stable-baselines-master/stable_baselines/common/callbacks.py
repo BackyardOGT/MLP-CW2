@@ -255,7 +255,8 @@ class EvalCallback(EventCallback):
                  best_model_save_path: str = None,
                  deterministic: bool = True,
                  render: bool = False,
-                 verbose: int = 1):
+                 verbose: int = 1,
+                 evaluate_policy_callback=None):
         super(EvalCallback, self).__init__(callback_on_new_best, verbose=verbose)
         self.n_eval_episodes = n_eval_episodes
         self.eval_freq = eval_freq
@@ -263,6 +264,7 @@ class EvalCallback(EventCallback):
         self.last_mean_reward = -np.inf
         self.deterministic = deterministic
         self.render = render
+        self.evaluate_policy_callback = evaluate_policy_callback
 
         # Convert to VecEnv for consistency
         if not isinstance(eval_env, VecEnv):
@@ -302,7 +304,8 @@ class EvalCallback(EventCallback):
                                                                n_eval_episodes=self.n_eval_episodes,
                                                                render=self.render,
                                                                deterministic=self.deterministic,
-                                                               return_episode_rewards=True)
+                                                               return_episode_rewards=True,
+                                                               callback=self.evaluate_policy_callback)
 
             if self.log_path is not None:
                 self.evaluations_timesteps.append(self.num_timesteps)

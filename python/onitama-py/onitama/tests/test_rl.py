@@ -1,4 +1,4 @@
-from onitama.rl import MaskedCNNPolicy, OnitamaEnv, RandomAgent
+from onitama.rl import MaskedCNNPolicy, OnitamaEnv, RandomAgent, get_mask, actionToMove
 from onitama.game import get_move
 import tensorflow as tf
 import gym
@@ -47,20 +47,20 @@ class RLTest(unittest.TestCase):
     def test_with_env(self):
         env = OnitamaEnv()
         env.reset()
-        dqn = DQN(MaskedCNNPolicy, env, learning_starts=10, exploration_initial_eps=0.0, exploration_final_eps=0.0)
+        dqn = DQN(MaskedCNNPolicy, env, learning_starts=10)
         dqn.learn(total_timesteps=100)
 
     def test_with_env_learn(self):
         env = OnitamaEnv()
         env.reset()
-        dqn = DQN(MaskedCNNPolicy, env, learning_starts=10, exploration_initial_eps=0.0, exploration_final_eps=0.0)
+        dqn = DQN(MaskedCNNPolicy, env, learning_starts=10)
         dqn.learn(total_timesteps=100)
 
     def test_mask_with_env(self):
         env = OnitamaEnv()
         env.reset()
         valid_moves = env.game.get_valid_moves(env.game.player1)
-        mask = env.get_mask()
+        mask = get_mask(env.game, env.thisPlayer)
         self.valid_mask(env, mask)
 
     def test_mask_with_env_step(self):
@@ -69,14 +69,14 @@ class RLTest(unittest.TestCase):
         valid_moves = env.game.get_valid_moves(env.game.player1)
         env.game.step(valid_moves[0])
         valid_moves = env.game.get_valid_moves(env.game.player1)
-        mask = env.get_mask()
+        mask = get_mask(env.game, env.thisPlayer)
         self.valid_mask(env, mask)
 
     def valid_mask(self, env, mask):
         mask_pos = [(a, b, c) for (a, b, c) in zip(*np.where(mask))]
         valid_moves = env.game.get_valid_moves(env.game.player1)
         for mp in mask_pos:
-            move = env.actionToMove(mp)
+            move = actionToMove(mp, env.game, env.thisPlayer)
             assert move in valid_moves, "Move: {}\nValid moves: {}".format(move, valid_moves)
 
     def test_policy_ac_with_env(self):
@@ -95,7 +95,7 @@ class RLTest(unittest.TestCase):
             for _ in range(100):
                 # mask ok?
                 mask = obs[:, :, 9:]
-                env_mask = env.get_mask()
+                env_mask = get_mask(env.game, env.thisPlayer)
                 assert len(env.game.get_valid_moves(env.game.player1)) > 0, "No valid moves p1"
                 assert not np.array_equal(env_mask, np.zeros_like(env_mask)), "Env mask is zeros"
                 assert not np.array_equal(mask, np.zeros_like(mask)), "Obs mask is zeros"
@@ -121,12 +121,12 @@ class RLTest(unittest.TestCase):
         obs = env.get_obs()
         # mask ok?
         mask = obs[:, :, 9:]
-        assert np.array_equal(mask, env.get_mask()), "Wrong mask"
+        assert np.array_equal(mask, get_mask(env.game, env.thisPlayer)), "Wrong mask"
         for ac_flat in np.where(dqn.action_probability(obs))[0]:
             ac = np.unravel_index(ac_flat, (5, 5, 50))
             # should this have been masked?
             assert mask[ac], "This action should be masked"
-            move = env.actionToMove(ac)
+            move = actionToMove(ac, env.game, env.thisPlayer)
             valid_moves = env.game.get_valid_moves(env.game.player1)
             # is it valid
             assert move in valid_moves, "Move: {}\nValid moves: {}".format(move, valid_moves)

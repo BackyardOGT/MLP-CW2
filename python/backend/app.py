@@ -1,6 +1,6 @@
 from flask import Flask, request
 from onitama.game import PvP, PvBot, BotVsBot
-from onitama.rl import RandomAgent, SimpleAgent
+from onitama.rl import RandomAgent, SimpleAgent, RLAgent, MaskedCNNPolicy
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -8,7 +8,7 @@ CORS(app)
 
 twoPlayer = PvP()
 againstBot = PvBot(SimpleAgent())
-botVsBot = BotVsBot(RandomAgent(isPlayer1=True), SimpleAgent())
+botVsBot = BotVsBot(RLAgent(thisPlayer=1), SimpleAgent())
 game = twoPlayer
 games = [twoPlayer, againstBot, botVsBot]
 game_id = 0

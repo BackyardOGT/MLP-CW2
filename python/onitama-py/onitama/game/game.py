@@ -40,6 +40,7 @@ class Move:
         return self.pos == other.pos and self.isKing == other.isKing \
                and self.i == other.i and self.cardId == other.cardId
 
+
 def get_move(pos, isKing, cardId, i):
     return Move({
         "pos": pos,
@@ -93,24 +94,25 @@ class Player:
         """
         Updates piece and card objects, validation etc. done in Game class
         """
-        #Store the last position of the most recently moved piece
+        # Store the last position of the most recently moved piece
         if move.isKing:
             self.last_pos = self.king.get()
             self.king.move(move.pos)
         else:  # it's pawn
             self.last_pos = self.pawns[move.i].get()
             self.pawns[move.i].move(move.pos)
-        #Store the most recent move
+        # Store the most recent move
         self.last_move = move
         # swap card
         self.cards[int(move.cardId)] = card
 
 
 class PvP:
-    def __init__(self):
+    def __init__(self, verbose=True):
         self.winner = 0
         self.reset()
         self.mode = "P vs P"
+        self.verbose = verbose
 
     def get(self):
         """
@@ -143,16 +145,20 @@ class PvP:
             pos: position moved to
         :return: self.get()
         """
+        curP, otherP = self.get_current_players()
+
         if not self.check_valid_move(move):
             print("Invalid move: ", move)
+            print("Valid moves: ", self.get_valid_moves(curP))
+            print()
             return self.get()
 
-        curP, otherP = self.get_current_players()
         kingTaken = self.handle_take(otherP, move)
         newCards = self.handle_cards(curP, move)
         curP.step(move, newCards)
         if self.reached_goal(curP) or kingTaken:
-            print("{} won: ".format(curP.player) + ("reached end" if self.reached_goal(curP) else "king taken"))
+            if self.verbose: print(
+                "{} won: ".format(curP.player) + ("reached end" if self.reached_goal(curP) else "king taken"))
             self.winner = 1 if self.isPlayer1 else 2
             return self.get()
 
@@ -172,7 +178,7 @@ class PvP:
         self.winner = 0
 
     def check_valid_move(self, move):
-        assert move, "Move passed is None"
+        assert move, "Move passed is {}".format(move)
         curP, otherP = self.get_current_players()
         return self.check_on_board(move) \
                and self.check_unoccupied(curP, move) \
@@ -197,7 +203,7 @@ class PvP:
                 return False
         return True
 
-    def check_move_on_card(self, player, move, verbose=True):
+    def check_move_on_card(self, player, move):
         if move.isKing:
             piecePos = player.king.get()
         else:  # pawn
@@ -206,7 +212,7 @@ class PvP:
         if np.all(np.greater_equal(posOnCard, 0)) and np.all(np.less_equal(posOnCard, 4)):
             if player.cards[move.cardId][posOnCard[0]][posOnCard[1]]:  # 1s and 0s so T/F
                 return True
-        if verbose:
+        if self.verbose:
             print("Move not on card {}".format(move.cardId))
             print("Move {}".format(move.pos))
             print("Piece {}".format(piecePos))
@@ -295,8 +301,8 @@ class PvP:
 
 
 class PvBot(PvP):
-    def __init__(self, agent):
-        super(PvBot, self).__init__()
+    def __init__(self, agent, *args, **kwargs):
+        super(PvBot, self).__init__(*args, **kwargs)
         self.agent = agent
         self.mode = "P vs Bot"
 
@@ -327,8 +333,8 @@ class PvBot(PvP):
 
 
 class BotVsBot(PvP):
-    def __init__(self, agent1, agent2):
-        super(BotVsBot, self).__init__()
+    def __init__(self, agent1, agent2, *args, **kwargs):
+        super(BotVsBot, self).__init__(*args, **kwargs)
         self.agent1 = agent1
         self.agent2 = agent2
         self.mode = "Bot vs Bot"
