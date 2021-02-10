@@ -101,12 +101,13 @@ class OnitamaEnv(gym.Env):
     Defaults to player 1
     See README for obs and ac space definitions
     """
-    def __init__(self, agent_type=RandomAgent, player=1, verbose=True):
+    def __init__(self, seed, agent_type=RandomAgent, player=1, verbose=True):
         super(OnitamaEnv, self).__init__()
-        self.game = PvBot(agent_type(), verbose=verbose)
+        self.game = PvBot(agent_type(seed), seed, verbose=verbose)
         self.observation_space = gym.spaces.Box(np.zeros((5, 5, 59)), np.ones((5, 5, 59)))
         self.action_space =  gym.spaces.Discrete(5 * 5 * 25 * 2)
         self.thisPlayer = player
+        self._seed = seed
 
     def step(self, ac):
         ac = np.squeeze(ac)
@@ -171,3 +172,7 @@ class OnitamaEnv(gym.Env):
         for k, r in reward_dict.items():
             reward += r * reward_weights[k]
         return reward
+
+    def seed(self, seed):
+        self._seed = seed
+        np.random.seed(seed)

@@ -9,8 +9,10 @@ import unittest
 
 
 class RLTest(unittest.TestCase):
+    seed = 123
+    
     def test_error(self):
-        env = OnitamaEnv(RandomAgent)
+        env = OnitamaEnv(self.seed, RandomAgent)
         observation_space = env.observation_space
         action_space = env.action_space
         n_env = 1
@@ -24,7 +26,7 @@ class RLTest(unittest.TestCase):
             actions, qs, _ = policy.step([obs])
 
     def test_masked_outputs(self):
-        env = OnitamaEnv(RandomAgent)
+        env = OnitamaEnv(self.seed, RandomAgent)
         observation_space = env.observation_space
         action_space = env.action_space
         n_env = 1
@@ -45,26 +47,26 @@ class RLTest(unittest.TestCase):
             assert (policy.step([obs])[0] == allowed), "Got: {} expected: {}".format(policy.step([obs]), allowed)
 
     def test_with_env(self):
-        env = OnitamaEnv()
+        env = OnitamaEnv(self.seed) 
         env.reset()
         dqn = DQN(MaskedCNNPolicy, env, learning_starts=10)
         dqn.learn(total_timesteps=100)
 
     def test_with_env_learn(self):
-        env = OnitamaEnv()
+        env = OnitamaEnv(self.seed) 
         env.reset()
         dqn = DQN(MaskedCNNPolicy, env, learning_starts=10)
         dqn.learn(total_timesteps=100)
 
     def test_mask_with_env(self):
-        env = OnitamaEnv()
+        env = OnitamaEnv(self.seed) 
         env.reset()
         valid_moves = env.game.get_valid_moves(env.game.player1)
         mask = get_mask(env.game, env.thisPlayer)
         self.valid_mask(env, mask)
 
     def test_mask_with_env_step(self):
-        env = OnitamaEnv()
+        env = OnitamaEnv(self.seed) 
         env.reset()
         valid_moves = env.game.get_valid_moves(env.game.player1)
         env.game.step(valid_moves[0])
@@ -80,14 +82,14 @@ class RLTest(unittest.TestCase):
             assert move in valid_moves, "Move: {}\nValid moves: {}".format(move, valid_moves)
 
     def test_policy_ac_with_env(self):
-        env = OnitamaEnv()
+        env = OnitamaEnv(self.seed) 
         dqn = DQN(MaskedCNNPolicy, env)
         obs = env.reset()
         ac, _ = dqn.predict(obs, deterministic=False)
         env.step(ac)
 
     def test_policy_ac_with_env_step(self):
-        env = OnitamaEnv()
+        env = OnitamaEnv(self.seed)
         self.dqn = DQN(MaskedCNNPolicy, env)
         dqn = self.dqn
         obs = env.reset()
@@ -113,7 +115,7 @@ class RLTest(unittest.TestCase):
                     obs = env.reset()
 
     def test_policy_proba_with_env_step(self):
-        env = OnitamaEnv()
+        env = OnitamaEnv(self.seed)
         dqn = DQN(MaskedCNNPolicy, env, learning_starts=10)
         env.reset()
         valid_moves = env.game.get_valid_moves(env.game.player1)

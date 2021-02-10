@@ -1,4 +1,4 @@
-from random import shuffle
+import random
 
 blank =    [[0,0,0,0,0],
             [0,0,0,0,0],
@@ -92,8 +92,10 @@ all_cards = [tiger, dragon, frog, rabbit,
             crane, boar, eel, cobra]
 
 
-def get_init_cards():
-      shuffle(all_cards)
+def get_init_cards(seed, do_shuffle=False):
+      if do_shuffle:
+          random.seed(seed)
+          random.shuffle(all_cards)
       return ([all_cards[0], all_cards[1]],
           [all_cards[2], all_cards[3]],
            [all_cards[4]])

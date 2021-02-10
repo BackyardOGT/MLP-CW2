@@ -109,13 +109,13 @@ class Player:
 
 
 class PvP:
-    def __init__(self, verbose=True,startingPlayer=1):
-        self.winner = 0
-        self.playerStart=startingPlayer
-        self.reset()
-        self.mode = "P vs P"
+    def __init__(self, seed, verbose=True, startingPlayer=1):
         self.verbose = verbose
-        
+        self.seed = seed
+        self.mode = "P vs P"
+        self.winner = 0
+        self.playerStart = startingPlayer
+        self.reset()
 
     def get(self):
         """
@@ -153,9 +153,11 @@ class PvP:
         otherP.lost_pawn_last_move = False
 
         if not self.check_valid_move(move):
-            print("Invalid move: ", move)
-            print("Valid moves: ", self.get_valid_moves(curP))
-            print()
+            print("\nInvalid move player " + curP.player)
+            if self.verbose:
+                print(move)
+                print("Valid moves: ", self.get_valid_moves(curP))
+                print()
             return self.get()
 
         kingTaken = self.handle_take(otherP, move)
@@ -171,7 +173,7 @@ class PvP:
         return self.get()
 
     def reset(self):
-        p1CardsInit, p2CardsInit, [spare_card] = get_init_cards()
+        p1CardsInit, p2CardsInit, [spare_card] = get_init_cards(self.seed)
 
         self.player1 = Player(True, p1CardsInit)
         self.player2 = Player(False, p2CardsInit)

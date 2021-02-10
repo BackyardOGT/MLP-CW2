@@ -73,22 +73,18 @@ Ran training code for a bit and it ran without error
 
 ## TODOs
 
+* Running with fixed cards, change `do_shuffle` arg in `init_cards` to do random.
+
 #### Higher priority
 
-* All - Try person and rand vs the heuristic agent, also testing env for any bugs
-* ? - Get running on cloud  
-* T - Add reward
-     Negative for lose pawn (negative reward, positive weight)
-     Positive for take pawn 
-     Negative reward for lose 
-     Check weighting 
-* T - Implement random card picking and pick which player starts - see onitama rules
-    In game.reset() (called before game starts)
-    Can set isPlayer1 flag for whose turn starts
+* O - taking invalid actions
+* ? - Get running on MLP server
+* T - Implement which pick which player starts based on cards- see onitama rules
 * G - Corner case: It is possible that you will find that you cannot use any of your cards to make a legal move. If this happens - and only then - you must pass your turn. 
   <br/>None of your pawns will move. But like the river that constantly flows, you cannot remain unchanged: you must still choose one of the two cards in front of you, place it to the left of the playmat and rotate it, then take the card from the right side of the board.
   * Remove assertion in env and handle no valid moves
   * Try and make a test case
+
 
 * O - Think masking for exploration works, worth checking / testing more
 * O - Add square highlighting before move to show bot vs bot

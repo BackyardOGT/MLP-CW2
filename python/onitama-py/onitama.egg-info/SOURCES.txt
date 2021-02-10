@@ -11,6 +11,10 @@ onitama/game/game.py
 onitama/rl/__init__.py
 onitama/rl/agents.py
 onitama/rl/env.py
+onitama/rl/eval.py
+onitama/rl/policy.py
+onitama/rl/rl_agent.py
+onitama/rl/train.py
 onitama/tests/__init__.py
 onitama/tests/test_env.py
 onitama/tests/test_rl.py

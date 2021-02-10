@@ -6,9 +6,11 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-twoPlayer = PvP()
-againstBot = PvBot(SimpleAgent())
-botVsBot = BotVsBot(RLAgent(thisPlayer=1), SimpleAgent())
+seed = 12442
+
+twoPlayer = PvP(seed)
+againstBot = PvBot(SimpleAgent(seed), seed)
+botVsBot = BotVsBot(RLAgent(seed, thisPlayer=1), SimpleAgent(seed), seed)
 game = twoPlayer
 games = [twoPlayer, againstBot, botVsBot]
 game_id = 0

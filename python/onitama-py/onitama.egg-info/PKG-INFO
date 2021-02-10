@@ -60,38 +60,50 @@ Description:
             Softmax to get move
             Return a 1250 (2 x 5 x 5 x 25 flat) one hot action
         
+        ## Notes
         
+        Heuristic agent seems good to me when I played it with UI. 
+        
+        Init RL (ie. no training) against heuristic agent looks good:
+        
+        Mean reward: 0.51
+        Std reward: 0.10440306508910549
+        Min reward: 0.4
+        Max reward: 0.7
+        Mean episode length: 5.5
+        Std episode length: 1.6278820596099706
+        Min episode length: 4
+        Max episode length: 9
+        Won 0 / 10
+        
+        Ran training code for a bit and it ran without error
         
         ## TODOs
         
+        * Running with fixed cards, change `do_shuffle` arg in `init_cards` to do random.
+        
         #### Higher priority
         
-        * G - agent doesn't work when used in flask + front end
-        * T - Reward doesn't pass own test
-          
-        * T - Implement pick which player starts
-        * ? - Try person and rand vs the heuristic agent
-        * ? - View init RL vs rand and heuristic agents
-        * ? - FE display bot vs bot and cmd line evaluation # wins, reward etc
+        * ? - Get running on MLP server
+        * T - Implement which pick which player starts based on cards- see onitama rules
         * G - Corner case: It is possible that you will find that you cannot use any of your cards to make a legal move. If this happens - and only then - you must pass your turn. 
           <br/>None of your pawns will move. But like the river that constantly flows, you cannot remain unchanged: you must still choose one of the two cards in front of you, place it to the left of the playmat and rotate it, then take the card from the right side of the board.
           * Remove assertion in env and handle no valid moves
           * Try and make a test case
-        * O - Masking for exploration
-          Works without exploration but explotation comes after masking so breaks the actions
-          Could allow invalid but return the current state and don't step the game. But this won't learn legal moves
-          as the masking will zero the gradient back to the network. Would have to remove masking completely to learn valid moves.
-          So will have to overwrite more of their stuff to mask exploration.
-          Can't just use param noise as this also uses eps greedy still
-        * Work on reward and heuristic agent?
+        
+        
+        * O - Think masking for exploration works, worth checking / testing more
+        * O - Add square highlighting before move to show bot vs bot
+        
+        * Work on reward and heuristic agent
         
         #### Lower
         
+        * Say what bots are playing
         * Check masking not making gradients explode / vanish? 
         * 5 x 5 filter with 5 x 5 input and output 
         * Gather data for behaviour clone from good github heuristic bot
         * Wrap flask app into a class instead of globals
-        * Make FE display intermediate state between user and agent move
           
         #### General
         

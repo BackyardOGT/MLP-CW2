@@ -7,9 +7,9 @@ import numpy as np
 import argparse
 
 
-def train_rl():
-    env = OnitamaEnv(SimpleAgent, verbose=False)
-    policy = DQN(MaskedCNNPolicy, env)
+def train_rl(seed):
+    env = OnitamaEnv(seed, SimpleAgent, verbose=False)
+    policy = DQN(MaskedCNNPolicy, env, seed=seed)
 
     checkpoint_callback = CheckpointCallback(save_freq=1e4, save_path='./logs/',
                                              name_prefix='rl_model')
@@ -20,8 +20,12 @@ def train_rl():
                                  evaluate_policy_callback=eval_policy_cb.eval_cb)
     callback = CallbackList([checkpoint_callback, eval_callback])
 
-    policy.learn(int(1e6), callback=checkpoint_callback)
+    policy.learn(int(1e6), callback=callback)
 
 
 if __name__ == "__main__":
-    train_rl()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--seed', default=12314, type=int)
+    args = parser.parse_args()
+
+    train_rl(args.seed)

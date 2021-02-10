@@ -34,6 +34,10 @@ def evaluate_rl(policy, env):
 
 
 if __name__ == "__main__":
-    env = OnitamaEnv(SimpleAgent, verbose=False)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--seed', default=12314, type=int)
+    args = parser.parse_args()
+
+    env = OnitamaEnv(args.seed, SimpleAgent, verbose=False)
     policy = DQN(MaskedCNNPolicy, env)
     evaluate_rl(policy, env)

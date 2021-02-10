@@ -9,7 +9,7 @@ class RLAgent:
     """
     Wraps policy to work with backend API calls
     """
-    def __init__(self, thisPlayer=2):
+    def __init__(self, seed, thisPlayer=2):
         """
         Assumes player 2 as this is normal
         """
@@ -17,7 +17,7 @@ class RLAgent:
 
         env = OnitamaEnv(SimpleAgent, verbose=False)
         self.policy = DQN(MaskedCNNPolicy, env)
-        np.random.seed(1123)
+        np.random.seed(seed)
 
     def get_action(self, state):
         obs = np.concatenate([_get_obs(state), get_mask(state, self.thisPlayer)], -1)

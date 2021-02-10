@@ -2,12 +2,12 @@ import numpy as np
 
 
 class RandomAgent:
-    def __init__(self, isPlayer1=False):
+    def __init__(self, seed, isPlayer1=False):
         """
         Assumes player 2 as this is normal
         """
         self.isPlayer1 = isPlayer1
-        np.random.seed(1123)
+        np.random.seed(seed)
 
     def get_action(self, state):
         """
@@ -28,8 +28,8 @@ class SimpleAgent:
     4) Attempts to move a random piece
     BUG ALERT: 5) Edge case problem where no valid moves are possible not handled
     '''
-    def __init__(self):
-        np.random.seed(9753)
+    def __init__(self, seed):
+        np.random.seed(seed)
 
     def get_action(self, state):
 
