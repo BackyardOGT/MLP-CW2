@@ -83,7 +83,7 @@ class Player:
         self.king = Piece([row, 2], KING_ID)
         self.pawns = [Piece([row, i], i) for i in range(5) if i != 2]
         self.lost_pawn_last_move = False
-
+        self.last_move = None
         
     def __str__(self):
         return str(self.to_dict())

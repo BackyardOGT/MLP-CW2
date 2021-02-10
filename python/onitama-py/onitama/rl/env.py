@@ -149,11 +149,10 @@ class OnitamaEnv(gym.Env):
         opponent = self.game.player2 if self.thisPlayer == 1 else self.game.player1 
 
         #Get number of rows moved
-        rows_moved = player.last_move.pos[0] - player.last_pos[0]
-
-        row_orientation = 1 if self.thisPlayer == 2 else -1
-
-        move_forwards = max(0,rows_moved * row_orientation)
+        if player.last_move is not None:
+            rows_moved = player.last_move.pos[0] - player.last_pos[0]
+            row_orientation = 1 if self.thisPlayer == 2 else -1
+            move_forwards = max(0,rows_moved * row_orientation)
 
         pawns_taken = 1 if opponent.lost_pawn_last_move else -1 if player.lost_pawn_last_move else 0
         
