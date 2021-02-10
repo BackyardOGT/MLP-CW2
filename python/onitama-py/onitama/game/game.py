@@ -31,7 +31,7 @@ class Move:
         self.cardId = int(json["id"])  # 0 / 1 for card
 
     def __str__(self):
-        return "Move : pos {}, isKing {}, i {}, cardId {}".format(self.pos, self.isKing, self.i, self.cardId)
+        return "(Move : pos {}, isKing {}, i {}, cardId {})".format(self.pos, self.isKing, self.i, self.cardId)
 
     def __repr__(self):
         return self.__str__()
@@ -152,13 +152,10 @@ class PvP:
 
         otherP.lost_pawn_last_move = False
 
-        if not self.check_valid_move(move):
-            print("\nInvalid move player " + curP.player)
-            if self.verbose:
-                print(move)
-                print("Valid moves: ", self.get_valid_moves(curP))
-                print()
-            return self.get()
+        assert self.check_valid_move(move), \
+            "\nInvalid move player " + curP.player + "\n" + str(move) + "\n" + \
+            "Valid moves: {}\n".format(self.get_valid_moves(curP))
+
 
         kingTaken = self.handle_take(otherP, move)
         newCards = self.handle_cards(curP, move)
@@ -185,7 +182,7 @@ class PvP:
         self.winner = 0
 
     def check_valid_move(self, move):
-        assert move, "Move passed is {}".format(move)
+        assert move, "Move passed is False: {}".format(move)
         curP, otherP = self.get_current_players()
         return self.check_on_board(move) \
                and self.check_unoccupied(curP, move) \

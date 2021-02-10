@@ -96,9 +96,8 @@ class MaskedCNNPolicy(DQNPolicy):
         self._setup_init()
 
     def apply_mask(self, values, mask_flat):
-        # TODO: more efficient way?
         # if it's masked, tf.float32.min, if it's valid then 1, to sample only valid
-        masked = tf.where(mask_flat > 0, values, tf.ones_like(values) * tf.float32.min)
+        masked = tf.where(mask_flat > 0, values, tf.fill(tf.shape(values), tf.float32.min))
         return masked
 
     def step(self, obs, state=None, mask=None, deterministic=True):

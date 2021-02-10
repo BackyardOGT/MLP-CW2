@@ -45,13 +45,13 @@ def get_piece(piece_pos, game, thisPlayer):
         return _get_piece(piece_pos, game.player2)
 
 
-def get_mask(game, thisPlayer):
+def get_mask(game, thisPlayer, mask_shape=(5, 5, 50)):
     """
     (5 x 5 x 50) (same shape as agent output)
     Returns the mask over valid moves
     Binary tensor.
     """
-    mask = np.zeros((5, 5, 50))
+    mask = np.zeros(mask_shape)
     player = game.player1 if thisPlayer == 1 else game.player2
     assert len(game.get_valid_moves(player)) > 0, "No valid moves for masking"
     for move in game.get_valid_moves(player):
@@ -81,16 +81,14 @@ def _get_obs(game):
     return np.concatenate(obs, -1)
 
 
-def actionToMove(ac_chosen, game, thisPlayer):
+def actionToMove(ac_chosen, game, thisPlayer, mask_shape):
     """
     :param ac_chosen: reshaped action (piece pos i, piece pos j, board x card data)
     :return: Move() object
     """
-    ac_ravel = np.ravel_multi_index(ac_chosen, (5, 5, 50))
+    ac_ravel = np.ravel_multi_index(ac_chosen, mask_shape)
     (piece_pos_i, piece_pos_j, pos_i, pos_j, card_id) = np.unravel_index(ac_ravel, (5, 5, 5, 5, 2))
     piece = get_piece([piece_pos_i, piece_pos_j], game, thisPlayer)
-    if not piece:
-        return None
     isKing, i = piece
     move = get_move([int(pos_i), int(pos_j)], isKing, card_id, i)
     return move
@@ -105,15 +103,16 @@ class OnitamaEnv(gym.Env):
         super(OnitamaEnv, self).__init__()
         self.game = PvBot(agent_type(seed), seed, verbose=verbose)
         self.observation_space = gym.spaces.Box(np.zeros((5, 5, 59)), np.ones((5, 5, 59)))
-        self.action_space =  gym.spaces.Discrete(5 * 5 * 25 * 2)
+        self.action_space = gym.spaces.Discrete(5 * 5 * 25 * 2)
+        self.mask_shape = (5, 5, 50)
         self.thisPlayer = player
         self._seed = seed
 
     def step(self, ac):
         ac = np.squeeze(ac)
         # action is index into 5 x 5 x 50
-        ac = np.unravel_index(ac, (5, 5, 50))
-        move = actionToMove(ac, self.game, self.thisPlayer)
+        ac = np.unravel_index(ac, self.mask_shape)
+        move = actionToMove(ac, self.game, self.thisPlayer, self.mask_shape)
         self.game.step(move)
         self.game.stepBot()
         info = {} if self.game.winner == 0 else {"winner": self.game.winner}
@@ -134,7 +133,6 @@ class OnitamaEnv(gym.Env):
         return np.concatenate([_get_obs(self.game), get_mask(self.game, self.thisPlayer)], -1)
 
     def get_reward(self):
-        # TODO
         # can get game state by eg.
         # self.game.player1
         move_forwards = 0

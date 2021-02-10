@@ -78,7 +78,7 @@ class RLTest(unittest.TestCase):
         mask_pos = [(a, b, c) for (a, b, c) in zip(*np.where(mask))]
         valid_moves = env.game.get_valid_moves(env.game.player1)
         for mp in mask_pos:
-            move = actionToMove(mp, env.game, env.thisPlayer)
+            move = actionToMove(mp, env.game, env.thisPlayer, env.mask_shape)
             assert move in valid_moves, "Move: {}\nValid moves: {}".format(move, valid_moves)
 
     def test_policy_ac_with_env(self):
@@ -97,7 +97,7 @@ class RLTest(unittest.TestCase):
             for _ in range(100):
                 # mask ok?
                 mask = obs[:, :, 9:]
-                env_mask = get_mask(env.game, env.thisPlayer)
+                env_mask = get_mask(env.game, env.thisPlayer, env.mask_shape)
                 assert len(env.game.get_valid_moves(env.game.player1)) > 0, "No valid moves p1"
                 assert not np.array_equal(env_mask, np.zeros_like(env_mask)), "Env mask is zeros"
                 assert not np.array_equal(mask, np.zeros_like(mask)), "Obs mask is zeros"
@@ -128,7 +128,7 @@ class RLTest(unittest.TestCase):
             ac = np.unravel_index(ac_flat, (5, 5, 50))
             # should this have been masked?
             assert mask[ac], "This action should be masked"
-            move = actionToMove(ac, env.game, env.thisPlayer)
+            move = actionToMove(ac, env.game, env.thisPlayer, env.mask_shape)
             valid_moves = env.game.get_valid_moves(env.game.player1)
             # is it valid
             assert move in valid_moves, "Move: {}\nValid moves: {}".format(move, valid_moves)

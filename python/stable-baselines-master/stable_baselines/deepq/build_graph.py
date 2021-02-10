@@ -143,12 +143,17 @@ def build_act(q_func, ob_space, ac_space, stochastic_ph, update_eps_ph, sess):
     deterministic_actions = tf.argmax(policy.q_values, axis=1)
 
     batch_size = tf.shape(policy.obs_ph)[0]
-    n_actions = ac_space.nvec if isinstance(ac_space, MultiDiscrete) else ac_space.n
     random_actions = tf.squeeze(tf.random.categorical(policy.mask, 1, dtype=tf.int64), -1)
     chose_random = tf.random_uniform(tf.stack([batch_size]), minval=0, maxval=1, dtype=tf.float32) < eps
     stochastic_actions = tf.where(chose_random, random_actions, deterministic_actions)
 
     output_actions = tf.cond(stochastic_ph, lambda: stochastic_actions, lambda: deterministic_actions)
+
+    # some useful prints to debug mask
+    # print_ops = tf.print("Random acs ", random_actions, "\nOutput acs ", output_actions,
+    #                      "\nMask", policy.mask[0][output_actions[0]], "\nMask possibles", tf.reduce_sum(tf.cast(policy.mask > 0, tf.float32)),
+    #                      tf.where(policy.mask > 0), summarize=-1)
+    # with tf.control_dependencies([print_ops]):
     update_eps_expr = eps.assign(tf.cond(update_eps_ph >= 0, lambda: update_eps_ph, lambda: eps))
     _act = tf_util.function(inputs=[policy.obs_ph, stochastic_ph, update_eps_ph],
                             outputs=output_actions,
@@ -179,6 +184,8 @@ def build_act_with_param_noise(q_func, ob_space, ac_space, stochastic_ph, update
         act function to select and action given observation (See the top of the file for details),
         A tuple containing the observation placeholder and the processed observation placeholder respectively.
     """
+    raise NotImplementedError
+
     if param_noise_filter_func is None:
         param_noise_filter_func = default_param_noise_filter
 

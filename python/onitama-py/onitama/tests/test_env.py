@@ -47,7 +47,7 @@ class EnvTest(unittest.TestCase):
         # ac has to be a piece
         # note all pieces in orig positions, for p1 it's [4, *], king at [4, 2]
         ac[4, 2, 29] = 1
-        move = actionToMove([i[0] for i in np.where(ac)], env.game, env.thisPlayer)
+        move = actionToMove([i[0] for i in np.where(ac)], env.game, env.thisPlayer, env.mask_shape)
         mask = moveToMask(move, env.game.player1)
         assert np.all([a[0] == m for a, m in zip(np.where(ac), mask)]), "Ac : {}\nMask : {}".format(np.where(ac), mask)
 
@@ -57,7 +57,7 @@ class EnvTest(unittest.TestCase):
         # ac has to be a piece
         # note all pieces in orig positions, for p1 it's [4, *], king at [4, 2]
         ac[4, 1, 29] = 1
-        move = actionToMove([i[0] for i in np.where(ac)], env.game, env.thisPlayer)
+        move = actionToMove([i[0] for i in np.where(ac)], env.game, env.thisPlayer, env.mask_shape)
         mask = moveToMask(move, env.game.player1)
         assert np.all([a[0] == m for a, m in zip(np.where(ac), mask)]), "Ac : {}\nMask : {}".format(np.where(ac), mask)
 
@@ -68,7 +68,7 @@ class EnvTest(unittest.TestCase):
         mask = moveToMask(move, env.game.player1)
         ac = np.zeros((5, 5, 50))
         ac[mask] = 1
-        move2 = actionToMove([i[0] for i in np.where(ac)], env.game, env.thisPlayer)
+        move2 = actionToMove([i[0] for i in np.where(ac)], env.game, env.thisPlayer, env.mask_shape)
         assert move.pos == move2.pos, "pos Orig : {}\nNew : {}".format(move, move2)
         assert move.isKing == move2.isKing, "isKing Orig : {}\nNew : {}".format(move, move2)
         assert move.i == move2.i, "i Orig : {}\nNew : {}".format(move, move2)
@@ -80,7 +80,7 @@ class EnvTest(unittest.TestCase):
         mask = moveToMask(move, env.game.player1)
         ac = np.zeros((5, 5, 50))
         ac[mask] = 1
-        move2 = actionToMove([i[0] for i in np.where(ac)], env.game, env.thisPlayer)
+        move2 = actionToMove([i[0] for i in np.where(ac)], env.game, env.thisPlayer, env.mask_shape)
         assert move.pos == move2.pos, "pos Orig : {}\nNew : {}".format(move, move2)
         assert move.isKing == move2.isKing, "isKing Orig : {}\nNew : {}".format(move, move2)
         assert move.i == move2.i, "i Orig : {}\nNew : {}".format(move, move2)
