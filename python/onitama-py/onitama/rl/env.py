@@ -157,8 +157,8 @@ class OnitamaEnv(gym.Env):
         
         #Discuss weights assigned to each reward with team
         reward_weights = {
-            "move_forwards": 0.01,
-            "take_pawn":0.1,
+            "move_forwards": 0.005,
+            "take_pawn":0.05,
             "win": 1.0,
         }
         reward_dict = {
