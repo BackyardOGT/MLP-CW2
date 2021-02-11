@@ -7,6 +7,7 @@ class RandomAgent:
         Assumes player 2 as this is normal
         """
         self.isPlayer1 = isPlayer1
+        print(seed, type(seed))
         np.random.seed(seed)
 
     def get_action(self, state):

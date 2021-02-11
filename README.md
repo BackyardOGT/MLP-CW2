@@ -77,8 +77,9 @@ Ran training code for a bit and it ran without error
 
 #### Higher priority
 
-* O - taking invalid actions in evaluation callback, fixed by using separate eval env
-* O - check seeding is repeatable  
+* Add prioritised replay buffer
+* Check ac and obs spaces  
+* O - check seeding is repeatable on train - seems ok on eval 
 * ? - Get running on MLP server
 * T - Implement which pick which player starts based on cards- see onitama rules
 * G - Corner case: It is possible that you will find that you cannot use any of your cards to make a legal move. If this happens - and only then - you must pass your turn. 

@@ -96,6 +96,30 @@ class EnvTest(unittest.TestCase):
             assert env.game.check_valid_move(move), "Found incorrect valid move {}".format(move)
 
 
+    def test_env_random_agent(self):
+        """
+        Would expect 50 / 50 of random unmasked actions compared to random agent
+        """
+        env = OnitamaEnv(self.seed)
+        n_episodes = 10
+        wins = 0
+        for ep in range(n_episodes):
+            obs = env.reset()
+            mask = obs[:, :, 9:]
+            done = False
+            while not done:
+                valid_acs = [np.ravel_multi_index(ac, (5, 5, 50)) for ac in zip(*np.where(mask))]
+                action = env.action_space.sample()
+                while not action in valid_acs:
+                    action = env.action_space.sample()
+                obs, reward, done, info = env.step(action)
+                mask = obs[:, :, 9:]
+                if done:
+                    if info["winner"] == 1:
+                        wins += 1
+        print("Won {} of {}".format(wins, n_episodes))
+
+
 if __name__ == "__main__":
     np.random.seed(111)
     unittest.main()

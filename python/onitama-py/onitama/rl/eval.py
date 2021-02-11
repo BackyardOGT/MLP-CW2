@@ -14,7 +14,7 @@ class EvalCB:
 
     def callback(self, locals, globals):
         if "winner" in locals["_info"]:
-            if locals["_info"] == 1:
+            if locals["_info"]["winner"] == 1:
                 self.n_wins += 1
         if locals["done"]:
             self.n_eps += 1
@@ -24,9 +24,12 @@ class EvalCB:
         self.reset()
 
 
-def evaluate_rl(policy, env):
+def evaluate_rl(policy, env, n_eps=100):
     eval_cb = EvalCB()
-    episode_rewards, episode_lengths = evaluate_policy(policy, env, callback=eval_cb.callback, return_episode_rewards=True)
+    episode_rewards, episode_lengths = evaluate_policy(policy, env,
+                                                       callback=eval_cb.callback,
+                                                       return_episode_rewards=True,
+                                                       n_eval_episodes=n_eps)
     print("Mean reward: {}".format(np.mean(episode_rewards)))
     print("Std reward: {}".format(np.std(episode_rewards)))
     print("Min reward: {}".format(np.min(episode_rewards)))
@@ -41,8 +44,9 @@ def evaluate_rl(policy, env):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--seed', default=12314, type=int)
+    parser.add_argument('--model_path', default="logs/best_model.zip", type=str)
     args = parser.parse_args()
 
     env = OnitamaEnv(args.seed, SimpleAgent, verbose=False)
-    policy = DQN(MaskedCNNPolicy, env)
+    policy = DQN.load(args.model_path)
     evaluate_rl(policy, env)
