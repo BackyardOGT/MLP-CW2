@@ -305,7 +305,7 @@ class EvalCallback(EventCallback):
                                                                render=self.render,
                                                                deterministic=self.deterministic,
                                                                return_episode_rewards=True,
-                                                               callback=self.evaluate_policy_callback)
+                                                               callback=self.evaluate_policy_callback.callback)
 
             if self.log_path is not None:
                 self.evaluations_timesteps.append(self.num_timesteps)
@@ -333,7 +333,7 @@ class EvalCallback(EventCallback):
                 # Trigger callback if needed
                 if self.callback is not None:
                     return self._on_event()
-
+            self.evaluate_policy_callback.print()
         return True
 
 

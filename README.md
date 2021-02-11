@@ -77,7 +77,7 @@ Ran training code for a bit and it ran without error
 
 #### Higher priority
 
-* O - taking invalid actions in evaluation callback, maybe bc tf.where?
+* O - taking invalid actions in evaluation callback, fixed by using separate eval env
 * O - check seeding is repeatable  
 * ? - Get running on MLP server
 * T - Implement which pick which player starts based on cards- see onitama rules

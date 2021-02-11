@@ -9,17 +9,17 @@ import argparse
 
 def train_rl(seed):
     env = OnitamaEnv(seed, SimpleAgent, verbose=False)
+    eval_env = OnitamaEnv(seed, SimpleAgent, verbose=False)
     policy = DQN(MaskedCNNPolicy, env, seed=seed)
 
     checkpoint_callback = CheckpointCallback(save_freq=1e4, save_path='./logs/',
                                              name_prefix='rl_model')
     eval_policy_cb = EvalCB()
-    eval_callback = EvalCallback(env, best_model_save_path='./logs/',
-                             log_path='./logs/', eval_freq=5, # TODO: 500
+    eval_callback = EvalCallback(eval_env, best_model_save_path='./logs/',
+                             log_path='./logs/', eval_freq=500,
                              deterministic=True, render=False,
-                                 evaluate_policy_callback=eval_policy_cb.eval_cb)
+                                 evaluate_policy_callback=eval_policy_cb)
     callback = CallbackList([checkpoint_callback, eval_callback])
-    # TODO: callback
     policy.learn(int(1e6), callback=callback)
 
 

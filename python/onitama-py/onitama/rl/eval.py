@@ -6,10 +6,13 @@ import argparse
 
 class EvalCB:
     def __init__(self):
+        self.reset()
+
+    def reset(self):
         self.n_wins = 0
         self.n_eps = 0
 
-    def eval_cb(self, locals, globals):
+    def callback(self, locals, globals):
         if "winner" in locals["_info"]:
             if locals["_info"] == 1:
                 self.n_wins += 1
@@ -18,10 +21,12 @@ class EvalCB:
 
     def print(self):
         print("Won {} / {}".format(self.n_wins, self.n_eps))
+        self.reset()
+
 
 def evaluate_rl(policy, env):
     eval_cb = EvalCB()
-    episode_rewards, episode_lengths = evaluate_policy(policy, env, callback=eval_cb.eval_cb, return_episode_rewards=True)
+    episode_rewards, episode_lengths = evaluate_policy(policy, env, callback=eval_cb.callback, return_episode_rewards=True)
     print("Mean reward: {}".format(np.mean(episode_rewards)))
     print("Std reward: {}".format(np.std(episode_rewards)))
     print("Min reward: {}".format(np.min(episode_rewards)))

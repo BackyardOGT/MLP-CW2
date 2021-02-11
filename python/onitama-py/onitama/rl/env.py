@@ -57,6 +57,7 @@ def get_mask(game, thisPlayer, mask_shape=(5, 5, 50)):
     for move in game.get_valid_moves(player):
         ac = moveToMask(move, player)
         mask[ac] = 1
+        # print("Valid move in mask: {}".format(np.ravel_multi_index(ac, mask_shape)))
     return mask
 
 

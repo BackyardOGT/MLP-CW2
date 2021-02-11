@@ -151,7 +151,7 @@ def build_act(q_func, ob_space, ac_space, stochastic_ph, update_eps_ph, sess):
 
     # some useful prints to debug mask
     # print_ops = tf.print("Random acs ", random_actions, "\nOutput acs ", output_actions,
-    #                      "\nMask", policy.mask[0][output_actions[0]], "\nMask possibles", tf.reduce_sum(tf.cast(policy.mask > 0, tf.float32)),
+    #                      "\nMask of output ac", policy.mask[0][output_actions[0]], "\nMask possibles", tf.reduce_sum(tf.cast(policy.mask > 0, tf.float32)),
     #                      tf.where(policy.mask > 0), summarize=-1)
     # with tf.control_dependencies([print_ops]):
     update_eps_expr = eps.assign(tf.cond(update_eps_ph >= 0, lambda: update_eps_ph, lambda: eps))
