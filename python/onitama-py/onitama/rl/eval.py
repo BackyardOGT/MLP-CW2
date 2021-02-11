@@ -13,8 +13,9 @@ class EvalCB:
         self.n_eps = 0
 
     def callback(self, locals, globals):
-        if "winner" in locals["_info"]:
-            if locals["_info"]["winner"] == 1:
+        info = locals["_info"] if not type(locals["_info"]) == list else locals["_info"][0]
+        if "winner" in info:
+            if info["winner"] == 1:
                 self.n_wins += 1
         if locals["done"]:
             self.n_eps += 1
