@@ -60,6 +60,8 @@ Actions:
 
 #### Higher priority
 
+* Do to play against RL - will have to change the move outputs to flipped board??
+    * Eval vs simple agent with RL as player 2 to check player order not impacting it   
 * Add prioritised replay buffer
 * Check ac and obs spaces  
 * O - check seeding is repeatable on train - seems ok on eval 
