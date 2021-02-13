@@ -1,5 +1,5 @@
 from onitama.game import PvBot, State, get_move
-from onitama.rl import RandomAgent
+from onitama.rl import RandomAgent, SimpleAgent
 import gym
 import numpy as np
 
@@ -100,7 +100,7 @@ class OnitamaEnv(gym.Env):
     Defaults to player 1
     See README for obs and ac space definitions
     """
-    def __init__(self, seed, agent_type=RandomAgent, player=1, verbose=True):
+    def __init__(self, seed, agent_type=SimpleAgent, player=1, verbose=True):
         super(OnitamaEnv, self).__init__()
         self.game = PvBot(agent_type(seed), seed, verbose=verbose)
         self.observation_space = gym.spaces.Box(np.zeros((5, 5, 59)), np.ones((5, 5, 59)))
