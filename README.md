@@ -53,23 +53,6 @@ Actions:
     Softmax to get move
     Return a 1250 (2 x 5 x 5 x 25 flat) one hot action
 
-## Notes
-
-Heuristic agent seems good to me when I played it with UI. 
-
-Init RL (ie. no training) against heuristic agent looks good:
-
-Mean reward: 0.51
-Std reward: 0.10440306508910549
-Min reward: 0.4
-Max reward: 0.7
-Mean episode length: 5.5
-Std episode length: 1.6278820596099706
-Min episode length: 4
-Max episode length: 9
-Won 0 / 10
-
-Ran training code for a bit and it ran without error
 
 ## TODOs
 
@@ -77,8 +60,9 @@ Ran training code for a bit and it ran without error
 
 #### Higher priority
 
-* O - taking invalid actions in evaluation callback, fixed by using separate eval env
-* O - check seeding is repeatable  
+* Add prioritised replay buffer
+* Check ac and obs spaces  
+* O - check seeding is repeatable on train - seems ok on eval 
 * ? - Get running on MLP server
 * T - Implement which pick which player starts based on cards- see onitama rules
 * G - Corner case: It is possible that you will find that you cannot use any of your cards to make a legal move. If this happens - and only then - you must pass your turn. 
@@ -104,3 +88,55 @@ Ran training code for a bit and it ran without error
 
 * Test and fix bugs
 * Player is always player 1 and bot player 2 is this OK?
+
+
+## Notes
+
+Heuristic agent seems good to me when I played it with UI. 
+
+Init RL (ie. no training) against heuristic agent looks good:
+
+Mean reward: 0.51
+Std reward: 0.10440306508910549
+Min reward: 0.4
+Max reward: 0.7
+Mean episode length: 5.5
+Std episode length: 1.6278820596099706
+Min episode length: 4
+Max episode length: 9
+Won 0 / 10
+
+Ran training code for a bit and it ran without error
+
+#### First run
+
+Went pretty well actually, within 5 mins you get a model close to SimpleAgent level:
+
+Mean reward: 0.1548
+Std reward: 1.0011478212531855
+Min reward: -1.31
+Max reward: 1.22
+Mean episode length: 6.11
+Std episode length: 4.749515764791186
+Min episode length: 2
+Max episode length: 26
+Won 56 / 100
+
+Need to work on it but v promising start!
+
+Changed the reward to favour wins more.
+
+
+#### Next run
+
+In less than 1 hour got to beating simple agent: 
+
+Mean reward: 0.5562999999999999
+Std reward: 0.8434487595580422
+Min reward: -1.155
+Max reward: 1.085
+Mean episode length: 5.41
+Std episode length: 3.954984197187139
+Min episode length: 2
+Max episode length: 23
+Won 78 / 100
