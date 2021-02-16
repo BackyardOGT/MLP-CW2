@@ -55,7 +55,7 @@ class State:
     Parses JSON sent to FE to object for easier handling
     """
 
-    def     __init__(self, json):
+    def __init__(self, json):
         self.player1_dict = json["player1"]
         self.player2_dict = json["player2"]
         self.current_player = json["player"]

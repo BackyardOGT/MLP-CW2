@@ -1,7 +1,37 @@
-from onitama.game import PvBot, State, get_move
+from onitama.game import PvBot, State, get_move, Piece
 from onitama.rl import RandomAgent, SimpleAgent
 import gym
 import numpy as np
+import copy
+
+
+def flip_pos(pos):
+    return list(np.subtract([4, 4], pos))
+
+
+def flip_player(player):
+    player_flipped = copy.deepcopy(player)
+    player_flipped.cards = [flip_card(c) for c in player.cards]
+    player_flipped.king = Piece(flip_pos(player.king.pos), -1)
+    player_flipped.pawns = [Piece(flip_pos(p.pos), i) for i, p in enumerate(player.pawns)]
+    return player_flipped
+
+
+def flip_card(card):
+    return list(np.flip(card, 0))
+
+
+def flip_game_view(game):
+    """
+    Board positions are flipped but player 1 is still player 1.
+    Card are flipped
+    Returns a PvBot object with a flipped board (ie. from player 2's view)
+    """
+    game_flipped = copy.deepcopy(game)
+    game_flipped.player1 = flip_player(game.player1)
+    game_flipped.player2 = flip_player(game.player2)
+    game_flipped.spare_card = flip_card(game.spare_card)
+    return game_flipped
 
 
 def get_board_state(player_dict):
@@ -90,9 +120,14 @@ def actionToMove(ac_chosen, game, thisPlayer, mask_shape):
     """
     ac_ravel = np.ravel_multi_index(ac_chosen, mask_shape)
     (piece_pos_i, piece_pos_j, pos_i, pos_j, card_id) = np.unravel_index(ac_ravel, (5, 5, 5, 5, 2))
-    piece = get_piece([piece_pos_i, piece_pos_j], game, thisPlayer)
+    piece_pos = [piece_pos_i, piece_pos_j]
+    pos = [int(pos_i), int(pos_j)]
+    if (thisPlayer != 1):
+        piece_pos = flip_pos(piece_pos)
+        pos = flip_pos(pos)
+    piece = get_piece(piece_pos, game, thisPlayer)
     isKing, i = piece
-    move = get_move([int(pos_i), int(pos_j)], isKing, card_id, i)
+    move = get_move(pos, isKing, card_id, i)
     return move
 
 
@@ -101,7 +136,7 @@ class OnitamaEnv(gym.Env):
     Defaults to player 1
     See README for obs and ac space definitions
     """
-    def __init__(self, seed, agent_type=RandomAgent, player=1, verbose=True):
+    def __init__(self, seed, agent_type=SimpleAgent, player=1, verbose=True):
         super(OnitamaEnv, self).__init__()
         self.game = PvBot(agent_type(seed), seed, verbose=verbose)
         self.observation_space = gym.spaces.Box(np.zeros((5, 5, 59)), np.ones((5, 5, 59)))

@@ -1,5 +1,6 @@
-from onitama.rl import OnitamaEnv, actionToMove, moveToMask
-from onitama.game import Move, get_move
+from onitama.rl import OnitamaEnv, actionToMove, moveToMask, RandomAgent
+from onitama.game import Move, get_move, PvBot
+from onitama.rl.env import flip_game_view
 import numpy as np
 import unittest
 
@@ -118,6 +119,17 @@ class EnvTest(unittest.TestCase):
                     if info["winner"] == 1:
                         wins += 1
         print("Won {} of {}".format(wins, n_episodes))
+
+    def test_game_flip(self):
+        game = PvBot(RandomAgent(self.seed), self.seed)
+        game_flip = flip_game_view(game)
+        game_flip_flip = flip_game_view(game_flip)
+        print(game.player1)
+        print(game_flip_flip.player1)
+        print(game_flip.player1)
+        print(game.player2)
+        print(game_flip_flip.player2)
+        print(game_flip.player2)
 
 
 if __name__ == "__main__":

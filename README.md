@@ -58,7 +58,7 @@ Actions:
 
 #### Higher priority
 
-* O - sort env to work with RL as player 2 - mirror the acs, obs and mask
+* O - test game flipped, then try using it in env for player 2
 * O - Add prioritised replay buffer
 * O - Run on full game vs simple agent - change `do_shuffle` arg in `init_cards` to do random.
 * ? - get github agent into our system (same as random/simple agent)
@@ -68,6 +68,7 @@ Actions:
 * T ? Implement pick which player starts based on cards- see onitama rules??
 * G - Fix the no moves corner case and test
 * G - make simple agent work as player 2
+* ? - make a cmd line print out of board state would be useful debugging
 
 * Work on reward and heuristic agent
 

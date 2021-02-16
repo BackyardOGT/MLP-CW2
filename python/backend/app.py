@@ -10,12 +10,15 @@ seed = 12442
 
 twoPlayer = PvP(seed)
 againstBot = PvBot(SimpleAgent(seed), seed)
-botVsBot = BotVsBot(RLAgent(seed, "../onitama-py/onitama/rl/logs/best_model.zip", thisPlayer=1),
-                    SimpleAgent(seed),
+# botVsBot = BotVsBot(RLAgent(seed, "../onitama-py/onitama/rl/logs/best_model.zip", thisPlayer=1),
+#                     SimpleAgent(seed),
+#                     seed)
+botVsBot = BotVsBot(RandomAgent(seed, isPlayer1=True),
+                    RLAgent(seed, "../onitama-py/onitama/rl/logs/best_model.zip", thisPlayer=2),
                     seed)
-game = twoPlayer
+game = botVsBot
 games = [twoPlayer, againstBot, botVsBot]
-game_id = 0
+game_id = 2
 
 
 @app.route('/getState')
