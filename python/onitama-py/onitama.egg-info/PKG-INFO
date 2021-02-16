@@ -83,7 +83,7 @@ Description:
         * Running with fixed cards, change `do_shuffle` arg in `init_cards` to do random.
         
         #### Higher priority
-        
+
         * ? - Get running on MLP server
         * T - Implement which pick which player starts based on cards- see onitama rules
         * G - Corner case: It is possible that you will find that you cannot use any of your cards to make a legal move. If this happens - and only then - you must pass your turn. 

@@ -1,6 +1,7 @@
 from flask import Flask, request
 from onitama.game import PvP, PvBot, BotVsBot
-from onitama.rl import RandomAgent, SimpleAgent, RLAgent, MaskedCNNPolicy
+from onitama.rl import RLAgent
+from onitama.rl.agents import RandomAgent, SimpleAgent, CarefulSimpleAgent
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -9,9 +10,9 @@ CORS(app)
 seed = 12442
 
 twoPlayer = PvP(seed)
-againstBot = PvBot(SimpleAgent(seed), seed)
+againstBot = PvBot(CarefulSimpleAgent(seed), seed)
 botVsBot = BotVsBot(RLAgent(seed, "../onitama-py/onitama/rl/logs/best_model.zip", thisPlayer=1),
-                    SimpleAgent(seed),
+                    CarefulSimpleAgent(seed),
                     seed)
 game = twoPlayer
 games = [twoPlayer, againstBot, botVsBot]

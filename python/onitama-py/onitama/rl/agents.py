@@ -92,7 +92,8 @@ class CarefulSimpleAgent:
 
     Careful Simple agent objectives (in order of priority).
     1) Attempts to move king to enemy home or capture enemy king
-    2) If own king is attackable: move king to random safe square
+    2) If own king is attackable: i) capture attacking piece
+                                  ii) try to flee to safe square
     3) Attempts to capture an enemy pawn without it being attackable
     4) If own pawn is attackable: move pawn to random safe square
     5) Attempts to move a random piece without it being attackable
@@ -115,10 +116,11 @@ class CarefulSimpleAgent:
         opp_pawns = state.player1.pawns  # [[r,c]]
 
         # Winning moves
-        winning_moves = [move for move in all_moves if move.isKing and move.pos == [0, 2]
+        winning_moves = [move for move in all_moves if move.isKing and move.pos == [4, 2]
                          or move.pos == opp_king.pos]
 
         # Safe moves are moves which end up on a square not attackable by an opponents piece
+        print(opp_moves)
         safe_moves = [move for move in all_moves if move.pos not in [opp_move.pos for opp_move in opp_moves]]
 
         # Safe retreats are safe moves where our pawn was under attack
@@ -130,17 +132,34 @@ class CarefulSimpleAgent:
         safe_captures = [move for move in safe_moves if move.pos in [opp_pawn.pos for opp_pawn in opp_pawns]]
 
         if len(winning_moves) > 0:
+            print("winning_move")
+            print(winning_moves)
             return winning_moves[0]
         elif king.pos in [opp_move.pos for opp_move in opp_moves]:
+            # attacker_pos = [piece.pos for piece in [*opp_pawns, opp_king] if piece.id in []]
+            # saving_captures = [move for move in all_moves if move.pos in [opp_move.pos for opp_move in opp_moves]
+            #                                               and move.pos == king.pos]
+            # if len(saving_captures) > 0:
+            #     print("saving_capture")
+            #     return np.random.choice(saving_captures)
             king_moves = [move for move in safe_moves if move.isKing]
             if len(king_moves) > 0:
+                print("saving_move")
+                print(king_moves)
                 return np.random.choice(king_moves)
 
         if len(safe_captures) > 0:
+            print("safe_capture")
+            print(safe_captures)
             return np.random.choice(safe_captures)
         elif len(safe_retreats) > 0:
+            print("safe_retreat")
+            print(safe_retreats)
             return np.random.choice(safe_retreats)
         elif len(safe_moves) > 0:
+            print("random_safe_move")
+            print(safe_moves)
             return np.random.choice(safe_moves)
         else:
+            print("random_move")
             return np.random.choice(all_moves)
