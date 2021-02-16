@@ -55,7 +55,7 @@ class State:
     Parses JSON sent to FE to object for easier handling
     """
 
-    def __init__(self, json):
+    def     __init__(self, json):
         self.player1_dict = json["player1"]
         self.player2_dict = json["player2"]
         self.current_player = json["player"]
@@ -119,6 +119,7 @@ class PvP:
 
     def get(self):
         """
+        * From a player - 1 view *
         Returns dict with positions in [row, col], zero-indexed
         In API format for front end, for each player:
         player1 : { king : [2], pawns : [[2], ..., [2]], cards: [ [5x5],  [5x5]]}
@@ -154,7 +155,7 @@ class PvP:
 
         assert self.check_valid_move(move), \
             "\nInvalid move player " + curP.player + "\n" + str(move) + "\n" + \
-            "Valid moves: {}\n".format(self.get_valid_moves(curP))
+            "Valid moves: {}\n".format(self.get_valid_moves(curP, self.isPlayer1))
 
 
         kingTaken = self.handle_take(otherP, move)
@@ -212,7 +213,7 @@ class PvP:
             piecePos = player.king.get()
         else:  # pawn
             piecePos = player.pawns[move.i].get()
-        posOnCard = self.board_to_card(move.pos, piecePos)
+        posOnCard = self.board_to_card(move.pos, piecePos, self.isPlayer1)
         if np.all(np.greater_equal(posOnCard, 0)) and np.all(np.less_equal(posOnCard, 4)):
             if player.cards[move.cardId][posOnCard[0]][posOnCard[1]]:  # 1s and 0s so T/F
                 return True
@@ -269,37 +270,37 @@ class PvP:
             return True
         return False
 
-    def get_valid_moves(self, curP):
+    def get_valid_moves(self, curP, isPlayer1):
         moves = []
         for cardId, card in enumerate(curP.cards):
             for p in np.reshape(np.where(card), [2, -1]).T:
                 # king
-                boardPos = self.card_to_board(curP.king.get(), p)
+                boardPos = self.card_to_board(curP.king.get(), p, isPlayer1)
                 # since we got these moves from card we only need check they're unoccupied now and on board
                 move = Move({"name": "king", "pos": boardPos, "id": cardId})
                 if self.check_unoccupied(curP, move) and self.check_on_board(move):
                     moves.append(move)
                 for i, pawn in enumerate(curP.pawns):
-                    boardPos = self.card_to_board(pawn.get(), p)
+                    boardPos = self.card_to_board(pawn.get(), p, isPlayer1)
                     move = Move({"name": "pawn", "pos": boardPos, "id": cardId, "i": i})
                     if self.check_unoccupied(curP, move) and self.check_on_board(move):
                         moves.append(move)
         return moves
 
-    def card_to_board(self, piecePos, cardPos):
+    def card_to_board(self, piecePos, cardPos, isPlayer1):
         """
         Returns np array (note need to convert to list for json)
         """
-        if self.isPlayer1:
+        if isPlayer1:
             return np.add(np.subtract(piecePos, [2, 2]), cardPos).tolist()
         else:
             return np.add(np.subtract(piecePos, cardPos), [2, 2]).tolist()
 
-    def board_to_card(self, boardPos, piecePos):
+    def board_to_card(self, boardPos, piecePos, isPlayer1):
         """
         Returns np array (note need to convert to list for json)
         """
-        if self.isPlayer1:
+        if isPlayer1:
             return np.subtract(np.add(boardPos, [2, 2]), piecePos).tolist()
         else:
             return np.subtract(np.add([2, 2], piecePos), boardPos).tolist()

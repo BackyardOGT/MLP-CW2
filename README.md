@@ -56,29 +56,25 @@ Actions:
 
 ## TODOs
 
-* Running with fixed cards, change `do_shuffle` arg in `init_cards` to do random.
-
 #### Higher priority
 
-* Add prioritised replay buffer
-* Check ac and obs spaces  
-* O - check seeding is repeatable on train - seems ok on eval 
-* ? - Get running on MLP server
-* T - Implement which pick which player starts based on cards- see onitama rules
-* G - Corner case: It is possible that you will find that you cannot use any of your cards to make a legal move. If this happens - and only then - you must pass your turn. 
-  <br/>None of your pawns will move. But like the river that constantly flows, you cannot remain unchanged: you must still choose one of the two cards in front of you, place it to the left of the playmat and rotate it, then take the card from the right side of the board.
-  * Remove assertion in env and handle no valid moves
-  * Try and make a test case
-
-
-* O - Think masking for exploration works, worth checking / testing more
-* O - Add square highlighting before move to show bot vs bot
+* O - sort env to work with RL as player 2 - mirror the acs, obs and mask
+* O - Add prioritised replay buffer
+* O - Run on full game vs simple agent - change `do_shuffle` arg in `init_cards` to do random.
+* ? - get github agent into our system (same as random/simple agent)
+* ? - Check ac and obs spaces and bounds
+* ? - check seeding is repeatable on train - seems ok on eval
+* T - Get running on MLP server
+* T ? Implement pick which player starts based on cards- see onitama rules??
+* G - Fix the no moves corner case and test
+* G - make simple agent work as player 2
 
 * Work on reward and heuristic agent
 
 #### Lower
 
-* Say what bots are playing
+* Label bots are playing in UI
+* O - Add square highlighting before move to show bot vs bot
 * Check masking not making gradients explode / vanish? 
 * 5 x 5 filter with 5 x 5 input and output 
 * Gather data for behaviour clone from good github heuristic bot

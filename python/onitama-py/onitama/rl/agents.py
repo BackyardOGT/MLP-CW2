@@ -15,7 +15,7 @@ class RandomAgent:
         State is a game object eg. PvP
         """
         player = state.player1 if self.isPlayer1 else state.player2
-        ac = np.random.choice(state.get_valid_moves(player))
+        ac = np.random.choice(state.get_valid_moves(player, self.isPlayer1))
         return ac
 
 

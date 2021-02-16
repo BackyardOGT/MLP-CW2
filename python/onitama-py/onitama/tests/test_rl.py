@@ -61,22 +61,22 @@ class RLTest(unittest.TestCase):
     def test_mask_with_env(self):
         env = OnitamaEnv(self.seed) 
         env.reset()
-        valid_moves = env.game.get_valid_moves(env.game.player1)
+        valid_moves = env.game.get_valid_moves(env.game.player1, True)
         mask = get_mask(env.game, env.thisPlayer)
         self.valid_mask(env, mask)
 
     def test_mask_with_env_step(self):
         env = OnitamaEnv(self.seed) 
         env.reset()
-        valid_moves = env.game.get_valid_moves(env.game.player1)
+        valid_moves = env.game.get_valid_moves(env.game.player1, True)
         env.game.step(valid_moves[0])
-        valid_moves = env.game.get_valid_moves(env.game.player1)
+        valid_moves = env.game.get_valid_moves(env.game.player1, True)
         mask = get_mask(env.game, env.thisPlayer)
         self.valid_mask(env, mask)
 
     def valid_mask(self, env, mask):
         mask_pos = [(a, b, c) for (a, b, c) in zip(*np.where(mask))]
-        valid_moves = env.game.get_valid_moves(env.game.player1)
+        valid_moves = env.game.get_valid_moves(env.game.player1, True)
         for mp in mask_pos:
             move = actionToMove(mp, env.game, env.thisPlayer, env.mask_shape)
             assert move in valid_moves, "Move: {}\nValid moves: {}".format(move, valid_moves)
@@ -98,7 +98,7 @@ class RLTest(unittest.TestCase):
                 # mask ok?
                 mask = obs[:, :, 9:]
                 env_mask = get_mask(env.game, env.thisPlayer, env.mask_shape)
-                assert len(env.game.get_valid_moves(env.game.player1)) > 0, "No valid moves p1"
+                assert len(env.game.get_valid_moves(env.game.player1, True)) > 0, "No valid moves p1"
                 assert not np.array_equal(env_mask, np.zeros_like(env_mask)), "Env mask is zeros"
                 assert not np.array_equal(mask, np.zeros_like(mask)), "Obs mask is zeros"
                 assert np.array_equal(mask,
@@ -118,7 +118,7 @@ class RLTest(unittest.TestCase):
         env = OnitamaEnv(self.seed)
         dqn = DQN(MaskedCNNPolicy, env, learning_starts=10)
         env.reset()
-        valid_moves = env.game.get_valid_moves(env.game.player1)
+        valid_moves = env.game.get_valid_moves(env.game.player1, True)
         env.game.step(valid_moves[0])
         obs = env.get_obs()
         # mask ok?
@@ -129,7 +129,7 @@ class RLTest(unittest.TestCase):
             # should this have been masked?
             assert mask[ac], "This action should be masked"
             move = actionToMove(ac, env.game, env.thisPlayer, env.mask_shape)
-            valid_moves = env.game.get_valid_moves(env.game.player1)
+            valid_moves = env.game.get_valid_moves(env.game.player1, True)
             # is it valid
             assert move in valid_moves, "Move: {}\nValid moves: {}".format(move, valid_moves)
 

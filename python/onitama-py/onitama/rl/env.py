@@ -52,9 +52,10 @@ def get_mask(game, thisPlayer, mask_shape=(5, 5, 50)):
     Binary tensor.
     """
     mask = np.zeros(mask_shape)
-    player = game.player1 if thisPlayer == 1 else game.player2
-    assert len(game.get_valid_moves(player)) > 0, "No valid moves for masking"
-    for move in game.get_valid_moves(player):
+    isPlayer1 = thisPlayer == 1
+    player = game.player1 if isPlayer1 else game.player2
+    assert len(game.get_valid_moves(player, isPlayer1)) > 0, "No valid moves for masking"
+    for move in game.get_valid_moves(player, isPlayer1):
         ac = moveToMask(move, player)
         mask[ac] = 1
         # print("Valid move in mask: {}".format(np.ravel_multi_index(ac, mask_shape)))
@@ -100,7 +101,7 @@ class OnitamaEnv(gym.Env):
     Defaults to player 1
     See README for obs and ac space definitions
     """
-    def __init__(self, seed, agent_type=SimpleAgent, player=1, verbose=True):
+    def __init__(self, seed, agent_type=RandomAgent, player=1, verbose=True):
         super(OnitamaEnv, self).__init__()
         self.game = PvBot(agent_type(seed), seed, verbose=verbose)
         self.observation_space = gym.spaces.Box(np.zeros((5, 5, 59)), np.ones((5, 5, 59)))
