@@ -167,7 +167,8 @@ class OnitamaEnv(gym.Env):
         Observation and mask for valid actions
         :return:
         """
-        return np.concatenate([_get_obs(self.game), get_mask(self.game, self.thisPlayer)], -1)
+        game = self.game if self.thisPlayer == 1 else flip_game_view(self.game)
+        return np.concatenate([_get_obs(game), get_mask(game, self.thisPlayer)], -1)
 
     def get_reward(self):
         # can get game state by eg.
