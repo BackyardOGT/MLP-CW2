@@ -142,7 +142,7 @@ class EnvTest(unittest.TestCase):
         env = OnitamaSelfPlayEnv(self.seed)
         p1 = DQN(MaskedCNNPolicy, env, learning_starts=10)
         p2 = DQN(MaskedCNNPolicy, env, learning_starts=10)
-        deterministic = True
+        deterministic = False
         n_episodes = 10
         wins = 0
         for ep in range(n_episodes):

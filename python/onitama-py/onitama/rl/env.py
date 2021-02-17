@@ -9,16 +9,16 @@ def flip_pos(pos):
     return list(np.subtract([4, 4], pos))
 
 
+def flip_card(card):
+    return list(np.flip(np.flip(card, 0), 1))
+
+
 def flip_player(player):
     player_flipped = copy.deepcopy(player)
-    player_flipped.cards = [flip_card(player.cards[0]), flip_card(player.cards[1])]
+    player_flipped.cards = [flip_card(c) for c in player.cards]
     player_flipped.king = Piece(flip_pos(player.king.pos), -1)
     player_flipped.pawns = [Piece(flip_pos(p.pos), i) for i, p in enumerate(player.pawns)]
     return player_flipped
-
-
-def flip_card(card):
-    return list(np.flip(card, 0))
 
 
 def flip_game_view(game):
@@ -84,7 +84,7 @@ def get_mask(game, isPlayer1, mask_shape=(5, 5, 50)):
     mask = np.zeros(mask_shape)
     player = game.player1 if isPlayer1 else game.player2
     assert len(game.get_valid_moves(player, isPlayer1)) > 0, "No valid moves for masking"
-    for move in game.get_valid_moves(player, True):
+    for move in game.get_valid_moves(player, isPlayer1):
         ac = moveToMask(move, player)
         mask[ac] = 1
         # print("Valid move in mask: {}".format(np.ravel_multi_index(ac, mask_shape)))
@@ -121,10 +121,10 @@ def actionToMove(ac_chosen, game, isPlayer1, mask_shape):
     (piece_pos_i, piece_pos_j, pos_i, pos_j, card_id) = np.unravel_index(ac_ravel, (5, 5, 5, 5, 2))
     piece_pos = [piece_pos_i, piece_pos_j]
     pos = [int(pos_i), int(pos_j)]
-    piece = get_piece(piece_pos, game, isPlayer1)
-    isKing, i = piece
     if not isPlayer1:
         pos = flip_pos(pos)
+    piece = get_piece(piece_pos, game, isPlayer1)
+    isKing, i = piece
     move = get_move(pos, isKing, card_id, i)
     return move
 
