@@ -1,4 +1,5 @@
-from onitama.rl import OnitamaEnv, actionToMove, moveToMask, RandomAgent
+from onitama.rl import OnitamaEnv, OnitamaSelfPlayEnv, actionToMove, moveToMask, RandomAgent, MaskedCNNPolicy
+from stable_baselines.deepq import DQN
 from onitama.game import Move, get_move, PvBot
 from onitama.rl.env import flip_game_view
 import numpy as np
@@ -48,7 +49,7 @@ class EnvTest(unittest.TestCase):
         # ac has to be a piece
         # note all pieces in orig positions, for p1 it's [4, *], king at [4, 2]
         ac[4, 2, 29] = 1
-        move = actionToMove([i[0] for i in np.where(ac)], env.game, env.thisPlayer, env.mask_shape)
+        move = actionToMove([i[0] for i in np.where(ac)], env.game, env.thisPlayer == 1, env.mask_shape)
         mask = moveToMask(move, env.game.player1)
         assert np.all([a[0] == m for a, m in zip(np.where(ac), mask)]), "Ac : {}\nMask : {}".format(np.where(ac), mask)
 
@@ -58,7 +59,7 @@ class EnvTest(unittest.TestCase):
         # ac has to be a piece
         # note all pieces in orig positions, for p1 it's [4, *], king at [4, 2]
         ac[4, 1, 29] = 1
-        move = actionToMove([i[0] for i in np.where(ac)], env.game, env.thisPlayer, env.mask_shape)
+        move = actionToMove([i[0] for i in np.where(ac)], env.game, env.thisPlayer == 1, env.mask_shape)
         mask = moveToMask(move, env.game.player1)
         assert np.all([a[0] == m for a, m in zip(np.where(ac), mask)]), "Ac : {}\nMask : {}".format(np.where(ac), mask)
 
@@ -69,7 +70,7 @@ class EnvTest(unittest.TestCase):
         mask = moveToMask(move, env.game.player1)
         ac = np.zeros((5, 5, 50))
         ac[mask] = 1
-        move2 = actionToMove([i[0] for i in np.where(ac)], env.game, env.thisPlayer, env.mask_shape)
+        move2 = actionToMove([i[0] for i in np.where(ac)], env.game, env.thisPlayer == 1, env.mask_shape)
         assert move.pos == move2.pos, "pos Orig : {}\nNew : {}".format(move, move2)
         assert move.isKing == move2.isKing, "isKing Orig : {}\nNew : {}".format(move, move2)
         assert move.i == move2.i, "i Orig : {}\nNew : {}".format(move, move2)
@@ -81,7 +82,7 @@ class EnvTest(unittest.TestCase):
         mask = moveToMask(move, env.game.player1)
         ac = np.zeros((5, 5, 50))
         ac[mask] = 1
-        move2 = actionToMove([i[0] for i in np.where(ac)], env.game, env.thisPlayer, env.mask_shape)
+        move2 = actionToMove([i[0] for i in np.where(ac)], env.game, env.thisPlayer == 1, env.mask_shape)
         assert move.pos == move2.pos, "pos Orig : {}\nNew : {}".format(move, move2)
         assert move.isKing == move2.isKing, "isKing Orig : {}\nNew : {}".format(move, move2)
         assert move.i == move2.i, "i Orig : {}\nNew : {}".format(move, move2)
@@ -121,6 +122,9 @@ class EnvTest(unittest.TestCase):
         print("Won {} of {}".format(wins, n_episodes))
 
     def test_game_flip(self):
+        """
+        Not really a test just prints out values to manually check but I put it here
+        """
         game = PvBot(RandomAgent(self.seed), self.seed)
         game_flip = flip_game_view(game)
         game_flip_flip = flip_game_view(game_flip)
@@ -130,6 +134,33 @@ class EnvTest(unittest.TestCase):
         print(game.player2)
         print(game_flip_flip.player2)
         print(game_flip.player2)
+
+    def test_self_play(self):
+        """
+        Make sure it all runs, also might expect fairly evenly matched at the start?
+        """
+        env = OnitamaSelfPlayEnv(self.seed)
+        p1 = DQN(MaskedCNNPolicy, env, learning_starts=10)
+        p2 = DQN(MaskedCNNPolicy, env, learning_starts=10)
+        deterministic = True
+        n_episodes = 10
+        wins = 0
+        for ep in range(n_episodes):
+            ob = env.reset()
+            done = False
+            while not done:
+                print("Player 1")
+                ac, _ = p1.predict(ob, deterministic=deterministic)
+                print(ac)
+                ob, _, done, info = env.step(ac)
+                print("Player 2")
+                ac, _ = p2.predict(ob, deterministic=deterministic)
+                print(ac)
+                ob, _, done, info = env.step(ac)
+                if done:
+                    if info["winner"] == 1:
+                        wins += 1
+        print("P1 won {} of {}".format(wins, n_episodes))
 
 
 if __name__ == "__main__":

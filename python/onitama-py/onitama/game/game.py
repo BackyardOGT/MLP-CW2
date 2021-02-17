@@ -158,8 +158,8 @@ class PvP:
 
 
         kingTaken = self.handle_take(otherP, move)
-        newCards = self.handle_cards(curP, move)
-        curP.step(move, newCards)
+        newCard = self.handle_cards(curP, move)
+        curP.step(move, newCard)
         if self.reached_goal(curP) or kingTaken:
             if self.verbose: print(
                 "{} won: ".format(curP.player) + ("reached end" if self.reached_goal(curP) else "king taken"))
@@ -247,7 +247,7 @@ class PvP:
         """
         Updates current spare card, returns new card for player
         """
-        cardId = move.cardId  # 0 or 1 so other is not cardId
+        cardId = move.cardId
         card = self.spare_card
         self.spare_card = curP.cards[cardId]
         return card
