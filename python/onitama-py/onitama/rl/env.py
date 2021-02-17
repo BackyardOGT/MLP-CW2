@@ -122,9 +122,6 @@ def actionToMove(ac_chosen, game, thisPlayer, mask_shape):
     (piece_pos_i, piece_pos_j, pos_i, pos_j, card_id) = np.unravel_index(ac_ravel, (5, 5, 5, 5, 2))
     piece_pos = [piece_pos_i, piece_pos_j]
     pos = [int(pos_i), int(pos_j)]
-    if (thisPlayer != 1):
-        piece_pos = flip_pos(piece_pos)
-        pos = flip_pos(pos)
     piece = get_piece(piece_pos, game, thisPlayer)
     isKing, i = piece
     move = get_move(pos, isKing, card_id, i)
@@ -149,7 +146,8 @@ class OnitamaEnv(gym.Env):
         ac = np.squeeze(ac)
         # action is index into 5 x 5 x 50
         ac = np.unravel_index(ac, self.mask_shape)
-        move = actionToMove(ac, self.game, self.thisPlayer, self.mask_shape)
+        game = self.game if self.thisPlayer == 1 else flip_game_view(self.game)
+        move = actionToMove(ac, game, self.thisPlayer, self.mask_shape)
         self.game.step(move)
         self.game.stepBot()
         info = {} if self.game.winner == 0 else {"winner": self.game.winner}

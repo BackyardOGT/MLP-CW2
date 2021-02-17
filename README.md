@@ -58,10 +58,11 @@ Actions:
 
 #### Higher priority
 
-* O - test game flipped, then try using it in env for player 2
+* O - sort env p1/p2
 * O - Add prioritised replay buffer
-* O - Run on full game vs simple agent - change `do_shuffle` arg in `init_cards` to do random.
-* ? - get github agent into our system (same as random/simple agent)
+* O - Run RL on full game vs simple agent - change `do_shuffle` arg in `init_cards` to do random.
+* ? - get github agent into our system (same as random/simple agent) - mostly as eval but worth trying to train with to
+* ? - look into self play  
 * ? - Check ac and obs spaces and bounds
 * ? - check seeding is repeatable on train - seems ok on eval
 * T - Get running on MLP server
