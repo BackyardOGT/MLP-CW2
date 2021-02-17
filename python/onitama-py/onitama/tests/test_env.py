@@ -13,7 +13,7 @@ class EnvTest(unittest.TestCase):
     #     # Test move_forwards
     #     ##Move player 2 pawn (id=0) forward 2 squares
     #     ##Reward should = 0.2 (2 moves * 0.1)
-    #     env = OnitamaEnv(self.seed, player=2)
+    #     env = OnitamaEnv(self.seed, isPlayer1=False)
     #
     #     moveJson = {"pos": [2, 0],
     #                 "name": "pawn",
@@ -28,7 +28,7 @@ class EnvTest(unittest.TestCase):
     # def testPlayer2TakePawn(self):
     #     # Test Player1 taking Player2s pawn at location [0,0]
     #     # NOTE: This test will only pass if the move is NOT checked to be a valid move
-    #     env = OnitamaEnv(self.seed, player=1)
+    #     env = OnitamaEnv(self.seed)
     #     moveJson = {"pos": [0, 0],
     #                 "name": "pawn",
     #                 "i": 0,

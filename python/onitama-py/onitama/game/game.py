@@ -114,6 +114,10 @@ class PvP:
         self.mode = "P vs P"
         self.winner = 0
         self.playerStart = startingPlayer
+        # set in reset
+        self.player1 = None
+        self.player2 = None
+        self.isPlayer1 = True
         self.reset()
 
     def get(self):
