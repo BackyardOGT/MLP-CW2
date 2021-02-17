@@ -1,6 +1,6 @@
 import numpy as np
 
-from onitama.game.cards import get_init_cards
+from onitama.game.cards import get_init_cards, card_stamps
 
 KING_ID = -1
 
@@ -23,7 +23,6 @@ class Move:
     """
     Parses json to move object
     """
-
     def __init__(self, json):
         self.pos = json["pos"]  # [row, col]
         self.isKing = json["name"] == "king"  # T/F
@@ -109,7 +108,7 @@ class Player:
 
 
 class PvP:
-    def __init__(self, seed, verbose=True, startingPlayer=1):
+    def __init__(self, seed, verbose=True, startingPlayer=None):
         self.verbose = verbose
         self.seed = seed
         self.mode = "P vs P"
@@ -175,7 +174,11 @@ class PvP:
 
         self.player1 = Player(True, p1CardsInit)
         self.player2 = Player(False, p2CardsInit)
-        self.isPlayer1 = self.playerStart == 1 
+        #Can override the player start based on card stamp, if declared in game init
+        if self.playerStart is None:
+            self.isPlayer1 = spare_card in card_stamps[1]
+        else:
+            self.isPlayer1 = self.playerStart == 1 
 
         self.spare_card = spare_card
 
