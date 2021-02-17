@@ -58,21 +58,16 @@ Actions:
 
 #### Higher priority
 
-* O - make a self play env 
-        - see if the RL works and scores about 50/50
-* T - reward for envs - for OnitamaEnv does it need to flip for player 2?
-            for OnitamaSelfPlayEnv needs to return the reward for player 1 or player 2 based on turn (game.isPlayer1),
-            note OnitamaSelfPlayEnv doesn't have self.thisPlayer
-* O - Add prioritised replay buffer
-* O - Run RL on full game vs simple agent - change `do_shuffle` arg in `init_cards` to do random.
-* ? - get github agent into our system (same as random/simple agent) - mostly as eval but worth trying to train with to
-* ? - look into self play  
-* ? - Check ac and obs spaces and bounds
-* ? - check seeding is repeatable on train - seems ok on eval
-* T - Get running on MLP server
-* T ? Implement pick which player starts based on cards- see onitama rules??
+* O - test rl p1/p2
 * G - Fix the no moves corner case and test
-* G - make simple agent work as player 2
+* O - Add prioritised replay buffer
+* ? - check seeding is repeatable on train - seems ok on eval
+* ? - Check ac and obs spaces and bounds
+* T - check if any of reward need be flipped
+* ? - Run RL on full game vs simple agent - check `do_shuffle=True` arg in game/cards.py `init_cards`.
+* ? - look into self play  
+* ? - get github agent into our system (same as random/simple agent) - mostly as eval but worth trying to train with to
+* T - Get running on MLP server
 * ? - make a cmd line print out of board state would be useful debugging
 
 * Work on reward and heuristic agent

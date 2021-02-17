@@ -101,7 +101,7 @@ all_cards = [tiger, dragon, frog, rabbit,
 card_stamps={1:[tiger,rabbit,crab,goose,monkey,ox,crane,eel],
              2:[dragon,frog,elephant,rooster,mantis,horse,boar,cobra]}
 
-def get_init_cards(seed, do_shuffle=False, test_case=False):
+def get_init_cards(seed, do_shuffle=True, test_case=False):
     if test_case:
         return ([only_sideways, only_sideways],
                 [only_sideways, only_sideways],
