@@ -1,4 +1,4 @@
-from onitama.game import PvBot, State, get_move, Piece
+from onitama.game import PvBot, State, get_move, Piece, PvP
 from onitama.rl import RandomAgent, SimpleAgent
 import gym
 import numpy as np
@@ -11,7 +11,7 @@ def flip_pos(pos):
 
 def flip_player(player):
     player_flipped = copy.deepcopy(player)
-    player_flipped.cards = [flip_card(c) for c in player.cards]
+    player_flipped.cards = [flip_card(player.cards[0]), flip_card(player.cards[1])]
     player_flipped.king = Piece(flip_pos(player.king.pos), -1)
     player_flipped.pawns = [Piece(flip_pos(p.pos), i) for i, p in enumerate(player.pawns)]
     return player_flipped
@@ -30,7 +30,7 @@ def flip_game_view(game):
     game_flipped = copy.deepcopy(game)
     game_flipped.player1 = flip_player(game.player1)
     game_flipped.player2 = flip_player(game.player2)
-    game_flipped.spare_card = flip_card(game.spare_card)
+    game_flipped.spare_card = flip_card(game_flipped.spare_card)
     return game_flipped
 
 
@@ -65,27 +65,26 @@ def _get_piece(piece_pos, player):
             return False, i
 
 
-def get_piece(piece_pos, game, thisPlayer):
+def get_piece(piece_pos, game, isPlayer1):
     """
     :return: isKing, i
     """
-    if thisPlayer == 1:
+    if isPlayer1:
         return _get_piece(piece_pos, game.player1)
     else:
         return _get_piece(piece_pos, game.player2)
 
 
-def get_mask(game, thisPlayer, mask_shape=(5, 5, 50)):
+def get_mask(game, isPlayer1, mask_shape=(5, 5, 50)):
     """
     (5 x 5 x 50) (same shape as agent output)
     Returns the mask over valid moves
     Binary tensor.
     """
     mask = np.zeros(mask_shape)
-    isPlayer1 = thisPlayer == 1
     player = game.player1 if isPlayer1 else game.player2
     assert len(game.get_valid_moves(player, isPlayer1)) > 0, "No valid moves for masking"
-    for move in game.get_valid_moves(player, isPlayer1):
+    for move in game.get_valid_moves(player, True):
         ac = moveToMask(move, player)
         mask[ac] = 1
         # print("Valid move in mask: {}".format(np.ravel_multi_index(ac, mask_shape)))
@@ -113,7 +112,7 @@ def _get_obs(game):
     return np.concatenate(obs, -1)
 
 
-def actionToMove(ac_chosen, game, thisPlayer, mask_shape):
+def actionToMove(ac_chosen, game, isPlayer1, mask_shape):
     """
     :param ac_chosen: reshaped action (piece pos i, piece pos j, board x card data)
     :return: Move() object
@@ -122,8 +121,10 @@ def actionToMove(ac_chosen, game, thisPlayer, mask_shape):
     (piece_pos_i, piece_pos_j, pos_i, pos_j, card_id) = np.unravel_index(ac_ravel, (5, 5, 5, 5, 2))
     piece_pos = [piece_pos_i, piece_pos_j]
     pos = [int(pos_i), int(pos_j)]
-    piece = get_piece(piece_pos, game, thisPlayer)
+    piece = get_piece(piece_pos, game, isPlayer1)
     isKing, i = piece
+    if not isPlayer1:
+        pos = flip_pos(pos)
     move = get_move(pos, isKing, card_id, i)
     return move
 
@@ -146,8 +147,8 @@ class OnitamaEnv(gym.Env):
         ac = np.squeeze(ac)
         # action is index into 5 x 5 x 50
         ac = np.unravel_index(ac, self.mask_shape)
-        game = self.game if self.thisPlayer == 1 else flip_game_view(self.game)
-        move = actionToMove(ac, game, self.thisPlayer, self.mask_shape)
+        game = self.get_game_maybe_flipped()
+        move = actionToMove(ac, game, self.thisPlayer == 1, self.mask_shape)
         self.game.step(move)
         self.game.stepBot()
         info = {} if self.game.winner == 0 else {"winner": self.game.winner}
@@ -165,8 +166,11 @@ class OnitamaEnv(gym.Env):
         Observation and mask for valid actions
         :return:
         """
-        game = self.game if self.thisPlayer == 1 else flip_game_view(self.game)
-        return np.concatenate([_get_obs(game), get_mask(game, self.thisPlayer)], -1)
+        game = self.get_game_maybe_flipped()
+        return np.concatenate([_get_obs(game), get_mask(game, self.thisPlayer == 1)], -1)
+
+    def get_game_maybe_flipped(self):
+        return self.game if self.thisPlayer == 1 else flip_game_view(self.game)
 
     def get_reward(self):
         # can get game state by eg.
@@ -205,6 +209,55 @@ class OnitamaEnv(gym.Env):
         for k, r in reward_dict.items():
             reward += r * reward_weights[k]
         return reward
+
+    def seed(self, seed):
+        self._seed = seed
+        np.random.seed(seed)
+
+
+class OnitamaSelfPlayEnv(gym.Env):
+    """
+    An env where step and reward is called for each player 1 and 2 being RL
+    """
+    def __init__(self, seed, verbose=True):
+        super(OnitamaSelfPlayEnv, self).__init__()
+        self.game = PvP(seed, verbose=verbose)
+        self.observation_space = gym.spaces.Box(np.zeros((5, 5, 59)), np.ones((5, 5, 59)))
+        self.action_space = gym.spaces.Discrete(5 * 5 * 25 * 2)
+        self.mask_shape = (5, 5, 50)
+        self._seed = seed
+
+    def step(self, ac):
+        ac = np.squeeze(ac)
+        # action is index into 5 x 5 x 50
+        ac = np.unravel_index(ac, self.mask_shape)
+        game = self.get_game_maybe_flipped()
+        move = actionToMove(ac, game, self.game.isPlayer1, self.mask_shape)
+        self.game.step(move)
+        info = {} if self.game.winner == 0 else {"winner": self.game.winner}
+        return self.get_obs(), self.get_reward(), self.game.winner > 0, info
+
+    def reset(self):
+        self.game.reset()
+        return self.get_obs()
+
+    def render(self, mode='human'):
+        pass
+
+    def get_obs(self):
+        """
+        Observation and mask for valid actions
+        :return:
+        """
+        game = self.get_game_maybe_flipped()
+        return np.concatenate([_get_obs(game), get_mask(game, self.game.isPlayer1)], -1)
+
+    def get_game_maybe_flipped(self):
+        return self.game if self.game.isPlayer1 else flip_game_view(self.game)
+
+    def get_reward(self):
+        # TODO
+        return 1
 
     def seed(self, seed):
         self._seed = seed

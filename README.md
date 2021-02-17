@@ -58,7 +58,11 @@ Actions:
 
 #### Higher priority
 
-* O - sort env p1/p2
+* O - make a self play env 
+        - see if the RL works and scores about 50/50
+* T - reward for envs - for OnitamaEnv does it need to flip for player 2?
+            for OnitamaSelfPlayEnv needs to return the reward for player 1 or player 2 based on turn (game.isPlayer1),
+            note OnitamaSelfPlayEnv doesn't have self.thisPlayer
 * O - Add prioritised replay buffer
 * O - Run RL on full game vs simple agent - change `do_shuffle` arg in `init_cards` to do random.
 * ? - get github agent into our system (same as random/simple agent) - mostly as eval but worth trying to train with to
