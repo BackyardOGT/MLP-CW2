@@ -49,7 +49,7 @@ class EnvTest(unittest.TestCase):
         # ac has to be a piece
         # note all pieces in orig positions, for p1 it's [4, *], king at [4, 2]
         ac[4, 2, 29] = 1
-        move = actionToMove([i[0] for i in np.where(ac)], env.game, env.thisPlayer == 1, env.mask_shape)
+        move = actionToMove([i[0] for i in np.where(ac)], env.game, env.isPlayer1, env.mask_shape)
         mask = moveToMask(move, env.game.player1)
         assert np.all([a[0] == m for a, m in zip(np.where(ac), mask)]), "Ac : {}\nMask : {}".format(np.where(ac), mask)
 
@@ -59,7 +59,7 @@ class EnvTest(unittest.TestCase):
         # ac has to be a piece
         # note all pieces in orig positions, for p1 it's [4, *], king at [4, 2]
         ac[4, 1, 29] = 1
-        move = actionToMove([i[0] for i in np.where(ac)], env.game, env.thisPlayer == 1, env.mask_shape)
+        move = actionToMove([i[0] for i in np.where(ac)], env.game, env.isPlayer1, env.mask_shape)
         mask = moveToMask(move, env.game.player1)
         assert np.all([a[0] == m for a, m in zip(np.where(ac), mask)]), "Ac : {}\nMask : {}".format(np.where(ac), mask)
 
@@ -70,7 +70,7 @@ class EnvTest(unittest.TestCase):
         mask = moveToMask(move, env.game.player1)
         ac = np.zeros((5, 5, 50))
         ac[mask] = 1
-        move2 = actionToMove([i[0] for i in np.where(ac)], env.game, env.thisPlayer == 1, env.mask_shape)
+        move2 = actionToMove([i[0] for i in np.where(ac)], env.game, env.isPlayer1, env.mask_shape)
         assert move.pos == move2.pos, "pos Orig : {}\nNew : {}".format(move, move2)
         assert move.isKing == move2.isKing, "isKing Orig : {}\nNew : {}".format(move, move2)
         assert move.i == move2.i, "i Orig : {}\nNew : {}".format(move, move2)
@@ -82,27 +82,33 @@ class EnvTest(unittest.TestCase):
         mask = moveToMask(move, env.game.player1)
         ac = np.zeros((5, 5, 50))
         ac[mask] = 1
-        move2 = actionToMove([i[0] for i in np.where(ac)], env.game, env.thisPlayer == 1, env.mask_shape)
+        move2 = actionToMove([i[0] for i in np.where(ac)], env.game, env.isPlayer1, env.mask_shape)
         assert move.pos == move2.pos, "pos Orig : {}\nNew : {}".format(move, move2)
         assert move.isKing == move2.isKing, "isKing Orig : {}\nNew : {}".format(move, move2)
         assert move.i == move2.i, "i Orig : {}\nNew : {}".format(move, move2)
         assert move.cardId == move2.cardId, "CardID Orig : {}\nNew : {}".format(move, move2)
 
     def test_valid_moves(self):
-        env = OnitamaEnv(self.seed)
+        env = OnitamaEnv(self.seed, agent_type=RandomAgent)
         env.reset()
+        assert env.game.isPlayer1, "Wrong player value"
+        for move in env.game.get_valid_moves(env.game.player1, True):
+            assert env.game.check_valid_move(move), "Before found incorrect valid move {} \n in p1 {}".format(
+                move, env.game.player1)
         valid_moves = env.game.get_valid_moves(env.game.player1, True)
         env.game.step(valid_moves[0])
+        assert not env.game.isPlayer1, "Wrong player value"
+        for move in env.game.get_valid_moves(env.game.player2, False):
+            assert env.game.check_valid_move(move), "After found incorrect valid move in p2 {}".format(move)
         env.game.stepBot()
         for move in env.game.get_valid_moves(env.game.player1, True):
-            assert env.game.check_valid_move(move), "Found incorrect valid move {}".format(move)
-
+            assert env.game.check_valid_move(move), "After found incorrect valid move in p1 {}".format(move)
 
     def test_env_random_agent(self):
         """
         Would expect 50 / 50 of random unmasked actions compared to random agent
         """
-        env = OnitamaEnv(self.seed)
+        env = OnitamaEnv(self.seed, agent_type=RandomAgent)
         n_episodes = 10
         wins = 0
         for ep in range(n_episodes):
@@ -149,13 +155,13 @@ class EnvTest(unittest.TestCase):
             ob = env.reset()
             done = False
             while not done:
-                print("Player 1")
+                # print("Player 1")
                 ac, _ = p1.predict(ob, deterministic=deterministic)
-                print(ac)
+                # print(ac)
                 ob, _, done, info = env.step(ac)
-                print("Player 2")
+                # print("Player 2")
                 ac, _ = p2.predict(ob, deterministic=deterministic)
-                print(ac)
+                # print(ac)
                 ob, _, done, info = env.step(ac)
                 if done:
                     if info["winner"] == 1:

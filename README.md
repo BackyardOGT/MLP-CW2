@@ -56,18 +56,30 @@ Actions:
 
 ## TODOs
 
+#### Notes
+
+* Env not using starting cards (game defaults to playerStart=1 rather than None) 
+* Cards not shuffled (in get_init_cards, do_shuffle=False)
+
 #### Higher priority
 
+* O - env needs to account for starting cards (then set to None rather than 1 in game)  
+* O - Add prioritised replay buffer etc.
+* G - fix bug with shuffled cards  
+* ? - Run RL on full game vs simple agent - check `do_shuffle=True` arg in game/cards.py `init_cards`.
 * O - test rl p1/p2
 * G - Fix the no moves corner case and test
-* O - Add prioritised replay buffer
+* T - check if any of reward need be flipped
+* T - enum for win
+* ? - try (vs. simple agent) training with held out cards and how it evals with them  
+* ? - look into self play 
+        Seems alpha zero just runs the current weights against themselves - do both train or just p1?
+        alphaGo zero stores best model and overwrites it if current weights better
+  
+* T - Get running on MLP server
 * ? - check seeding is repeatable on train - seems ok on eval
 * ? - Check ac and obs spaces and bounds
-* T - check if any of reward need be flipped
-* ? - Run RL on full game vs simple agent - check `do_shuffle=True` arg in game/cards.py `init_cards`.
-* ? - look into self play  
 * ? - get github agent into our system (same as random/simple agent) - mostly as eval but worth trying to train with to
-* T - Get running on MLP server
 * ? - make a cmd line print out of board state would be useful debugging
 
 * Work on reward and heuristic agent
