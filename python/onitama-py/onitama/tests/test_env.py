@@ -1,6 +1,7 @@
 from onitama.rl import OnitamaEnv, OnitamaSelfPlayEnv, actionToMove, moveToMask, RandomAgent, MaskedCNNPolicy
 from stable_baselines.deepq import DQN
 from onitama.game import Move, get_move, PvBot
+from onitama.game.cards import only_sideways
 from onitama.rl.env import flip_game_view
 import numpy as np
 import unittest
@@ -167,6 +168,13 @@ class EnvTest(unittest.TestCase):
                     if info["winner"] == 1:
                         wins += 1
         print("P1 won {} of {}".format(wins, n_episodes))
+
+    def test_no_valid_moves(self):
+        game = PvBot()
+        game.player1.cards = [only_sideways, only_sideways]
+        game.player2.cards = [only_sideways, only_sideways]
+        game.spare_card = only_sideways
+        # TODO
 
 
 if __name__ == "__main__":

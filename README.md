@@ -65,7 +65,8 @@ Actions:
 
 * O - env needs to account for starting cards (then set to None rather than 1 in game)  
 * O - Add prioritised replay buffer etc.
-* G - fix bug with shuffled cards  
+* G - fix bug with shuffled cards - note I removed test case from the get_init_cards and set it up
+    in test_env.py. If it's a major difficulty then can revert that back but bit cleaner to keep tests together
 * ? - Run RL on full game vs simple agent - check `do_shuffle=True` arg in game/cards.py `init_cards`.
 * O - test rl p1/p2
 * G - Fix the no moves corner case and test
