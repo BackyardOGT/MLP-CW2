@@ -63,13 +63,11 @@ Actions:
 
 #### Higher priority
 
-* O - env needs to account for starting cards (then set to None rather than 1 in game)  
-* O - Add prioritised replay buffer etc.
-* G - fix bug with shuffled cards - note I removed test case from the get_init_cards and set it up
-    in test_env.py. If it's a major difficulty then can revert that back but bit cleaner to keep tests together
+* ? - Try hparams, esp. buffer and batch size, LR, try param noise?
 * ? - Run RL on full game vs simple agent - check `do_shuffle=True` arg in game/cards.py `init_cards`.
 * O - test rl p1/p2
-* G - Fix the no moves corner case and test
+* G - Fix the no moves corner case and test - note I removed test case from the get_init_cards and set it up
+    in test_env.py. If it's a major difficulty then can revert that back but bit cleaner to keep tests together
 * T - check if any of reward need be flipped
 * T - enum for win
 * ? - try (vs. simple agent) training with held out cards and how it evals with them  
@@ -77,6 +75,7 @@ Actions:
         Seems alpha zero just runs the current weights against themselves - do both train or just p1?
         alphaGo zero stores best model and overwrites it if current weights better
   
+* O - env needs to account for starting cards (then set to None rather than 1 in game)
 * T - Get running on MLP server
 * ? - check seeding is repeatable on train - seems ok on eval
 * ? - Check ac and obs spaces and bounds

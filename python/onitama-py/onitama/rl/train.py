@@ -13,6 +13,7 @@ def train_rl(seed):
     policy = DQN(MaskedCNNPolicy,
                  env,
                  seed=seed,
+                 prioritized_replay=True
                  )
 
     checkpoint_callback = CheckpointCallback(save_freq=1e4, save_path='./logs/',
