@@ -1,6 +1,6 @@
 import numpy as np
 
-from onitama.game.cards import get_init_cards
+from onitama.game.cards import get_init_cards, card_stamps
 
 KING_ID = -1
 
@@ -23,7 +23,6 @@ class Move:
     """
     Parses json to move object
     """
-
     def __init__(self, json):
         self.pos = json["pos"]  # [row, col]
         self.isKing = json["name"] == "king"  # T/F
@@ -115,10 +114,15 @@ class PvP:
         self.mode = "P vs P"
         self.winner = 0
         self.playerStart = startingPlayer
+        # set in reset
+        self.player1 = None
+        self.player2 = None
+        self.isPlayer1 = True
         self.reset()
 
     def get(self):
         """
+        * From a player - 1 view *
         Returns dict with positions in [row, col], zero-indexed
         In API format for front end, for each player:
         player1 : { king : [2], pawns : [[2], ..., [2]], cards: [ [5x5],  [5x5]]}
@@ -154,12 +158,12 @@ class PvP:
 
         assert self.check_valid_move(move), \
             "\nInvalid move player " + curP.player + "\n" + str(move) + "\n" + \
-            "Valid moves: {}\n".format(self.get_valid_moves(curP))
+            "Valid moves: {}\n".format(self.get_valid_moves(curP, self.isPlayer1))
 
 
         kingTaken = self.handle_take(otherP, move)
-        newCards = self.handle_cards(curP, move)
-        curP.step(move, newCards)
+        newCard = self.handle_cards(curP, move)
+        curP.step(move, newCard)
         if self.reached_goal(curP) or kingTaken:
             if self.verbose: print(
                 "{} won: ".format(curP.player) + ("reached end" if self.reached_goal(curP) else "king taken"))
@@ -174,7 +178,11 @@ class PvP:
 
         self.player1 = Player(True, p1CardsInit)
         self.player2 = Player(False, p2CardsInit)
-        self.isPlayer1 = self.playerStart == 1 
+        #Can override the player start based on card stamp, if declared in game init
+        if self.playerStart is None:
+            self.isPlayer1 = spare_card in card_stamps[1]
+        else:
+            self.isPlayer1 = self.playerStart == 1 
 
         self.spare_card = spare_card
 
@@ -212,7 +220,7 @@ class PvP:
             piecePos = player.king.get()
         else:  # pawn
             piecePos = player.pawns[move.i].get()
-        posOnCard = self.board_to_card(move.pos, piecePos)
+        posOnCard = self.board_to_card(move.pos, piecePos, self.isPlayer1)
         if np.all(np.greater_equal(posOnCard, 0)) and np.all(np.less_equal(posOnCard, 4)):
             if player.cards[move.cardId][posOnCard[0]][posOnCard[1]]:  # 1s and 0s so T/F
                 return True
@@ -243,7 +251,7 @@ class PvP:
         """
         Updates current spare card, returns new card for player
         """
-        cardId = move.cardId  # 0 or 1 so other is not cardId
+        cardId = move.cardId
         card = self.spare_card
         self.spare_card = curP.cards[cardId]
         return card
@@ -269,37 +277,37 @@ class PvP:
             return True
         return False
 
-    def get_valid_moves(self, curP):
+    def get_valid_moves(self, curP, isPlayer1):
         moves = []
         for cardId, card in enumerate(curP.cards):
             for p in np.reshape(np.where(card), [2, -1]).T:
                 # king
-                boardPos = self.card_to_board(curP.king.get(), p)
+                boardPos = self.card_to_board(curP.king.get(), p, isPlayer1)
                 # since we got these moves from card we only need check they're unoccupied now and on board
                 move = Move({"name": "king", "pos": boardPos, "id": cardId})
                 if self.check_unoccupied(curP, move) and self.check_on_board(move):
                     moves.append(move)
                 for i, pawn in enumerate(curP.pawns):
-                    boardPos = self.card_to_board(pawn.get(), p)
+                    boardPos = self.card_to_board(pawn.get(), p, isPlayer1)
                     move = Move({"name": "pawn", "pos": boardPos, "id": cardId, "i": i})
                     if self.check_unoccupied(curP, move) and self.check_on_board(move):
                         moves.append(move)
         return moves
 
-    def card_to_board(self, piecePos, cardPos):
+    def card_to_board(self, piecePos, cardPos, isPlayer1):
         """
         Returns np array (note need to convert to list for json)
         """
-        if self.isPlayer1:
+        if isPlayer1:
             return np.add(np.subtract(piecePos, [2, 2]), cardPos).tolist()
         else:
             return np.add(np.subtract(piecePos, cardPos), [2, 2]).tolist()
 
-    def board_to_card(self, boardPos, piecePos):
+    def board_to_card(self, boardPos, piecePos, isPlayer1):
         """
         Returns np array (note need to convert to list for json)
         """
-        if self.isPlayer1:
+        if isPlayer1:
             return np.subtract(np.add(boardPos, [2, 2]), piecePos).tolist()
         else:
             return np.subtract(np.add([2, 2], piecePos), boardPos).tolist()

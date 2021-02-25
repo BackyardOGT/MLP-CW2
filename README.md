@@ -56,31 +56,38 @@ Actions:
 
 ## TODOs
 
-* Running with fixed cards, change `do_shuffle` arg in `init_cards` to do random.
+#### Notes
+
+* Env not using starting cards (game defaults to playerStart=1 rather than None) 
+* Cards not shuffled (in get_init_cards, do_shuffle=False)
 
 #### Higher priority
 
-* Do to play against RL - will have to change the move outputs to flipped board??
-    * Eval vs simple agent with RL as player 2 to check player order not impacting it   
-* Add prioritised replay buffer
-* Check ac and obs spaces  
-* O - check seeding is repeatable on train - seems ok on eval 
-* ? - Get running on MLP server
-* T - Implement which pick which player starts based on cards- see onitama rules
-* G - Corner case: It is possible that you will find that you cannot use any of your cards to make a legal move. If this happens - and only then - you must pass your turn. 
-  <br/>None of your pawns will move. But like the river that constantly flows, you cannot remain unchanged: you must still choose one of the two cards in front of you, place it to the left of the playmat and rotate it, then take the card from the right side of the board.
-  * Remove assertion in env and handle no valid moves
-  * Try and make a test case
-
-
-* O - Think masking for exploration works, worth checking / testing more
-* O - Add square highlighting before move to show bot vs bot
+* ? - Try hparams, esp. buffer and batch size, LR, try param noise?
+* ? - Run RL on full game vs simple agent - check `do_shuffle=True` arg in game/cards.py `init_cards`.
+* O - test rl p1/p2
+* G - Fix the no moves corner case and test - note I removed test case from the get_init_cards and set it up
+    in test_env.py. If it's a major difficulty then can revert that back but bit cleaner to keep tests together
+* T - check if any of reward need be flipped
+* T - enum for win
+* ? - try (vs. simple agent) training with held out cards and how it evals with them  
+* ? - look into self play 
+        Seems alpha zero just runs the current weights against themselves - do both train or just p1?
+        alphaGo zero stores best model and overwrites it if current weights better
+  
+* O - env needs to account for starting cards (then set to None rather than 1 in game)
+* T - Get running on MLP server
+* ? - check seeding is repeatable on train - seems ok on eval
+* ? - Check ac and obs spaces and bounds
+* ? - get github agent into our system (same as random/simple agent) - mostly as eval but worth trying to train with to
+* ? - make a cmd line print out of board state would be useful debugging
 
 * Work on reward and heuristic agent
 
 #### Lower
 
-* Say what bots are playing
+* Label bots are playing in UI
+* O - Add square highlighting before move to show bot vs bot
 * Check masking not making gradients explode / vanish? 
 * 5 x 5 filter with 5 x 5 input and output 
 * Gather data for behaviour clone from good github heuristic bot

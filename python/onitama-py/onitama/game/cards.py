@@ -86,16 +86,26 @@ cobra =    [[0,0,0,0,0],
             [0,0,0,1,0],
             [0,0,0,0,0]]
 
+# For test case
+only_sideways = [[0,0,0,0,0],
+                 [0,0,0,0,0],
+                 [1,1,0,1,1],
+                 [0,0,0,0,0],
+                 [0,0,0,0,0]]
+
 all_cards = [tiger, dragon, frog, rabbit,
             crab, elephant, goose, rooster,
             monkey, mantis, horse, ox,
             crane, boar, eel, cobra]
 
+card_stamps={1:[tiger,rabbit,crab,goose,monkey,ox,crane,eel],
+             2:[dragon,frog,elephant,rooster,mantis,horse,boar,cobra]}
 
-def get_init_cards(seed, do_shuffle=False):
-      if do_shuffle:
-          random.seed(seed)
-          random.shuffle(all_cards)
-      return ([all_cards[0], all_cards[1]],
-          [all_cards[2], all_cards[3]],
-           [all_cards[4]])
+
+def get_init_cards(seed, do_shuffle=True):
+    if do_shuffle:
+        random.seed(seed)
+        random.shuffle(all_cards)
+    return ([all_cards[0], all_cards[1]],
+            [all_cards[2], all_cards[3]],
+            [all_cards[4]])
