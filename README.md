@@ -64,7 +64,6 @@ Actions:
 #### Higher priority
 
 * ? - Try hparams, esp. buffer and batch size, LR, try param noise?
-* ? - Run RL on full game vs simple agent - check `do_shuffle=True` arg in game/cards.py `init_cards`.
 * O - test rl p1/p2
 * G - Fix the no moves corner case and test - note I removed test case from the get_init_cards and set it up
     in test_env.py. If it's a major difficulty then can revert that back but bit cleaner to keep tests together
@@ -100,6 +99,31 @@ Actions:
 
 
 ## Notes
+
+Tried 
+                 learning_rate=1e-4,
+                 buffer_size=100000,
+                 batch_size=256,
+        with reward for move forward as 0.001
+Training was much slower and no better
+
+With shuffled cards and prioritised replay
+
+300k epochs
+
+Mean reward: -0.5558500000000001
+Std reward: 0.8145609415507227
+Min reward: -1.145
+Max reward: 1.055
+Mean episode length: 26.53
+Std episode length: 22.09997963799967
+Min episode length: 3
+Max episode length: 142
+Won 23 / 100
+
+
+
+
 
 Heuristic agent seems good to me when I played it with UI. 
 
