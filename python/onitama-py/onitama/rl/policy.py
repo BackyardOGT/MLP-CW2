@@ -1,8 +1,10 @@
 import numpy as np
 import tensorflow as tf
 import tensorflow.contrib.layers as tf_layers
-from stable_baselines.common.tf_layers import conv, conv_to_fc
+from stable_baselines.common.tf_layers import conv, conv_to_fc, linear
 from stable_baselines.deepq.policies import DQNPolicy
+from stable_baselines.common.policies import ActorCriticPolicy
+from stable_baselines.common.distributions import ProbabilityDistributionType, CategoricalProbabilityDistribution
 
 
 def cnn_extractor_onitama(scaled_images, n_obs=9, n_filters_out=50, filter_size=5, **kwargs):
@@ -27,7 +29,13 @@ def cnn_extractor_onitama(scaled_images, n_obs=9, n_filters_out=50, filter_size=
     return layer_3_flat
 
 
-class MaskedCNNPolicy(DQNPolicy):
+def apply_mask(values, mask_flat, mask_to=tf.float32.min):
+    # if it's masked, tf.float32.min, if it's valid then 1, to sample only valid
+    masked = tf.where(mask_flat > 0, values, tf.fill(tf.shape(values), mask_to))
+    return masked
+
+
+class DQNMaskedCNNPolicy(DQNPolicy):
     """
     Policy object that implements a DQN policy, using a feed forward neural network.
     Uses part of inputs to mask the output action probability distribution.
@@ -50,13 +58,10 @@ class MaskedCNNPolicy(DQNPolicy):
     :param kwargs: (dict) Extra keyword arguments for the nature CNN feature extraction
     """
     def __init__(self, sess, ob_space, ac_space, n_env, n_steps, n_batch, reuse=False, layers=None,
-                 cnn_extractor=cnn_extractor_onitama, feature_extraction="cnn",
                  obs_phs=None, layer_norm=False, dueling=False, act_fun=tf.nn.relu, **kwargs):
-        super(MaskedCNNPolicy, self).__init__(sess, ob_space, ac_space, n_env, n_steps,
-                                                n_batch, dueling=dueling, reuse=reuse,
-                                                scale=(feature_extraction == "cnn"), obs_phs=obs_phs)
-
-        self._kwargs_check(feature_extraction, kwargs)
+        super(DQNMaskedCNNPolicy, self).__init__(sess, ob_space, ac_space, n_env, n_steps,
+                                                 n_batch, dueling=dueling, reuse=reuse,
+                                                 scale=True, obs_phs=obs_phs)
 
         self.n_obs = 9
 
@@ -65,10 +70,8 @@ class MaskedCNNPolicy(DQNPolicy):
 
         with tf.variable_scope("model", reuse=reuse):
             with tf.variable_scope("action_value"):
-                extracted_features = cnn_extractor(self.processed_obs, n_obs=self.n_obs)
-                action_out = extracted_features
-
-                action_scores = tf_layers.fully_connected(action_out, num_outputs=self.n_actions)
+                extracted_features = cnn_extractor_onitama(self.processed_obs, n_obs=self.n_obs)
+                action_scores = tf_layers.fully_connected(extracted_features, num_outputs=self.n_actions)
 
             if self.dueling:
                 with tf.variable_scope("state_value"):
@@ -89,16 +92,11 @@ class MaskedCNNPolicy(DQNPolicy):
         mask_inp = self.processed_obs[:, :, :, self.n_obs:]
         mask_flat = conv_to_fc(mask_inp)
         # get a mask as tf.float32.min for invalid and 1s for valid
-        self.mask = self.apply_mask(tf.ones_like(mask_flat), mask_flat)
+        self.mask = apply_mask(tf.ones_like(mask_flat), mask_flat)
         # get masked q values
-        masked_q = self.apply_mask(q_out, mask_flat)
+        masked_q = apply_mask(q_out, mask_flat)
         self.q_values = masked_q
         self._setup_init()
-
-    def apply_mask(self, values, mask_flat):
-        # if it's masked, tf.float32.min, if it's valid then 1, to sample only valid
-        masked = tf.where(mask_flat > 0, values, tf.fill(tf.shape(values), tf.float32.min))
-        return masked
 
     def step(self, obs, state=None, mask=None, deterministic=True):
         """
@@ -132,3 +130,87 @@ class MaskedCNNPolicy(DQNPolicy):
         :return: (np.ndarray float) the action probability
         """
         return self.sess.run(self.policy_proba, {self.obs_ph: obs})
+
+
+class ACMaskedCNNPolicy(ActorCriticPolicy):
+    """
+    Policy object that implements actor critic, using a feed forward neural network.
+
+    :param sess: (TensorFlow session) The current TensorFlow session
+    :param ob_space: (Gym Space) The observation space of the environment
+    :param ac_space: (Gym Space) The action space of the environment
+    :param n_env: (int) The number of environments to run
+    :param n_steps: (int) The number of steps to run for each environment
+    :param n_batch: (int) The number of batch to run (n_envs * n_steps)
+    :param reuse: (bool) If the policy is reusable or not
+    :param layers: ([int]) (deprecated, use net_arch instead) The size of the Neural network for the policy
+        (if None, default to [64, 64])
+    :param net_arch: (list) Specification of the actor-critic policy network architecture (see mlp_extractor
+        documentation for details).
+    :param act_fun: (tf.func) the activation function to use in the neural network.
+    :param cnn_extractor: (function (TensorFlow Tensor, ``**kwargs``): (TensorFlow Tensor)) the CNN feature extraction
+    :param feature_extraction: (str) The feature extraction type ("cnn" or "mlp")
+    :param kwargs: (dict) Extra keyword arguments for the nature CNN feature extraction
+    """
+    def __init__(self, sess, ob_space, ac_space, n_env, n_steps, n_batch, reuse=False, layers=None, **kwargs):
+        super(ACMaskedCNNPolicy, self).__init__(sess, ob_space, ac_space, n_env, n_steps, n_batch, reuse=reuse, scale=True)
+
+        self.n_obs = 9
+
+        with tf.variable_scope("model", reuse=reuse):
+            mask = self.processed_obs[:, :, :, self.n_obs:]
+            pi_latent = vf_latent = cnn_extractor_onitama(self.processed_obs, **kwargs)
+
+            self._value_fn = linear(vf_latent, 'vf', 1)
+
+            self._pdtype = MaskedCategoricalProbabilityDistributionType(ac_space.n)
+            self._proba_distribution, self._policy, self.q_value = \
+                self.pdtype.proba_distribution_from_latent(pi_latent, vf_latent, mask, init_scale=0.01)
+
+        self._setup_init()
+
+    def step(self, obs, state=None, mask=None, deterministic=False):
+        if deterministic:
+            action, value, neglogp = self.sess.run([self.deterministic_action, self.value_flat, self.neglogp],
+                                                   {self.obs_ph: obs})
+        else:
+            action, value, neglogp = self.sess.run([self.action, self.value_flat, self.neglogp],
+                                                   {self.obs_ph: obs})
+        return action, value, self.initial_state, neglogp
+
+    def proba_step(self, obs, state=None, mask=None):
+        return self.sess.run(self.policy_proba, {self.obs_ph: obs})
+
+    def value(self, obs, state=None, mask=None):
+        return self.sess.run(self.value_flat, {self.obs_ph: obs})
+
+
+class MaskedCategoricalProbabilityDistributionType(ProbabilityDistributionType):
+    def __init__(self, n_cat):
+        """
+        The probability distribution type for categorical input
+
+        :param n_cat: (int) the number of categories
+        """
+        self.n_cat = n_cat
+
+    def probability_distribution_class(self):
+        return CategoricalProbabilityDistribution
+
+    def proba_distribution_from_latent(self, pi_latent_vector, vf_latent_vector, mask, init_scale=1.0, init_bias=0.0):
+        pdparam = linear(pi_latent_vector, 'pi', self.n_cat, init_scale=init_scale, init_bias=init_bias)
+        q_values = linear(vf_latent_vector, 'q', self.n_cat, init_scale=init_scale, init_bias=init_bias)
+        # apply mask
+        mask_flat = conv_to_fc(mask)
+        pdparam = apply_mask(pdparam, mask_flat)
+        q_values = apply_mask(q_values, mask_flat)
+        return self.proba_distribution_from_flat(pdparam), pdparam, q_values
+
+    def param_shape(self):
+        return [self.n_cat]
+
+    def sample_shape(self):
+        return []
+
+    def sample_dtype(self):
+        return tf.int64

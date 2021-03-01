@@ -25,3 +25,4 @@ yarn-error.log*
 venv
 __pycache__
 /python/onitama-py/onitama.egg-info/
+/python/onitama-py/onitama/rl/logs/

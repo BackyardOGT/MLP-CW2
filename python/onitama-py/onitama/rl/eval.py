@@ -1,4 +1,4 @@
-from onitama.rl import OnitamaEnv, MaskedCNNPolicy, SimpleAgent
+from onitama.rl import OnitamaEnv, DQNMaskedCNNPolicy, SimpleAgent
 from stable_baselines.deepq import DQN
 from stable_baselines.common.evaluation import evaluate_policy
 import numpy as np

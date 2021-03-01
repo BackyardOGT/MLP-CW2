@@ -1,4 +1,4 @@
-from onitama.rl import OnitamaEnv, OnitamaSelfPlayEnv, actionToMove, moveToMask, RandomAgent, MaskedCNNPolicy
+from onitama.rl import OnitamaEnv, OnitamaSelfPlayEnv, actionToMove, moveToMask, RandomAgent, DQNMaskedCNNPolicy
 from stable_baselines.deepq import DQN
 from onitama.game import Move, get_move, PvBot
 from onitama.game.cards import only_sideways
@@ -147,8 +147,9 @@ class EnvTest(unittest.TestCase):
         Make sure it all runs, also might expect fairly evenly matched at the start?
         """
         env = OnitamaSelfPlayEnv(self.seed)
-        p1 = DQN(MaskedCNNPolicy, env, learning_starts=10)
-        p2 = DQN(MaskedCNNPolicy, env, learning_starts=10)
+        p1 = DQN(DQNMaskedCNNPolicy, env, learning_starts=10)
+        p2 = DQN(DQNMaskedCNNPolicy, env, learning_starts=10)
+        env.setSelfPlayModel(p1)
         deterministic = False
         n_episodes = 10
         wins = 0
@@ -170,7 +171,7 @@ class EnvTest(unittest.TestCase):
         print("P1 won {} of {}".format(wins, n_episodes))
 
     def test_no_valid_moves(self):
-        game = PvBot()
+        game = PvBot(RandomAgent, self.seed)
         game.player1.cards = [only_sideways, only_sideways]
         game.player2.cards = [only_sideways, only_sideways]
         game.spare_card = only_sideways

@@ -1,4 +1,4 @@
-from onitama.rl import OnitamaEnv, MaskedCNNPolicy, SimpleAgent
+from onitama.rl import OnitamaEnv, DQNMaskedCNNPolicy, SimpleAgent
 from onitama.rl.eval import EvalCB
 from stable_baselines.deepq import DQN
 from stable_baselines.common.evaluation import evaluate_policy
@@ -10,7 +10,7 @@ import argparse
 def train_rl(seed):
     env = OnitamaEnv(seed, SimpleAgent, verbose=False)
     eval_env = OnitamaEnv(seed, SimpleAgent, verbose=False)
-    policy = DQN(MaskedCNNPolicy,
+    policy = DQN(DQNMaskedCNNPolicy,
                  env,
                  seed=seed,
                  prioritized_replay=True

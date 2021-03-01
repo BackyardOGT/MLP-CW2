@@ -1,4 +1,4 @@
-from onitama.rl import MaskedCNNPolicy, get_mask, SimpleAgent, actionToMove
+from onitama.rl import DQNMaskedCNNPolicy, get_mask, SimpleAgent, actionToMove
 from onitama.rl.env import _get_obs
 from stable_baselines.deepq import DQN
 

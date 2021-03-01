@@ -229,7 +229,7 @@ class OnitamaSelfPlayEnv(gym.Env):
     An env where step and reward is called for each player 1 and 2 being RL
     """
 
-    def __init__(self, seed, verbose=True, deterministicSelfPlay=False):
+    def __init__(self, seed, verbose=True, deterministicSelfPlay=False, nStepsSelfPlay=int(1e3)):
         super(OnitamaSelfPlayEnv, self).__init__()
         self.game = PvP(seed, verbose=verbose)
         self.observation_space = gym.spaces.Box(np.zeros((5, 5, 59)), np.ones((5, 5, 59)))
@@ -237,7 +237,7 @@ class OnitamaSelfPlayEnv(gym.Env):
         self.mask_shape = (5, 5, 50)
         self._seed = seed
         # the model weights for self play
-        self.selfPlayPolicy = None
+        self.selfPlayModel = None
         self.deterministicSelfPlay = deterministicSelfPlay
 
     def step(self, ac):
@@ -245,7 +245,7 @@ class OnitamaSelfPlayEnv(gym.Env):
         move = self.getMove(ac)
         self.game.step(move)
         # step the self play action
-        acSelfPlay, _ = self.selfPlayPolicy.predict([self.get_obs()], deterministic=self.deterministicSelfPlay)
+        acSelfPlay, _ = self.selfPlayModel.predict([self.get_obs()], deterministic=self.deterministicSelfPlay)
         moveSelfPlay = self.getMove(acSelfPlay)
         self.game.step(moveSelfPlay)
 
@@ -260,7 +260,7 @@ class OnitamaSelfPlayEnv(gym.Env):
         return move
 
     def reset(self):
-        assert self.selfPlayPolicy, "No model set"
+        assert self.selfPlayModel, "No model set"
         self.game.reset()
         return self.get_obs()
 
@@ -317,5 +317,5 @@ class OnitamaSelfPlayEnv(gym.Env):
         self._seed = seed
         np.random.seed(seed)
 
-    def setSelfPlayer(self, policy):
-        self.selfPlayPolicy = policy
+    def setSelfPlayModel(self, model):
+        self.selfPlayModel = model

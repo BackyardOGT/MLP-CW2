@@ -1,6 +1,6 @@
 from flask import Flask, request
 from onitama.game import PvP, PvBot, BotVsBot
-from onitama.rl import RandomAgent, SimpleAgent, RLAgent, MaskedCNNPolicy
+from onitama.rl import RandomAgent, SimpleAgent, RLAgent, DQNMaskedCNNPolicy
 from flask_cors import CORS
 
 app = Flask(__name__)
