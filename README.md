@@ -63,7 +63,7 @@ Actions:
 #### Higher priority
 
 * ? - Try hparams, esp. buffer and batch size, LR, try param noise?
-* O - try passing mask also as input
+* O - update notes that mask now input as an input too
 * O - am thinking it needs to learn based on the latest opponent  
         try DQN with smaller buffer size? 
         try PPO?

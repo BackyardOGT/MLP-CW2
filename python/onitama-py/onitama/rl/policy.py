@@ -7,7 +7,7 @@ from stable_baselines.common.policies import ActorCriticPolicy
 from stable_baselines.common.distributions import ProbabilityDistributionType, CategoricalProbabilityDistribution
 
 
-def cnn_extractor_onitama(scaled_images, n_obs=9, n_filters_out=50, filter_size=5, **kwargs):
+def cnn_extractor_onitama(scaled_images, n_filters_out=50, filter_size=5, **kwargs):
     """
     CNN with 5 x 5 x 50 (50 = 25 x 2) outputs, that is masked by 2nd half of inputs
     :param scaled_images: (TensorFlow Tensor) Image input placeholder (Batch size x Obs shape)
@@ -17,7 +17,7 @@ def cnn_extractor_onitama(scaled_images, n_obs=9, n_filters_out=50, filter_size=
     """
     activ = tf.nn.relu
     # split into mask and
-    obs = scaled_images[:, :, :, :n_obs]
+    obs = scaled_images
     layer_1 = activ(
         conv(obs, 'c1', n_filters=32, filter_size=filter_size, stride=1, pad='SAME', init_scale=np.sqrt(2), **kwargs))
     layer_2 = activ(
@@ -70,7 +70,7 @@ class DQNMaskedCNNPolicy(DQNPolicy):
 
         with tf.variable_scope("model", reuse=reuse):
             with tf.variable_scope("action_value"):
-                extracted_features = cnn_extractor_onitama(self.processed_obs, n_obs=self.n_obs)
+                extracted_features = cnn_extractor_onitama(self.processed_obs)
                 action_scores = tf_layers.fully_connected(extracted_features, num_outputs=self.n_actions)
 
             if self.dueling:
@@ -159,7 +159,7 @@ class ACMaskedCNNPolicy(ActorCriticPolicy):
 
         with tf.variable_scope("model", reuse=reuse):
             mask = self.processed_obs[:, :, :, self.n_obs:]
-            pi_latent = vf_latent = cnn_extractor_onitama(self.processed_obs, **kwargs)
+            pi_latent = vf_latent = cnn_extractor_onitama(self.processed_obs)
 
             self._value_fn = linear(vf_latent, 'vf', 1)
 
