@@ -10,21 +10,20 @@ import unittest
 class EnvTest(unittest.TestCase):
     seed = 123124
 
-    # def testMoveForwardsPlayer2(self):
-    #     # Test move_forwards
-    #     ##Move player 2 pawn (id=0) forward 2 squares
-    #     ##Reward should = 0.2 (2 moves * 0.1)
-    #     env = OnitamaEnv(self.seed, isPlayer1=False)
-    #
-    #     moveJson = {"pos": [2, 0],
-    #                 "name": "pawn",
-    #                 "i": 0,
-    #                 "id": 0}
-    #
-    #     move = Move(moveJson)
-    #
-    #     env.game.player2.step(move, None)
-    #     self.assertEqual(env.get_reward(), 0.02)
+    def testMoveForwardsPlayer2(self):
+        # Test move_forwards
+        ##Move player 2 pawn (id=0) forward 2 squares
+        ##Reward should = 0.2 (2 moves * 0.1)
+        env = OnitamaEnv(self.seed, isPlayer1=True)
+    
+        moveJson = {"pos": [2, 0],
+                    "name": "pawn",
+                    "i": 0,
+                    "id": 0}
+    
+        move = Move(moveJson)
+        env.game.player1.step(move, None)
+        self.assertEqual(env.get_reward(), 0.01)
     #
     # def testPlayer2TakePawn(self):
     #     # Test Player1 taking Player2s pawn at location [0,0]
@@ -124,7 +123,7 @@ class EnvTest(unittest.TestCase):
                 obs, reward, done, info = env.step(action)
                 mask = obs[:, :, 9:]
                 if done:
-                    if info["winner"] == 1:
+                    if info["winner"].value == 1:
                         wins += 1
         print("Won {} of {}".format(wins, n_episodes))
 
@@ -166,7 +165,7 @@ class EnvTest(unittest.TestCase):
                 # print(ac)
                 ob, _, done, info = env.step(ac)
                 if done:
-                    if info["winner"] == 1:
+                    if info["winner"].value == 1:
                         wins += 1
         print("P1 won {} of {}".format(wins, n_episodes))
 
