@@ -102,7 +102,7 @@ card_stamps={1:[tiger,rabbit,crab,goose,monkey,ox,crane,eel],
              2:[dragon,frog,elephant,rooster,mantis,horse,boar,cobra]}
 
 
-def get_init_cards(seed, do_shuffle=False):
+def get_init_cards(seed, do_shuffle=True):
     if do_shuffle:
         random.seed(seed)
         random.shuffle(all_cards)

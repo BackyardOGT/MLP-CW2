@@ -58,10 +58,13 @@ Actions:
 
 #### Notes
 
-* Cards not shuffled (in get_init_cards, do_shuffle=False)
-
 #### Higher priority
 
+* o - try ppo vs simple agent
+* g - rewards
+* g - make simple agent p1/p2
+* o,t - simple agent improvements - test by playing current simple agent
+	ordering where currently picks random from good set of moves
 * ? - debug self play
 * O - added mask as an input:
         keep it? update notes that mask now input as an input too
@@ -102,6 +105,14 @@ Actions:
 
 
 ## Notes
+
+From meeting with Arushi 02/03
+
+no existing literature to compare to on onitama
+focus on making simple agent harder first, then self play
+rewards
+
+____
 
 Tried DQN self play with a 5000 buffer size and it didnt seem to train well but only ran 32,000 timesteps
 
