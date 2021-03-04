@@ -123,7 +123,7 @@ class EnvTest(unittest.TestCase):
                 obs, reward, done, info = env.step(action)
                 mask = obs[:, :, 9:]
                 if done:
-                    if info["winner"].value == 1:
+                    if info["winner"] == 1:
                         wins += 1
         print("Won {} of {}".format(wins, n_episodes))
 
@@ -165,7 +165,7 @@ class EnvTest(unittest.TestCase):
                 # print(ac)
                 ob, _, done, info = env.step(ac)
                 if done:
-                    if info["winner"].value == 1:
+                    if info["winner"] == 1:
                         wins += 1
         print("P1 won {} of {}".format(wins, n_episodes))
 
