@@ -61,7 +61,6 @@ export default function Game({state, sendMove, resetGame, toggleGameMode, stepBo
     return (
         <div
             style={{
-                marginTop: 25,
                 display: "flex",
                 flexDirection: "column",
                 height: "100%",
@@ -142,9 +141,15 @@ export default function Game({state, sendMove, resetGame, toggleGameMode, stepBo
                         justifyContent: "center",
                     }}
                 >
-                    <button onClick={resetGame}>Reset</button>
-                    <button onClick={toggleGameMode}>Toggle game mode</button>
-                    <button onClick={stepBot}>Step bot</button>
+                    <button style={{background: "var(--light)", color: "var(--dark)", fontSize: "1.5rem",
+                        border: 0, borderRadius: 10, marginTop: 3}}
+                            onClick={resetGame}>Reset</button>
+                    <button style={{background: "var(--light)", color: "var(--dark)", fontSize: "1.5rem",
+                        border: 0, borderRadius: 10, marginTop: 3}}
+                            onClick={toggleGameMode}>Toggle game mode</button>
+                    <button style={{background: "var(--light)", color: "var(--dark)", fontSize: "1.5rem",
+                        border: 0, borderRadius: 10, marginTop: 3}}
+                            onClick={stepBot}>Step bot</button>
                     <p>Turn: Player {currentPlayer}</p>
                     <p>Mode: {state.mode}</p>
                 </div>

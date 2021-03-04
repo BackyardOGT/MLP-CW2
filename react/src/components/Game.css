@@ -1,12 +1,19 @@
 :root {
-    --light: #8b8b2a;
-    --lightText: #FFFFF0;
-    --dark: #2d2d63;
-    --validMove: #df17e6;
-    --cardCenter: #338d09;
-    --cardValid: #a10ca5;
-    --cardCenterHighlight: #51ff00;
-    --cardValidHighlight: #f700ff;
+    /* 200 */
+    --light: #E7E5E4;
+    /* 400 */
+    --lightText: #A8A29E;
+    /* 500 */
+    --lightPiece: #78716C;
+    /* 700 */
+    --darkPiece: #44403C;
+    /* 800 */
+    --dark: #292524;
+    --validMove: #65A30D;
+    --cardCenter: #0284C7;
+    --cardValid: #65A30D;
+    --cardCenterHighlight: #38BDF8;
+    --cardValidHighlight: #A3E635;
 }
 
 .cardDiv {
