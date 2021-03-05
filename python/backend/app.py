@@ -13,8 +13,8 @@ againstBot = PvBot(SimpleAgent(seed), seed)
 # botVsBot = BotVsBot(RLAgent(seed, "../onitama-py/onitama/rl/logs/best_model.zip", isPlayer1=True),
 #                     SimpleAgent(seed),
 #                     seed)
-botVsBot = BotVsBot(RandomAgent(seed, isPlayer1=True),
-                    SimpleAgent(seed),
+botVsBot = BotVsBot(SimpleAgent(seed, isPlayer1=True, isVerbose=True),
+                    SimpleAgent(seed, isPlayer1=False, isVerbose=True),
                     seed)
 game = botVsBot
 games = [twoPlayer, againstBot, botVsBot]
