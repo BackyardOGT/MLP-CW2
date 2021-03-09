@@ -1,13 +1,14 @@
-from onitama.rl import OnitamaEnv, OnitamaSelfPlayEnv, DQNMaskedCNNPolicy, ACMaskedCNNPolicy, SimpleAgent, RandomAgent
+from onitama.rl import DQNMaskedCNNPolicy, ACMaskedCNNPolicy, SimpleAgent, RandomAgent
 from onitama.rl.eval import EvalCB
 from stable_baselines import DQN
 from stable_baselines import PPO2
 from stable_baselines.common.callbacks import CheckpointCallback, EvalCallback, CallbackList
 import argparse
-
+import onitama
+import gym
 
 def getPolicy(algorithm, seed):
-    env = OnitamaSelfPlayEnv(seed, verbose=False)
+    env = gym.make("OnitamaSelfPlay-v0", seed=seed, verbose=False)
 
     if algorithm == "PPO":
         policy = PPO2(ACMaskedCNNPolicy,
@@ -30,7 +31,8 @@ def getPolicy(algorithm, seed):
 
 def train_rl(algorithm, seed):
     policy = getPolicy(algorithm, seed)
-    eval_env = OnitamaEnv(seed, SimpleAgent, verbose=False)
+    eval_env = gym.make("Onitama-v0", seed=seed, agent_type=SimpleAgent, verbose=False)
+
 
     checkpoint_callback = CheckpointCallback(save_freq=1e4, save_path='./logs/',
                                              name_prefix='rl_model', verbose=2)

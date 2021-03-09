@@ -1,15 +1,16 @@
-from onitama.rl import OnitamaEnv, DQNMaskedCNNPolicy, SimpleAgent
+from onitama.rl import DQNMaskedCNNPolicy, SimpleAgent
 from onitama.rl.eval import EvalCB
 from stable_baselines.deepq import DQN
 from stable_baselines.common.evaluation import evaluate_policy
 from stable_baselines.common.callbacks import CheckpointCallback, EvalCallback, CallbackList
 import numpy as np
 import argparse
-
+import onitama
+import gym
 
 def train_rl(seed):
-    env = OnitamaEnv(seed, SimpleAgent, verbose=False)
-    eval_env = OnitamaEnv(seed, SimpleAgent, verbose=False)
+    env = gym.make("Onitama-v0", seed=seed, agent_type=SimpleAgent, verbose=False)
+    eval_env = gym.make("Onitama-v0", seed=seed, agent_type=SimpleAgent, verbose=False)
     policy = DQN(DQNMaskedCNNPolicy,
                  env,
                  seed=seed,

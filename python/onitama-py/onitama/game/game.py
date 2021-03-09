@@ -1,6 +1,6 @@
 import numpy as np
 
-from onitama.game.cards import get_init_cards, card_stamps
+from onitama.game.cards import get_init_cards, card_stamps, seed_cards
 
 KING_ID = -1
 
@@ -111,6 +111,7 @@ class PvP:
     def __init__(self, seed, verbose=True, startingPlayer=1):
         self.verbose = verbose
         self.seed = seed
+        seed_cards(seed)
         self.mode = "P vs P"
         self.winner = 0
         self.playerStart = startingPlayer
@@ -174,7 +175,7 @@ class PvP:
         return self.get()
 
     def reset(self):
-        p1CardsInit, p2CardsInit, [spare_card] = get_init_cards(self.seed)
+        p1CardsInit, p2CardsInit, [spare_card] = get_init_cards()
 
         self.player1 = Player(True, p1CardsInit)
         self.player2 = Player(False, p2CardsInit)

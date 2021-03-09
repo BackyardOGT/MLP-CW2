@@ -62,7 +62,6 @@ Actions:
 
 * o - try ppo vs simple agent
 * g - rewards
-* g - make simple agent p1/p2
 * o,t - simple agent improvements - test by playing current simple agent
 	ordering where currently picks random from good set of moves
 * ? - debug self play
@@ -72,17 +71,15 @@ Actions:
 * O - am thinking it needs to learn based on the latest opponent  
         try DQN with smaller buffer size? 
         try PPO?
+        Try hparams, esp. buffer and batch size, LR, try param noise?
 * G - Fix the no moves corner case and test - note I removed test case from the get_init_cards and set it up
     in test_env.py. If it's a major difficulty then can revert that back but bit cleaner to keep tests together
 * T - check if any of reward need be flipped
-* T - enum for win
 * ? - try (vs. simple agent) training with held out cards and how it evals with them
-* ? - Try hparams, esp. buffer and batch size, LR, try param noise?
 * ? - Implement for env not using player start bsaed on cards 
     (set in game playerStart=None instead of playerStart=1 rather to use starting player based on cards)
     
 * T - Get running on MLP server
-* ? - check seeding is repeatable on train - seems ok on eval
 * ? - Check ac and obs spaces and bounds
 * ? - get github agent into our system (same as random/simple agent) - mostly as eval but worth trying to train with to
 * ? - make a cmd line print out of board state would be useful debugging
@@ -105,6 +102,12 @@ Actions:
 
 
 ## Notes
+
+Agent has some problems left notably that it doesn't consider winning by reaching the end 
+(this might be a winning strategy the RL finds) and it's very shy, never moving pawns to 
+squares that could be attacked by enemy pieces (even if they are defended). 
+This makes the agent very defensive.  If you try playing it yourself this agent is pretty 
+solid. If the RL works it's definitely beatable though
 
 From meeting with Arushi 02/03
 

@@ -1,8 +1,10 @@
-from onitama.rl import OnitamaEnv, DQNMaskedCNNPolicy, SimpleAgent
+from onitama.rl import DQNMaskedCNNPolicy, SimpleAgent
 from stable_baselines.deepq import DQN
 from stable_baselines.common.evaluation import evaluate_policy
 import numpy as np
 import argparse
+import onitama
+import gym
 
 class EvalCB:
     def __init__(self):
@@ -48,6 +50,6 @@ if __name__ == "__main__":
     parser.add_argument('--model_path', default="logs/best_model.zip", type=str)
     args = parser.parse_args()
 
-    env = OnitamaEnv(args.seed, SimpleAgent, verbose=False)
+    env = gym.make("Onitama-v0", seed=args.seed, agent_type=SimpleAgent, verbose=False)
     policy = DQN.load(args.model_path)
     evaluate_rl(policy, env)
