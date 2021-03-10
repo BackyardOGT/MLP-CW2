@@ -1,5 +1,5 @@
 import numpy as np
-
+from enum import Enum
 from onitama.game.cards import get_init_cards, card_stamps, seed_cards
 
 KING_ID = -1
@@ -64,10 +64,15 @@ class State:
 
     def __str__(self):
         return "State : current player {}, winner: {}, mode: {}\n" \
-               "spare_card: {}\nplayer 1: {}\nplayer2: {}".format(self.current_player, self.winner,
+               "spare_card: {}\nplayer 1: {}\nplayer2: {}".format(self.current_player, Winner(self.winner).name,
                                                                   self.mode, self.spare_card, self.player1_dict,
                                                                   self.player2_dict)
 
+class Winner(Enum):
+    noWin = 0
+    player1 = 1
+    player2 = 2
+    draw = 3
 
 class Player:
     def __init__(self, isPlayer1, cards):
@@ -113,7 +118,7 @@ class PvP:
         self.seed = seed
         seed_cards(seed)
         self.mode = "P vs P"
-        self.winner = 0
+        self.winner = Winner.noWin
         self.playerStart = startingPlayer
         # set in reset
         self.player1 = None
@@ -168,7 +173,7 @@ class PvP:
         if self.reached_goal(curP) or kingTaken:
             if self.verbose: print(
                 "{} won: ".format(curP.player) + ("reached end" if self.reached_goal(curP) else "king taken"))
-            self.winner = 1 if self.isPlayer1 else 2
+            self.winner = Winner.player1 if self.isPlayer1 else Winner.player2
             return self.get()
 
         self.isPlayer1 = not self.isPlayer1
@@ -188,7 +193,7 @@ class PvP:
         self.spare_card = spare_card
 
         # 0 for none, 1 for player 1, 2 for player 2
-        self.winner = 0
+        self.winner = Winner.noWin
 
     def check_valid_move(self, move):
         assert move, "Move passed is False: {}".format(move)
@@ -348,7 +353,7 @@ class PvBot(PvP):
         Steps the bot
         """
         state = self.get()
-        if not self.winner:
+        if self.winner is Winner.noWin:
             agentMove = self.agent.get_action(self)
             state = super(PvBot, self).step(agentMove)
         return state
