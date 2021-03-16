@@ -1,5 +1,5 @@
-from onitama.rl import DQNMaskedCNNPolicy, SimpleAgent
-from stable_baselines.deepq import DQN
+from onitama.rl import DQNMaskedCNNPolicy, SimpleAgent, RandomAgent
+from stable_baselines import DQN, PPO2
 from stable_baselines.common.evaluation import evaluate_policy
 import numpy as np
 import argparse
@@ -47,9 +47,14 @@ def evaluate_rl(policy, env, n_eps=100):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--seed', default=12314, type=int)
+    parser.add_argument('--algorithm', default="DQN", type=str)
     parser.add_argument('--model_path', default="logs/best_model.zip", type=str)
     args = parser.parse_args()
 
-    env = gym.make("Onitama-v0", seed=args.seed, agent_type=SimpleAgent, verbose=False)
-    policy = DQN.load(args.model_path)
+    env = gym.make("Onitama-v0", seed=args.seed, agent_type=RandomAgent, verbose=False)
+    if args.algorithm == "PPO":
+        policy = PPO2.load(args.model_path)
+    else:
+        policy = DQN.load(args.model_path)
+
     evaluate_rl(policy, env)

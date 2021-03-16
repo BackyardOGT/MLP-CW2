@@ -58,13 +58,10 @@ Actions:
 
 #### Notes
 
+* Added mask as input to policy currently NOT input but can easily add it, set n_obs to -1 in policy.py
+
 #### Higher priority
 
-* o - try dqn vs simple agent without mask inputs
-    * O - added mask as an input:
-        keep it? update notes that mask now input as an input too
-        else remove it if adding too much additional inputs
-* o - try ppo vs simple agent
 * g - rewards
 * o,t - simple agent improvements - test by playing current simple agent
 	ordering where currently picks random from good set of moves

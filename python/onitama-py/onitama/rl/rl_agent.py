@@ -1,6 +1,6 @@
 from onitama.rl import DQNMaskedCNNPolicy, get_mask, SimpleAgent, actionToMove
 from onitama.rl.env import _get_obs
-from stable_baselines.deepq import DQN
+from stable_baselines import DQN, PPO2
 
 import numpy as np
 
@@ -9,13 +9,16 @@ class RLAgent:
     """
     Wraps policy to work with backend API calls
     """
-    def __init__(self, seed, model_path, isPlayer1=False):
+    def __init__(self, seed, model_path, algorithm="DQN", isPlayer1=False):
         """
         Assumes player 2 as this is normal
         """
         self.isPlayer1 = isPlayer1
 
-        self.policy = DQN.load(model_path)
+        if algorithm == "PPO":
+            self.policy = PPO2.load(model_path)
+        else:
+            self.policy = DQN.load(model_path)
         np.random.seed(seed)
 
     def get_action(self, state):

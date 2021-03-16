@@ -1,6 +1,6 @@
-from onitama.rl import DQNMaskedCNNPolicy, SimpleAgent
+from onitama.rl import DQNMaskedCNNPolicy, ACMaskedCNNPolicy, SimpleAgent, RandomAgent
 from onitama.rl.eval import EvalCB
-from stable_baselines.deepq import DQN
+from stable_baselines import DQN, PPO2
 from stable_baselines.common.evaluation import evaluate_policy
 from stable_baselines.common.callbacks import CheckpointCallback, EvalCallback, CallbackList
 import numpy as np
@@ -8,16 +8,26 @@ import argparse
 import onitama
 import gym
 
-def train_rl(seed):
-    env = gym.make("Onitama-v0", seed=seed, agent_type=SimpleAgent, verbose=False)
-    eval_env = gym.make("Onitama-v0", seed=seed, agent_type=SimpleAgent, verbose=False)
-    policy = DQN(DQNMaskedCNNPolicy,
-                 env,
-                 seed=seed,
-                 prioritized_replay=True
-                 )
+def train_rl(seed, algorithm):
+    agent_type = RandomAgent
+    env = gym.make("Onitama-v0", seed=seed, agent_type=agent_type, verbose=False)
+    eval_env = gym.make("Onitama-v0", seed=seed, agent_type=agent_type, verbose=False)
+    if algorithm == "PPO":
+        policy = PPO2(ACMaskedCNNPolicy,
+                      env,
+                      seed=seed,
+                      verbose=1,
+                      )
 
-    checkpoint_callback = CheckpointCallback(save_freq=1e4, save_path='./logs/',
+    else:
+        policy = DQN(DQNMaskedCNNPolicy,
+                     env,
+                     seed=seed,
+                     prioritized_replay=True,
+                     verbose=1,
+                     )
+
+    checkpoint_callback = CheckpointCallback(save_freq=5e3, save_path='./logs/',
                                              name_prefix='rl_model', verbose=2)
     eval_policy_cb = EvalCB()
     eval_callback = EvalCallback(eval_env, best_model_save_path='./logs/',
@@ -30,7 +40,8 @@ def train_rl(seed):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--seed', default=12314, type=int)
+    parser.add_argument('--seed', default=3141, type=int)
+    parser.add_argument('--algorithm', default="DQN", type=str)
     args = parser.parse_args()
 
-    train_rl(args.seed)
+    train_rl(args.seed, args.algorithm)
