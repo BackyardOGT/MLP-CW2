@@ -1,4 +1,4 @@
-from onitama.game import PvBot, State, get_move, Piece, PvP
+from onitama.game import PvBot, State, get_move, Piece, PvP, Winner
 from onitama.rl import RandomAgent, SimpleAgent
 import gym
 import numpy as np
@@ -163,8 +163,8 @@ class OnitamaEnv(gym.Env):
         move = actionToMove(ac, self.game, self.isPlayer1, self.mask_shape)
         self.game.step(move)
         self.game.stepBot()
-        info = {} if self.game.winner == 0 else {"winner": self.game.winner}
-        return self.get_obs(), self.get_reward(), self.game.winner > 0, info
+        info = {} if self.game.winner == Winner.noWin else {"winner": self.game.winner.value}
+        return self.get_obs(), self.get_reward(), self.game.winner.value > 0, info
 
     def reset(self):
         self.game.reset()
@@ -186,14 +186,16 @@ class OnitamaEnv(gym.Env):
         move_forwards = 0
         reward_win = 0
 
+        player = self.game.player1 if self.game.isPlayer1 else self.game.player2
+        opponent = self.game.player2 if self.game.isPlayer1 else self.game.player1
+
+        
         state = State(self.game.get())
 
-        # Set reward win to 1 if agent wins, else set reward to 0 for no winner, and -1 for opponent wins.
-        reward_win = 1 if ((state.winner == 1 and self.isPlayer1) or (state.winner == 2 and not self.isPlayer1)) \
-            else -int(state.winner > 0)
+        win_dict = {player.player:1,opponent.player:-1,"noWin":0,"draw":0}
+        reward_win = win_dict[self.game.winner.name]
 
-        player = self.game.player1 if self.isPlayer1 else self.game.player2
-        opponent = self.game.player2 if self.isPlayer1 else self.game.player1
+        player = self.game.player1 if self.game.isPlayer1 else self.game.player2
 
         # Get number of rows moved
         if player.last_move is not None:
@@ -249,8 +251,8 @@ class OnitamaSelfPlayEnv(gym.Env):
         moveSelfPlay = self.getMove(acSelfPlay)
         self.game.step(moveSelfPlay)
 
-        info = {} if self.game.winner == 0 else {"winner": self.game.winner}
-        return self.get_obs(), self.get_reward(), self.game.winner > 0, info
+        info = {} if self.game.winner is Winner.noWin else {"winner": self.game.winner.value}
+        return self.get_obs(), self.get_reward(), self.game.winner.value > 0, info
 
     def getMove(self, ac):
         ac = np.squeeze(ac)
@@ -280,14 +282,17 @@ class OnitamaSelfPlayEnv(gym.Env):
         move_forwards = 0
         reward_win = 0
 
-        state = State(self.game.get())
-
-        # Set reward win to 1 if agent wins, else set reward to 0 for no winner, and -1 for opponent wins.
-        reward_win = 1 if ((state.winner == 1 and self.game.isPlayer1) or (state.winner == 2 and not self.game.isPlayer1)) \
-            else -int(state.winner > 0)
-
         player = self.game.player1 if self.game.isPlayer1 else self.game.player2
         opponent = self.game.player2 if self.game.isPlayer1 else self.game.player1
+
+        
+        state = State(self.game.get())
+
+        win_dict = {player.player:1,opponent.player:-1,"noWin":0,"draw":0}
+        reward_win = win_dict[self.game.winner.name]
+
+        player = self.game.player1 if self.game.isPlayer1 else self.game.player2
+        
 
         # Get number of rows moved
         if player.last_move is not None:
