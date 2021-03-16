@@ -59,6 +59,7 @@ Actions:
 #### Notes
 
 * Added mask as input to policy currently NOT input but can easily add it, set n_obs to -1 in policy.py
+* Simple agent beats Random agent 100 / 100 so we should be aiming for that on RL
 
 #### Higher priority
 
