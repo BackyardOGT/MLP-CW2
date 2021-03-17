@@ -18,7 +18,6 @@ class EvalCB:
         self.eps_rew = 0
 
     def callback(self, locals, globals):
-        self.num_timesteps += 1
         info = locals["_info"] if not type(locals["_info"]) == list else locals["_info"][0]
         self.eps_rew += locals["reward"]
         if "is_success" in info:

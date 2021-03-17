@@ -43,11 +43,11 @@ def train_rl(algorithm, seed):
                                              name_prefix='rl_model', verbose=2)
     eval_policy_cb = EvalCB(logdir)
     eval_callback = EvalCallback(eval_env, best_model_save_path=logdir,
-                                 log_path='./logs/', eval_freq=500, n_eval_episodes=20,
+                                 log_path='./logs/', eval_freq=1e3, n_eval_episodes=20,
                                  deterministic=True, render=False,
                                  evaluate_policy_callback=eval_policy_cb)
     callback = CallbackList([checkpoint_callback, eval_callback])
-    policy.learn(int(1e6), callback=callback)
+    policy.learn(int(1e6), callback=callback, log_interval=10 if algorithm == "PPO" else 100)
 
 
 if __name__ == "__main__":
