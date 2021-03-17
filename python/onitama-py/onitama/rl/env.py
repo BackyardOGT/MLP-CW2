@@ -172,6 +172,7 @@ class OnitamaEnv(gym.Env):
             info["winner"] = self.game.winner.value
             # success if controlled winning player
             info["is_success"] = self.game.winner.value == (1 + int(not self.isPlayer1))
+
         return self.get_obs(), self.get_reward(), done, info
 
     def reset(self):
@@ -203,8 +204,10 @@ class OnitamaEnv(gym.Env):
         
         state = State(self.game.get())
 
-        win_dict = {player.player:1,opponent.player:-1,"noWin":0,"draw":0}
-        reward_win = win_dict[self.game.winner.name]
+        # we have a winner
+        if self.game.winner is not Winner.noWin:
+            # value = 1, 2 or 3, we want 1 if value == current player else 0
+            reward_win = self.game.winner.value == (1 + int(not self.isPlayer1))
 
         player = self.game.player1 if self.game.isPlayer1 else self.game.player2
 
@@ -218,8 +221,8 @@ class OnitamaEnv(gym.Env):
 
         # Discuss weights assigned to each reward with team
         reward_weights = {
-            "move_forwards": 0.01,
-            "take_pawn": 0.1,
+            "move_forwards": 0.0,
+            "take_pawn": 0.0,
             "win": 1.0,
         }
         reward_dict = {

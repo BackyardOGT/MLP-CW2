@@ -65,9 +65,8 @@ Actions:
 
 * improve reward
 * revert simple agent to simpler
-* o - why is mean 100 episode reward the same? - seeding seems ok
-* o - see ppo logs for things to add to env infos
-* o - plot mean rewards over time
+* try win reward only vs random agent
+    try a self play with eval vs random agent (need to update logging etc. to match train.py)
 * parameters
 * review behaviour
 
