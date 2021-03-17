@@ -147,8 +147,9 @@ def get_reward(game, isPlayer1):
     move_forwards = 0
     reward_win = 0
 
-    opponent = game.player2 if game.isPlayer1 else game.player1
-
+    opponent = game.player2 if isPlayer1 else game.player1
+    player = game.player1 if isPlayer1 else game.player2
+    
     # we have a winner
     if game.winner is not Winner.noWin:
         # 1 for p1, 2 for p2
@@ -160,7 +161,7 @@ def get_reward(game, isPlayer1):
         else:
             reward_win = -1
 
-    player = game.player1 if game.isPlayer1 else game.player2
+    
 
     # Get number of rows moved
     if player.last_move is not None:
