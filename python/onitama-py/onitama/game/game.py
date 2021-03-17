@@ -173,7 +173,7 @@ class PvP:
         if self.reached_goal(curP) or kingTaken:
             if self.verbose: print(
                 "{} won: ".format(curP.player) + ("reached end" if self.reached_goal(curP) else "king taken"))
-            self.winner = Winner.player1 if self.isPlayer1 else Winner.player2
+            self.winner = Winner.player2 if self.isPlayer1 else Winner.player1
             return self.get()
 
         self.isPlayer1 = not self.isPlayer1

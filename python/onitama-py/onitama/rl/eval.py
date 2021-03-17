@@ -27,9 +27,9 @@ def evaluate_rl(policy, env, n_eps=100):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    parser.add_argument('model_path', type=str)
     parser.add_argument('--seed', default=12314, type=int)
     parser.add_argument('--algorithm', default="DQN", type=str)
-    parser.add_argument('--model_path', default="logs/best_model.zip", type=str)
     args = parser.parse_args()
 
     env = gym.make("Onitama-v0", seed=args.seed, agent_type=RandomAgent, verbose=False)

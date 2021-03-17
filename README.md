@@ -54,6 +54,12 @@ Actions:
     Return a 1250 (2 x 5 x 5 x 25 flat) one hot action
 
 
+## Tensorboard
+
+```tensorboard --logdir logs/ppo-tb/```
+
+```tensorboard --logdir logs/dqn-tb/```
+
 ## TODOs
 
 #### Notes

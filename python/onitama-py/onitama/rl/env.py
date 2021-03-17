@@ -141,6 +141,52 @@ def get_game_maybe_flipped(game, isPlayer1):
     return game if isPlayer1 else flip_game_view(game)
 
 
+def get_reward(game, isPlayer1):
+    # can get game state by eg.
+    # game.player1
+    move_forwards = 0
+    reward_win = 0
+
+    opponent = game.player2 if game.isPlayer1 else game.player1
+
+    # we have a winner
+    if game.winner is not Winner.noWin:
+        # 1 for p1, 2 for p2
+        curPValue = (1 + int(not isPlayer1))
+        if game.winner is Winner.draw:
+            reward_win = 0
+        elif game.winner.value == curPValue:
+            reward_win = 1
+        else:
+            reward_win = -1
+
+    player = game.player1 if game.isPlayer1 else game.player2
+
+    # Get number of rows moved
+    if player.last_move is not None:
+        rows_moved = player.last_move.pos[0] - player.last_pos[0]
+        row_orientation = 1 if not isPlayer1 else -1
+        move_forwards = max(0, rows_moved * row_orientation)
+
+    pawns_taken = 1 if opponent.lost_pawn_last_move else -1 if player.lost_pawn_last_move else 0
+
+    # Discuss weights assigned to each reward with team
+    reward_weights = {
+        "move_forwards": 0.0,
+        "take_pawn": 0.0,
+        "win": 1.0,
+    }
+    reward_dict = {
+        "move_forwards": move_forwards,
+        "take_pawn": pawns_taken,
+        "win": reward_win
+    }
+    reward = 0
+    for k, r in reward_dict.items():
+        reward += r * reward_weights[k]
+    return reward
+
+
 class OnitamaEnv(gym.Env):
     """
     Defaults to player 1
@@ -173,17 +219,11 @@ class OnitamaEnv(gym.Env):
             # success if controlled winning player
             info["is_success"] = self.game.winner.value == (1 + int(not self.isPlayer1))
 
-        return self.get_obs(), self.get_reward(), done, info
+        return self.get_obs(), get_reward(self.game, self.isPlayer1), done, info
 
     def reset(self):
         self.game.reset()
-        # print()
-        # print(*[" ".join(map(str, a)) + "\n" for a in self.game.player1.cards[0]])
-        # print(*[" ".join(map(str, a)) + "\n" for a in self.game.spare_card])
         return self.get_obs()
-
-    def render(self, mode='human'):
-        pass
 
     def get_obs(self):
         """
@@ -191,49 +231,6 @@ class OnitamaEnv(gym.Env):
         :return:
         """
         return np.concatenate([_get_obs(self.game, self.isPlayer1), get_mask(self.game, self.isPlayer1)], -1)
-
-    def get_reward(self):
-        # can get game state by eg.
-        # self.game.player1
-        move_forwards = 0
-        reward_win = 0
-
-        player = self.game.player1 if self.game.isPlayer1 else self.game.player2
-        opponent = self.game.player2 if self.game.isPlayer1 else self.game.player1
-
-        
-        state = State(self.game.get())
-
-        # we have a winner
-        if self.game.winner is not Winner.noWin:
-            # value = 1, 2 or 3, we want 1 if value == current player else 0
-            reward_win = self.game.winner.value == (1 + int(not self.isPlayer1))
-
-        player = self.game.player1 if self.game.isPlayer1 else self.game.player2
-
-        # Get number of rows moved
-        if player.last_move is not None:
-            rows_moved = player.last_move.pos[0] - player.last_pos[0]
-            row_orientation = 1 if not self.isPlayer1 else -1
-            move_forwards = max(0, rows_moved * row_orientation)
-
-        pawns_taken = 1 if opponent.lost_pawn_last_move else -1 if player.lost_pawn_last_move else 0
-
-        # Discuss weights assigned to each reward with team
-        reward_weights = {
-            "move_forwards": 0.0,
-            "take_pawn": 0.0,
-            "win": 1.0,
-        }
-        reward_dict = {
-            "move_forwards": move_forwards,
-            "take_pawn": pawns_taken,
-            "win": reward_win
-        }
-        reward = 0
-        for k, r in reward_dict.items():
-            reward += r * reward_weights[k]
-        return reward
 
     def seed(self, seed):
         self._seed = seed
@@ -246,7 +243,7 @@ class OnitamaSelfPlayEnv(gym.Env):
     Assume p1 to be the main player for training
     """
 
-    def __init__(self, seed, verbose=True, deterministicSelfPlay=False, nStepsSelfPlay=int(1e3)):
+    def __init__(self, seed, verbose=True, deterministicSelfPlay=False):
         super(OnitamaSelfPlayEnv, self).__init__()
         self.game = PvP(seed, verbose=verbose)
         self.observation_space = gym.spaces.Box(np.zeros((5, 5, 59)), np.ones((5, 5, 59)))
@@ -256,6 +253,7 @@ class OnitamaSelfPlayEnv(gym.Env):
         # the model weights for self play
         self.selfPlayModel = None
         self.deterministicSelfPlay = deterministicSelfPlay
+        self.isPlayer1 = True
 
     def step(self, ac):
         # run the training model action
@@ -272,9 +270,9 @@ class OnitamaSelfPlayEnv(gym.Env):
         if self.game.winner is not Winner.noWin:
             done = True
             info["winner"] = self.game.winner.value
-            # success if player 1 won
-            info["is_success"] = self.game.winner.value == 1
-        return self.get_obs(), self.get_reward(), done, info
+            # success if controlled winning player
+            info["is_success"] = self.game.winner.value == (1 + int(not self.isPlayer1))
+        return self.get_obs(), get_reward(self.game, self.isPlayer1), done, info
 
     def getMove(self, ac):
         ac = np.squeeze(ac)
@@ -297,48 +295,6 @@ class OnitamaSelfPlayEnv(gym.Env):
         :return:
         """
         return np.concatenate([_get_obs(self.game, self.game.isPlayer1), get_mask(self.game, self.game.isPlayer1)], -1)
-
-    def get_reward(self):
-        # can get game state by eg.
-        # self.game.player1
-        move_forwards = 0
-        reward_win = 0
-
-        player = self.game.player1 if self.game.isPlayer1 else self.game.player2
-        opponent = self.game.player2 if self.game.isPlayer1 else self.game.player1
-
-        
-        state = State(self.game.get())
-
-        win_dict = {player.player:1,opponent.player:-1,"noWin":0,"draw":0}
-        reward_win = win_dict[self.game.winner.name]
-
-        player = self.game.player1 if self.game.isPlayer1 else self.game.player2
-        
-
-        # Get number of rows moved
-        if player.last_move is not None:
-            rows_moved = player.last_move.pos[0] - player.last_pos[0]
-            row_orientation = 1 if not self.game.isPlayer1 else -1
-            move_forwards = max(0, rows_moved * row_orientation)
-
-        pawns_taken = 1 if opponent.lost_pawn_last_move else -1 if player.lost_pawn_last_move else 0
-
-        # Discuss weights assigned to each reward with team
-        reward_weights = {
-            "move_forwards": 0.005,
-            "take_pawn": 0.05,
-            "win": 1.0,
-        }
-        reward_dict = {
-            "move_forwards": move_forwards,
-            "take_pawn": pawns_taken,
-            "win": reward_win
-        }
-        reward = 0
-        for k, r in reward_dict.items():
-            reward += r * reward_weights[k]
-        return reward
 
     def seed(self, seed):
         self._seed = seed
