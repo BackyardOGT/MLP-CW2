@@ -32,7 +32,7 @@ if __name__ == "__main__":
     parser.add_argument('--algorithm', default="DQN", type=str)
     args = parser.parse_args()
 
-    env = gym.make("Onitama-v0", seed=args.seed, agent_type=RandomAgent, verbose=False)
+    env = gym.make("Onitama-v0", seed=args.seed, agent_type=SimpleAgent, verbose=False)
     if args.algorithm == "PPO":
         policy = PPO2.load(args.model_path)
     else:

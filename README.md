@@ -71,17 +71,16 @@ Actions:
 
 * improve reward
 * revert simple agent to simpler
-* try win reward only vs random agent
-    try a self play with eval vs random agent (need to update logging etc. to match train.py)
 * parameters
 * review behaviour
+
+Get running on server 
 
 #### Lower
 
 * G - Fix the no moves corner case and test - note I removed test case from the get_init_cards and set it up
     in test_env.py. If it's a major difficulty then can revert that back but bit cleaner to keep tests together
 * T - check if any of reward need be flipped
-* ? - debug self play
 * ? - try (vs. simple agent) training with held out cards and how it evals with them
 * ? - Implement for env not using player start bsaed on cards 
     (set in game playerStart=None instead of playerStart=1 rather to use starting player based on cards)

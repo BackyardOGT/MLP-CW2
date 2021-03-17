@@ -12,7 +12,7 @@ def getPolicy(algorithm, seed):
     env = gym.make("OnitamaSelfPlay-v0", seed=seed, verbose=False)
 
     if algorithm == "PPO":
-        basedir = "./logs/ppo-tb/"
+        basedir = "./logs/ppo-self-tb/"
         env, logdir = setup_monitor(basedir, env)
         policy = PPO2(ACMaskedCNNPolicy,
                       env,
@@ -22,7 +22,7 @@ def getPolicy(algorithm, seed):
                       )
 
     else:
-        basedir = "./logs/dqn-tb/"
+        basedir = "./logs/dqn-self-tb/"
         env, logdir = setup_monitor(basedir, env)
         policy = DQN(DQNMaskedCNNPolicy,
                      env,
@@ -43,7 +43,7 @@ def train_rl(algorithm, seed):
                                              name_prefix='rl_model', verbose=2)
     eval_policy_cb = EvalCB(logdir)
     eval_callback = EvalCallback(eval_env, best_model_save_path=logdir,
-                                 log_path='./logs/', eval_freq=1e3, n_eval_episodes=20,
+                                 log_path=logdir, eval_freq=1e3, n_eval_episodes=20,
                                  deterministic=True, render=False,
                                  evaluate_policy_callback=eval_policy_cb)
     callback = CallbackList([checkpoint_callback, eval_callback])

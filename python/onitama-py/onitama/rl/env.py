@@ -141,7 +141,7 @@ def get_game_maybe_flipped(game, isPlayer1):
     return game if isPlayer1 else flip_game_view(game)
 
 
-def get_reward(game, isPlayer1):
+def get_reward(game, isPlayer1, sparse=False):
     # can get game state by eg.
     # game.player1
     move_forwards = 0
@@ -161,7 +161,7 @@ def get_reward(game, isPlayer1):
         else:
             reward_win = -1
 
-    
+    if sparse: return reward_win
 
     # Get number of rows moved
     if player.last_move is not None:
@@ -173,8 +173,8 @@ def get_reward(game, isPlayer1):
 
     # Discuss weights assigned to each reward with team
     reward_weights = {
-        "move_forwards": 0.0,
-        "take_pawn": 0.0,
+        "move_forwards": 0.01,
+        "take_pawn": 0.1,
         "win": 1.0,
     }
     reward_dict = {
@@ -273,7 +273,7 @@ class OnitamaSelfPlayEnv(gym.Env):
             info["winner"] = self.game.winner.value
             # success if controlled winning player
             info["is_success"] = self.game.winner.value == (1 + int(not self.isPlayer1))
-        return self.get_obs(), get_reward(self.game, self.isPlayer1), done, info
+        return self.get_obs(), get_reward(self.game, self.isPlayer1, sparse=True), done, info
 
     def getMove(self, ac):
         ac = np.squeeze(ac)
