@@ -163,11 +163,22 @@ class OnitamaEnv(gym.Env):
         move = actionToMove(ac, self.game, self.isPlayer1, self.mask_shape)
         self.game.step(move)
         self.game.stepBot()
-        info = {} if self.game.winner == Winner.noWin else {"winner": self.game.winner.value}
-        return self.get_obs(), self.get_reward(), self.game.winner.value > 0, info
+
+        info = {}
+        done = False
+        # win, lose or draw
+        if self.game.winner is not Winner.noWin:
+            done = True
+            info["winner"] = self.game.winner.value
+            # success if controlled winning player
+            info["is_success"] = self.game.winner.value == (1 + int(not self.isPlayer1))
+        return self.get_obs(), self.get_reward(), done, info
 
     def reset(self):
         self.game.reset()
+        # print()
+        # print(*[" ".join(map(str, a)) + "\n" for a in self.game.player1.cards[0]])
+        # print(*[" ".join(map(str, a)) + "\n" for a in self.game.spare_card])
         return self.get_obs()
 
     def render(self, mode='human'):
@@ -229,6 +240,7 @@ class OnitamaEnv(gym.Env):
 class OnitamaSelfPlayEnv(gym.Env):
     """
     An env where step and reward is called for each player 1 and 2 being RL
+    Assume p1 to be the main player for training
     """
 
     def __init__(self, seed, verbose=True, deterministicSelfPlay=False, nStepsSelfPlay=int(1e3)):
@@ -251,8 +263,15 @@ class OnitamaSelfPlayEnv(gym.Env):
         moveSelfPlay = self.getMove(acSelfPlay)
         self.game.step(moveSelfPlay)
 
-        info = {} if self.game.winner is Winner.noWin else {"winner": self.game.winner.value}
-        return self.get_obs(), self.get_reward(), self.game.winner.value > 0, info
+        info = {}
+        done = False
+        # win, lose or draw
+        if self.game.winner is not Winner.noWin:
+            done = True
+            info["winner"] = self.game.winner.value
+            # success if player 1 won
+            info["is_success"] = self.game.winner.value == 1
+        return self.get_obs(), self.get_reward(), done, info
 
     def getMove(self, ac):
         ac = np.squeeze(ac)

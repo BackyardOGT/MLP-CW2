@@ -63,13 +63,16 @@ Actions:
 
 #### Higher priority
 
-* g - rewards
-* o,t - simple agent improvements - test by playing current simple agent
-	ordering where currently picks random from good set of moves
-* O - am thinking it needs to learn based on the latest opponent  
-        try DQN with smaller buffer size? 
-        try PPO?
-        Try hparams, esp. buffer and batch size, LR, try param noise?
+* improve reward
+* revert simple agent to simpler
+* o - why is mean 100 episode reward the same? - seeding seems ok
+* o - see ppo logs for things to add to env infos
+* o - plot mean rewards over time
+* parameters
+* review behaviour
+
+#### Lower
+
 * G - Fix the no moves corner case and test - note I removed test case from the get_init_cards and set it up
     in test_env.py. If it's a major difficulty then can revert that back but bit cleaner to keep tests together
 * T - check if any of reward need be flipped
@@ -77,15 +80,7 @@ Actions:
 * ? - try (vs. simple agent) training with held out cards and how it evals with them
 * ? - Implement for env not using player start bsaed on cards 
     (set in game playerStart=None instead of playerStart=1 rather to use starting player based on cards)
-    
-* T - Get running on MLP server
-* ? - Check ac and obs spaces and bounds
-* ? - get github agent into our system (same as random/simple agent) - mostly as eval but worth trying to train with to
-* ? - make a cmd line print out of board state would be useful debugging
 
-* Work on reward and heuristic agent
-
-#### Lower
 
 * Label bots are playing in UI
 * O - Add square highlighting before move to show bot vs bot

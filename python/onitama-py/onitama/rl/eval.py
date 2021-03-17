@@ -1,30 +1,11 @@
 from onitama.rl import DQNMaskedCNNPolicy, SimpleAgent, RandomAgent
+from onitama.rl.callbacks import EvalCB
 from stable_baselines import DQN, PPO2
 from stable_baselines.common.evaluation import evaluate_policy
 import numpy as np
 import argparse
 import onitama
 import gym
-
-class EvalCB:
-    def __init__(self):
-        self.reset()
-
-    def reset(self):
-        self.n_wins = 0
-        self.n_eps = 0
-
-    def callback(self, locals, globals):
-        info = locals["_info"] if not type(locals["_info"]) == list else locals["_info"][0]
-        if "winner" in info:
-            if info["winner"] == 1:
-                self.n_wins += 1
-        if locals["done"]:
-            self.n_eps += 1
-
-    def print(self):
-        print("Won {} / {}".format(self.n_wins, self.n_eps))
-        self.reset()
 
 
 def evaluate_rl(policy, env, n_eps=100):
