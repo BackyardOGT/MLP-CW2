@@ -29,13 +29,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('model_path', type=str)
     parser.add_argument('--seed', default=12314, type=int)
-    parser.add_argument('--algorithm', default="PPO", type=str)
+    parser.add_argument('--DQN', action="store_true", help="Use DQN")
     args = parser.parse_args()
 
     env = gym.make("OnitamaSelfPlay-v0", seed=args.seed, verbose=False)
-    if args.algorithm == "PPO":
-        policy = PPO2.load(args.model_path)
-    else:
+    if args.DQN:
         policy = DQN.load(args.model_path)
+    else:
+        policy = PPO2.load(args.model_path)
     env.setSelfPlayModel(policy)
     evaluate_rl(policy, env)

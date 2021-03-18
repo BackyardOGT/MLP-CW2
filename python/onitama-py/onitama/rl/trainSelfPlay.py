@@ -8,20 +8,11 @@ import argparse
 import onitama
 import gym
 
-def getPolicy(algorithm, seed):
+
+def getPolicy(isDQN, seed):
     env = gym.make("OnitamaSelfPlay-v0", seed=seed, verbose=False)
 
-    if algorithm == "PPO":
-        basedir = "./logs/ppo-self-tb/"
-        env, logdir = setup_monitor(basedir, env)
-        policy = PPO2(ACMaskedCNNPolicy,
-                      env,
-                      seed=seed,
-                      verbose=1,
-                      tensorboard_log=logdir
-                      )
-
-    else:
+    if isDQN:
         basedir = "./logs/dqn-self-tb/"
         env, logdir = setup_monitor(basedir, env)
         policy = DQN(DQNMaskedCNNPolicy,
@@ -31,13 +22,25 @@ def getPolicy(algorithm, seed):
                      verbose=1,
                      tensorboard_log=logdir
                      )
+    else:
+        basedir = "./logs/ppo-self-tb/"
+        env, logdir = setup_monitor(basedir, env)
+        policy = PPO2(ACMaskedCNNPolicy,
+                      env,
+                      seed=seed,
+                      verbose=1,
+                      tensorboard_log=logdir
+                      )
+
     env.setSelfPlayModel(policy)
     return policy, logdir
 
 
-def train_rl(algorithm, seed):
-    policy, logdir = getPolicy(algorithm, seed)
-    eval_env = gym.make("Onitama-v0", seed=seed, agent_type=SimpleAgent, verbose=False)
+def train_rl(isDQN, seed, isRandom):
+    policy, logdir = getPolicy(isDQN, seed)
+
+    agent_type = RandomAgent if isRandom else SimpleAgent
+    eval_env = gym.make("Onitama-v0", seed=seed, agent_type=agent_type, verbose=False)
 
     checkpoint_callback = CheckpointCallback(save_freq=5e3, save_path=logdir,
                                              name_prefix='rl_model', verbose=2)
@@ -52,8 +55,8 @@ def train_rl(algorithm, seed):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--seed', default=12314, type=int)
-    parser.add_argument('--algorithm', default="PPO", type=str)
+    parser.add_argument('--DQN', action="store_true", help="Use DQN")
+    parser.add_argument('--random', action="store_true", help="Use random agent")
     args = parser.parse_args()
 
-    train_rl(args.algorithm, args.seed)
+    train_rl(args.DQN, args.seed, args.random)

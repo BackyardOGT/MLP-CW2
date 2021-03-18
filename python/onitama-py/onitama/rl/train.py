@@ -11,21 +11,12 @@ import argparse
 import onitama
 import gym
 
-def train_rl(seed, algorithm):
-    agent_type = SimpleAgent
+
+def train_rl(seed, isDQN, isRandom):
+    agent_type = RandomAgent if isRandom else SimpleAgent
     env = gym.make("Onitama-v0", seed=seed, agent_type=agent_type, verbose=False)
     eval_env = gym.make("Onitama-v0", seed=seed, agent_type=agent_type, verbose=False)
-    if algorithm == "PPO":
-        basedir = "./logs/ppo-tb/"
-        env, logdir = setup_monitor(basedir, env)
-        policy = PPO2(ACMaskedCNNPolicy,
-                      env,
-                      seed=seed,
-                      verbose=1,
-                      tensorboard_log=logdir
-                      )
-
-    else:
+    if isDQN:
         basedir = "./logs/dqn-tb/"
         env, logdir = setup_monitor(basedir, env)
         policy = DQN(DQNMaskedCNNPolicy,
@@ -36,12 +27,22 @@ def train_rl(seed, algorithm):
                      tensorboard_log=logdir
                      )
 
+    else:
+        basedir = "./logs/ppo-tb/"
+        env, logdir = setup_monitor(basedir, env)
+        policy = PPO2(ACMaskedCNNPolicy,
+                      env,
+                      seed=seed,
+                      verbose=1,
+                      tensorboard_log=logdir
+                      )
+
     checkpoint_callback = CheckpointCallback(save_freq=5e3, save_path=logdir,
                                              name_prefix='rl_model', verbose=2)
     eval_policy_cb = EvalCB(logdir)
     eval_callback = EvalCallback(eval_env, best_model_save_path=logdir,
-                             log_path=logdir, eval_freq=500, n_eval_episodes=20,
-                             deterministic=True, render=False,
+                                 log_path=logdir, eval_freq=500, n_eval_episodes=20,
+                                 deterministic=True, render=False,
                                  evaluate_policy_callback=eval_policy_cb)
     callback = CallbackList([checkpoint_callback, eval_callback])
     policy.learn(int(1e6), callback=callback, log_interval=10 if algorithm == "PPO" else 100)
@@ -58,7 +59,8 @@ def setup_monitor(basedir, env):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--seed', default=3141, type=int)
-    parser.add_argument('--algorithm', default="PPO", type=str)
+    parser.add_argument('--DQN', action="store_true", help="Use DQN")
+    parser.add_argument('--random', action="store_true", help="Use random agent")
     args = parser.parse_args()
 
-    train_rl(args.seed, args.algorithm)
+    train_rl(args.seed, args.DQN, args.random)

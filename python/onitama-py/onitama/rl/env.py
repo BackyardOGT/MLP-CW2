@@ -208,6 +208,7 @@ class OnitamaEnv(gym.Env):
         # action is index into 5 x 5 x 50
         ac = np.unravel_index(ac, self.mask_shape)
         move = actionToMove(ac, self.game, self.isPlayer1, self.mask_shape)
+
         self.game.step(move)
         self.game.stepBot()
 
@@ -224,6 +225,9 @@ class OnitamaEnv(gym.Env):
 
     def reset(self):
         self.game.reset()
+        # if it's not the rl's turn then let the bot take it's turn
+        if self.game.isPlayer1 != self.isPlayer1:
+            self.game.stepBot()
         return self.get_obs()
 
     def get_obs(self):
@@ -285,6 +289,12 @@ class OnitamaSelfPlayEnv(gym.Env):
     def reset(self):
         assert self.selfPlayModel, "No model set"
         self.game.reset()
+        # if it's not the rl's turn then let the self play opponent take it's turn
+        if self.game.isPlayer1 != self.isPlayer1:
+            # step the self play action
+            acSelfPlay, _ = self.selfPlayModel.predict([self.get_obs()], deterministic=self.deterministicSelfPlay)
+            moveSelfPlay = self.getMove(acSelfPlay)
+            self.game.step(moveSelfPlay)
         return self.get_obs()
 
     def render(self, mode='human'):

@@ -71,13 +71,18 @@ Actions:
 
 * improve reward
 * revert simple agent to simpler
-* run with dense reward vs simple agent
+* run with dense reward vs random agent PPO also try with PPO self play again after tweak here
 
 * parameters
 * review behaviour
 
+
 PPO self play later on gets quite high win rate learns to beat itself despite updates - need to train the p2 as well?
-Best model 3/100 vs simple agent but 86/100 against itself!
+    Best model 3/100 vs simple agent but 86/100 against itself
+    Seems to be winning by the end square which is why it can beat itself so much bc it's going first it can often
+    win by getting there first
+x Setup Tim's starting player thing to work
+* Else try set RL in self play to be p2
 DQN later on stays closer to 0 line or even to end up losing more to itself but doesnt seem to learn much vs simple agent
 
 #### Lower
@@ -86,8 +91,6 @@ DQN later on stays closer to 0 line or even to end up losing more to itself but 
     in test_env.py. If it's a major difficulty then can revert that back but bit cleaner to keep tests together
 * T - check if any of reward need be flipped
 * ? - try (vs. simple agent) training with held out cards and how it evals with them
-* ? - Implement for env not using player start bsaed on cards 
-    (set in game playerStart=None instead of playerStart=1 rather to use starting player based on cards)
 
 
 * Label bots are playing in UI

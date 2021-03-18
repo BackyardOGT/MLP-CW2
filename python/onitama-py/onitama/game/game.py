@@ -113,7 +113,7 @@ class Player:
 
 
 class PvP:
-    def __init__(self, seed, verbose=True, startingPlayer=1):
+    def __init__(self, seed, verbose=True, startingPlayer=None):
         self.verbose = verbose
         self.seed = seed
         seed_cards(seed)
