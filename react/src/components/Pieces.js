@@ -37,10 +37,12 @@ function Piece({
             style={{
                 gridRow: row + 1,
                 gridColumn: col + 1,
-                height: "100%",
-                width: "100%",
+                height: "80%",
+                width: "80%",
                 overflow: "hidden",
-                position: "relative"
+                position: "relative",
+                alignSelf: "end",
+                justifySelf: player === 1 ? "start" : "end"
             }}
         >
             {name === "king" ? <KingSvg player={player}/> : <PawnSvg player={player}/>}

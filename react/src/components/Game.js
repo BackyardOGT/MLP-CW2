@@ -104,7 +104,7 @@ export default function Game({state, sendMove, resetGame, toggleGameMode, stepBo
                     playerData={playerData}
                 />
                 <div className="cardDiv">
-                    <h2 style={{background: "#eeeeee", color: "black"}}>Player 2</h2>
+                    <h2 style={{color: "var(--darkPiece)"}}>Player 2</h2>
                     <Card
                         data={state.player2.cards[0]}
                         player={2}
@@ -132,7 +132,10 @@ export default function Game({state, sendMove, resetGame, toggleGameMode, stepBo
                     justifyContent: "space-around",
                 }}
             >
-                <Card data={state.spare_card} player={1} currentPlayer={1} id="next"/>
+                {/*Display spare card or winner if game over*/}
+                {state.winner === 3 ? <h2 style={{color: "var(--light)"}}>Draw</h2> :
+                    state.winner === 0 ? <Card data={state.spare_card} player={1} currentPlayer={1} id="next"/>
+                        : <h2 style={{color: "var(--light)"}}>Winner Player {state.winner}</h2>}
                 <div
                     style={{
                         margin: 10,
@@ -141,15 +144,24 @@ export default function Game({state, sendMove, resetGame, toggleGameMode, stepBo
                         justifyContent: "center",
                     }}
                 >
-                    <button style={{background: "var(--light)", color: "var(--dark)", fontSize: "1.5rem",
-                        border: 0, borderRadius: 10, marginTop: 3}}
-                            onClick={resetGame}>Reset</button>
-                    <button style={{background: "var(--light)", color: "var(--dark)", fontSize: "1.5rem",
-                        border: 0, borderRadius: 10, marginTop: 3}}
-                            onClick={toggleGameMode}>Toggle game mode</button>
-                    <button style={{background: "var(--light)", color: "var(--dark)", fontSize: "1.5rem",
-                        border: 0, borderRadius: 10, marginTop: 3}}
-                            onClick={stepBot}>Step bot</button>
+                    <button style={{
+                        background: "var(--light)", color: "var(--darkPiece)", fontSize: "1.5rem",
+                        border: 0, borderRadius: 10, marginTop: 3
+                    }}
+                            onClick={resetGame}>Reset
+                    </button>
+                    <button style={{
+                        background: "var(--light)", color: "var(--darkPiece)", fontSize: "1.5rem",
+                        border: 0, borderRadius: 10, marginTop: 3
+                    }}
+                            onClick={toggleGameMode}>Toggle game mode
+                    </button>
+                    <button style={{
+                        background: "var(--light)", color: "var(--darkPiece)", fontSize: "1.5rem",
+                        border: 0, borderRadius: 10, marginTop: 3
+                    }}
+                            onClick={stepBot}>Step bot
+                    </button>
                     <p>Turn: Player {currentPlayer}</p>
                     <p>Mode: {state.mode}</p>
                 </div>

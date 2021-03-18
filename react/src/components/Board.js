@@ -62,8 +62,15 @@ export default function Board({
     );
   };
 
-  placePlayer(state.player1, 1);
-  placePlayer(state.player2, 2);
+  // place current player last so we see them on top
+  if (currentPlayer === 1) {
+    placePlayer(state.player2, 2);
+    placePlayer(state.player1, 1);
+  }
+  else {
+    placePlayer(state.player2, 2);
+    placePlayer(state.player1, 1);
+  }
 
   return (
     <div>

@@ -9,7 +9,7 @@ class RLAgent:
     """
     Wraps policy to work with backend API calls
     """
-    def __init__(self, seed, model_path, algorithm="DQN", isPlayer1=False):
+    def __init__(self, seed, model_path, algorithm="PPO", isPlayer1=False):
         """
         Assumes player 2 as this is normal
         """

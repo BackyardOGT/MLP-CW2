@@ -71,10 +71,14 @@ Actions:
 
 * improve reward
 * revert simple agent to simpler
+* run with dense reward vs simple agent
+
 * parameters
 * review behaviour
 
-Get running on server 
+PPO self play later on gets quite high win rate learns to beat itself despite updates - need to train the p2 as well?
+Best model 3/100 vs simple agent but 86/100 against itself!
+DQN later on stays closer to 0 line or even to end up losing more to itself but doesnt seem to learn much vs simple agent
 
 #### Lower
 

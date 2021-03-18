@@ -49,13 +49,11 @@ function App() {
     };
 
     const stepBot = () => {
+        if (boardState.winner !== 0) {return}
         fetch("http://localhost:5000/stepBot")
             .then((res) => res.json())
             .then((data) => {
                 setBoardState(data);
-                if (data.winner !== 0) {
-                    alert("Winner is player " + data.winner);
-                }
             });
     };
 

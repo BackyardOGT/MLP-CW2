@@ -141,7 +141,7 @@ class PvP:
                 **self.player2.to_dict(),
                 "player": 1 if self.isPlayer1 else 2,
                 "spare_card": self.spare_card,
-                "winner": self.winner,
+                "winner": self.winner.value,
                 "mode": self.mode}
 
     def stepApi(self, moveJson):

@@ -1,14 +1,9 @@
 :root {
-    /* 200 */
     --light: #E7E5E4;
-    /* 400 */
     --lightText: #A8A29E;
-    /* 500 */
     --lightPiece: #78716C;
-    /* 700 */
-    --darkPiece: #44403C;
-    /* 800 */
-    --dark: #292524;
+    --darkPiece: #1C1917;
+    --bg: #57534E;
     --validMove: #65A30D;
     --cardCenter: #0284C7;
     --cardValid: #65A30D;

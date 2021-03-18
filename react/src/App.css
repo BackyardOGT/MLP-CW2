@@ -1,7 +1,10 @@
 @import "./components/Game.css";
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@500&display=swap');
+
 .App {
   text-align: center;
+  font-weight: 500;
 }
 
 .App-logo {
@@ -16,7 +19,7 @@
 }
 
 .App-header {
-  background-color: var(--dark);
+  background-color: var(--bg);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
