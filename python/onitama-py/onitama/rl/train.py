@@ -58,7 +58,7 @@ def setup_monitor(basedir, env):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--seed', default=3141, type=int)
+    parser.add_argument('--seed', default=12314, type=int)
     parser.add_argument('--DQN', action="store_true", help="Use DQN")
     parser.add_argument('--random', action="store_true", help="Use random agent")
     args = parser.parse_args()
