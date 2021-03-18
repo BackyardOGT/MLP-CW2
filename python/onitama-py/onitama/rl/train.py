@@ -45,7 +45,8 @@ def train_rl(seed, isDQN, isRandom):
                                  deterministic=True, render=False,
                                  evaluate_policy_callback=eval_policy_cb)
     callback = CallbackList([checkpoint_callback, eval_callback])
-    policy.learn(int(1e6), callback=callback, log_interval=10 if algorithm == "PPO" else 100)
+    policy.learn(int(1e6), callback=callback, log_interval=100 if isDQN else 10)
+
 
 
 def setup_monitor(basedir, env):

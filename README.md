@@ -73,8 +73,9 @@ Actions:
 * revert simple agent to simpler
 * run with dense reward vs random agent PPO also try with PPO self play again after tweak here
 
-* parameters
-* review behaviour
+* how to improve ppo self play?
+    * parameters
+    * review behaviour
 
 
 PPO self play later on gets quite high win rate learns to beat itself despite updates - need to train the p2 as well?
@@ -82,6 +83,7 @@ PPO self play later on gets quite high win rate learns to beat itself despite up
     Seems to be winning by the end square which is why it can beat itself so much bc it's going first it can often
     win by getting there first
 x Setup Tim's starting player thing to work
+    Got to 12/100 against simple agent now
 * Else try set RL in self play to be p2
 DQN later on stays closer to 0 line or even to end up losing more to itself but doesnt seem to learn much vs simple agent
 
