@@ -1,4 +1,5 @@
 import numpy as np
+import random
 
 
 class RandomAgent:
@@ -34,10 +35,12 @@ class SimpleAgent:
     5) Attempts to move a random piece
     '''
 
-    def __init__(self, seed, isPlayer1=False, isVerbose=False):
+    def __init__(self, seed, isPlayer1=False, isVerbose=False, threshold = 0.):
         self.isPlayer1 = isPlayer1
         self.isVerbose = isVerbose
+        self.threshold = threshold
         print(seed, type(seed))
+        random.seed(seed)
         np.random.seed(seed)
 
     def get_action(self, state):
@@ -68,6 +71,11 @@ class SimpleAgent:
             for move in opp_moves:
                 print(move)
 
+        #For threshold fraction of time, choose random move
+        randomChoice = random.uniform(0,1)
+        if randomChoice <= self.threshold:
+            return np.random.choice(all_moves)
+            
         # Winning moves
         enemy_shrine_pos = [0, 2] if self.isPlayer1 else [4, 2]
         winning_moves = [move for move in all_moves if move.isKing and move.pos == enemy_shrine_pos
