@@ -17,10 +17,11 @@ def train_rl(seed, isDQN, isRandom, decrease_threshold):
     agent_type = RandomAgent if isRandom else SimpleAgent
     env = gym.make("Onitama-v0", seed=seed, agent_type=agent_type, verbose=False)
     eval_env = gym.make("Onitama-v0", seed=seed, agent_type=agent_type, verbose=False)
-    
+
+
     #Only decrease threshold if playing SimpleAgent
     assert not isRandom or not decrease_threshold
-    
+
     if not isRandom and decrease_threshold:
         env.game.agent.threshold = 1
         eval_env.game.agent.threshold=1
@@ -51,7 +52,7 @@ def train_rl(seed, isDQN, isRandom, decrease_threshold):
     eval_callback = EvalCallback(eval_env, best_model_save_path=logdir,
                                  log_path=logdir, eval_freq=500, n_eval_episodes=20,
                                  deterministic=True, render=False,
-                                 evaluate_policy_callback=eval_policy_cb, env=env, 
+                                 evaluate_policy_callback=eval_policy_cb, env=env,
                                  decrease_threshold=decrease_threshold)
     callback = CallbackList([checkpoint_callback, eval_callback])
     policy.learn(int(1e6), callback=callback, log_interval=100 if isDQN else 10)
@@ -67,7 +68,7 @@ def setup_monitor(basedir, env):
 
 
 if __name__ == "__main__":
-    
+
     parser = argparse.ArgumentParser()
     parser.add_argument('--seed', default=12314, type=int)
     parser.add_argument('--DQN', default=True, action="store_true", help="Use DQN")
