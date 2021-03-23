@@ -1,4 +1,5 @@
 import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 from datetime import datetime
 from onitama.rl import DQNMaskedCNNPolicy, ACMaskedCNNPolicy, SimpleAgent, RandomAgent
 from onitama.rl.callbacks import EvalCB
@@ -12,10 +13,13 @@ import onitama
 import gym
 
 
-def train_rl(seed, isDQN, isRandom):
+def train_rl(seed, isDQN, isRandom, decrease_threshold):
     agent_type = RandomAgent if isRandom else SimpleAgent
     env = gym.make("Onitama-v0", seed=seed, agent_type=agent_type, verbose=False)
     eval_env = gym.make("Onitama-v0", seed=seed, agent_type=agent_type, verbose=False)
+    if not isRandom and decrease_threshold:
+        env.game.agent.threshold = 1
+        eval_env.game.agent.threshold=1
     if isDQN:
         basedir = "./logs/dqn-tb/"
         env, logdir = setup_monitor(basedir, env)
@@ -43,7 +47,8 @@ def train_rl(seed, isDQN, isRandom):
     eval_callback = EvalCallback(eval_env, best_model_save_path=logdir,
                                  log_path=logdir, eval_freq=500, n_eval_episodes=20,
                                  deterministic=True, render=False,
-                                 evaluate_policy_callback=eval_policy_cb)
+                                 evaluate_policy_callback=eval_policy_cb, env=env, 
+                                 decrease_threshold=decrease_threshold)
     callback = CallbackList([checkpoint_callback, eval_callback])
     policy.learn(int(1e6), callback=callback, log_interval=100 if isDQN else 10)
 
@@ -63,6 +68,7 @@ if __name__ == "__main__":
     parser.add_argument('--seed', default=12314, type=int)
     parser.add_argument('--DQN', action="store_true", help="Use DQN")
     parser.add_argument('--random', action="store_true", help="Use random agent")
+    parser.add_argument('--decrease_threshold',action="store_true",help="Decrease number of Simple Agent random moves as RL agent improves")
     args = parser.parse_args()
 
-    train_rl(args.seed, args.DQN, args.random)
+    train_rl(args.seed, args.DQN, args.random, args.decrease_threshold)

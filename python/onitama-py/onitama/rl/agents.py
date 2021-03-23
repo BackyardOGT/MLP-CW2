@@ -75,7 +75,7 @@ class SimpleAgent:
         randomChoice = random.uniform(0,1)
         if randomChoice <= self.threshold:
             return np.random.choice(all_moves)
-            
+        
         # Winning moves
         enemy_shrine_pos = [0, 2] if self.isPlayer1 else [4, 2]
         winning_moves = [move for move in all_moves if move.isKing and move.pos == enemy_shrine_pos

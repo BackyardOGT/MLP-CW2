@@ -34,9 +34,11 @@ class EvalCB:
 
     def print(self):
         print("Won {} / {}".format(self.n_wins, self.n_eps))
+        winRate = self.n_wins/self.n_eps
         if self.writer:
             summary = tf.Summary()
             summary.value.add(tag="eval win rate", simple_value=self.n_wins / self.n_eps)
             self.writer.add_summary(summary, self.num_timesteps)
             self.writer.flush()
         self.reset()
+        return winRate
