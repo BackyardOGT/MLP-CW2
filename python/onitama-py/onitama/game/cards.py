@@ -93,6 +93,12 @@ only_sideways = [[0,0,0,0,0],
                  [0,0,0,0,0],
                  [0,0,0,0,0]]
 
+simple_card = [[0,0,0,0,0],
+               [0,1,1,1,0],
+               [0,1,0,1,0],
+               [0,1,1,1,0],
+               [0,0,0,0,0]]
+
 all_cards = [tiger, dragon, frog, rabbit,
             crab, elephant, goose, rooster,
             monkey, mantis, horse, ox,
@@ -106,10 +112,18 @@ def seed_cards(seed):
     random.seed(12312)
 
 
-def get_init_cards(do_shuffle=True):
+def get_init_cards(do_shuffle=True, simple_cards=False, custom_cards=None):
+    if simple_cards:
+        cards = [[simple_card, simple_card],
+                 [simple_card, simple_card],
+                 [simple_card]]
+    elif custom_cards is not None:
+        cards = custom_cards
+    else:
+        cards = all_cards
     if do_shuffle:
-        random.shuffle(all_cards)
-    return ([all_cards[0], all_cards[1]],
-            [all_cards[2], all_cards[3]],
-            [all_cards[4]])
+        random.shuffle(cards)
+    return ([cards[0], cards[1]],
+            [cards[2], cards[3]],
+            [cards[4]])
 

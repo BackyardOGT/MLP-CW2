@@ -144,13 +144,12 @@ def get_game_maybe_flipped(game, isPlayer1):
 def get_reward(game, isPlayer1, sparse=False):
     # can get game state by eg.
     # game.player1
-    move_forwards = 0
-    reward_win = 0
 
-    opponent = game.player2 if isPlayer1 else game.player1
     player = game.player1 if isPlayer1 else game.player2
-    
-    # we have a winner
+    opponent = game.player2 if isPlayer1 else game.player1
+
+    # We have a winner
+    reward_win = 0
     if game.winner is not Winner.noWin:
         # 1 for p1, 2 for p2
         curPValue = (1 + int(not isPlayer1))
@@ -168,20 +167,77 @@ def get_reward(game, isPlayer1, sparse=False):
         rows_moved = player.last_move.pos[0] - player.last_pos[0]
         row_orientation = 1 if not isPlayer1 else -1
         move_forwards = max(0, rows_moved * row_orientation)
+        if not player.last_move.isKing:
+            move_pawn_forwards = move_forwards
 
-    pawns_taken = 1 if opponent.lost_pawn_last_move else -1 if player.lost_pawn_last_move else 0
+    next_moves = game.get_valid_moves(player, game.isPlayer1, show_overlapping_moves=True)
+    opp_moves = game.get_valid_moves(opponent, not game.isPlayer1, show_overlapping_moves=True)
+
+    # Move went to an attackable square that is not defended
+    attackable_squares = [move.pos for move in opp_moves]
+    unsafe_move = 0
+    if player.last_move.pos in attackable_squares and player.last_move.pos not in [move.pos for move in next_moves]:
+        unsafe_move = -1
+
+    # Move went to a defendable square
+    defendable_squares = [move.pos for move in next_moves]
+    defended_move = 0
+    if player.last_move.pos in defendable_squares:
+        defended_move = 1
+
+    # Move threatens a king capture on the next move
+    opponent_king_attacked = 0
+    if opponent.king.pos in [move.pos for move in next_moves]:
+        opponent_king_attacked = 1
+
+    # Threatened pawn capture
+    threatened_pawn_captures = 0
+    for pawn in opponent.pawns:
+        if pawn.pos in [move.pos for move in next_moves]:
+            threatened_pawn_captures = 1
+
+    # There is a threatened safe pawn captures
+    safe_threatened_pawn_captures = 0
+    for pawn in opponent.pawns:
+        if pawn.pos in [move.pos for move in next_moves] and pawn.pos not in [move.pos for move in opp_moves]:
+            safe_threatened_pawn_captures += 1
+
+    # Whether the move made resulted in a capture
+    pawn_taken = 0
+    if opponent.lost_pawn_last_move:
+        pawn_taken = 1
+
+    # Whether a pawn was lost
+    pawn_lost = 0
+    if player.lost_pawn_last_move:
+        pawn_lost = -1
 
     # Discuss weights assigned to each reward with team
     reward_weights = {
-        "move_forwards": 0.01,
-        "take_pawn": 0.1,
+        "move_forwards": 0,
+        "move_pawn_forwards": 0.05,
+        "defended_move": 0.1,
+        "unsafe_move": 0.5,
+        "threatened_pawn_captures": 0.1,
+        "safe_threatened_pawn_captures": 0.25,
+        "pawn_taken": 1.0,
+        "pawn_lost": 1.0,
         "win": 1.0,
     }
     reward_dict = {
         "move_forwards": move_forwards,
-        "take_pawn": pawns_taken,
+        "move_pawn_forwards": move_pawn_forwards,
+        "unsafe_move": unsafe_move,
+        "defended_move": defended_move,
+        "threatened_pawn_captures": threatened_pawn_captures,
+        "safe_threatened_pawn_captures": safe_threatened_pawn_captures,
+        "pawn_taken": pawn_taken,
+        "pawn_lost": pawn_lost,
         "win": reward_win
     }
+
+    print(reward_dict)
+
     reward = 0
     for k, r in reward_dict.items():
         reward += r * reward_weights[k]
@@ -220,7 +276,6 @@ class OnitamaEnv(gym.Env):
             info["winner"] = self.game.winner.value
             # success if controlled winning player
             info["is_success"] = self.game.winner.value == (1 + int(not self.isPlayer1))
-
         return self.get_obs(), get_reward(self.game, self.isPlayer1), done, info
 
     def reset(self):

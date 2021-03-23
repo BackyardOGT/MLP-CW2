@@ -19,7 +19,7 @@ def train_rl(seed, isDQN, isRandom, decrease_threshold):
     eval_env = gym.make("Onitama-v0", seed=seed, agent_type=agent_type, verbose=False)
     
     #Only decrease threshold if playing SimpleAgent
-    assert not isRandom and decrease_threshold
+    assert not isRandom or not decrease_threshold
     
     if not isRandom and decrease_threshold:
         env.game.agent.threshold = 1
@@ -70,9 +70,9 @@ if __name__ == "__main__":
     
     parser = argparse.ArgumentParser()
     parser.add_argument('--seed', default=12314, type=int)
-    parser.add_argument('--DQN', action="store_true", help="Use DQN")
-    parser.add_argument('--random', action="store_true", help="Use random agent")
-    parser.add_argument('--decrease_threshold',action="store_true",help="Decrease number of Simple Agent random moves as RL agent improves")
+    parser.add_argument('--DQN', default=True, action="store_true", help="Use DQN")
+    parser.add_argument('--random', default=False, action="store_true", help="Use random agent")
+    parser.add_argument('--decrease_threshold', default=False, action="store_true", help="Decrease number of Simple Agent random moves as RL agent improves")
     args = parser.parse_args()
 
     train_rl(args.seed, args.DQN, args.random, args.decrease_threshold)

@@ -283,12 +283,14 @@ class PvP:
             return True
         return False
 
-    def get_valid_moves(self, curP, isPlayer1, get_opponent=False):
+    def get_valid_moves(self, curP, isPlayer1, show_overlapping_moves=False):
         """
         :param curP: player we want the cards for
         :param isPlayer1: whether that player is p1 or p2
-        :param get_opponent: when looking at opponents possible moves, we do not rule out "self captures" as
-                             our piece may be moved to that position.
+        :param show_overlapping_moves: when looking at opponents possible moves, we do not rule out "self captures" as
+                             our piece may be moved to that position. Similary, when calculating reward we want to look
+                             at the moves possible after our opponent has made theirs. Again this may appear to be a
+                             "self capture" but it needs to be checked in case the opponent captures that piece.
         :return:
         """
         assert(curP.player == "player1" if isPlayer1 else "player2"), "error in get valid moves: player1 != player2"
@@ -299,12 +301,12 @@ class PvP:
                 boardPos = self.card_to_board(curP.king.get(), p, isPlayer1)
                 # since we got these moves from card we only need check they're unoccupied now and on board
                 move = Move({"name": "king", "pos": boardPos, "id": cardId})
-                if (self.check_unoccupied(curP, move) or get_opponent) and self.check_on_board(move):
+                if (self.check_unoccupied(curP, move) or show_overlapping_moves) and self.check_on_board(move):
                     moves.append(move)
                 for i, pawn in enumerate(curP.pawns):
                     boardPos = self.card_to_board(pawn.get(), p, isPlayer1)
                     move = Move({"name": "pawn", "pos": boardPos, "id": cardId, "i": i})
-                    if (self.check_unoccupied(curP, move) or get_opponent) and self.check_on_board(move):
+                    if (self.check_unoccupied(curP, move) or show_overlapping_moves) and self.check_on_board(move):
                         moves.append(move)
         return moves
 
@@ -379,4 +381,5 @@ class BotVsBot(PvP):
         agent = self.agent1 if self.isPlayer1 else self.agent2
         agentMove = agent.get_action(self)
         state = super(BotVsBot, self).step(agentMove)
+        print(get_reward(self, self.isPlayer1))
         return state

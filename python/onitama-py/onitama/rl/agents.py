@@ -48,7 +48,7 @@ class SimpleAgent:
         opp_player = state.player2 if self.isPlayer1 else state.player1
 
         all_moves = state.get_valid_moves(agent_player, self.isPlayer1)
-        opp_moves = state.get_valid_moves(opp_player, not self.isPlayer1, get_opponent=True)
+        opp_moves = state.get_valid_moves(opp_player, not self.isPlayer1, show_overlapping_moves=True)
 
         # Agent king, opponent king, and opponent pawn positions
         king = agent_player.king  # [r,c]
