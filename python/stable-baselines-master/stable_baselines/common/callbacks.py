@@ -256,7 +256,10 @@ class EvalCallback(EventCallback):
                  deterministic: bool = True,
                  render: bool = False,
                  verbose: int = 1,
-                 evaluate_policy_callback=None):
+                 evaluate_policy_callback=None,
+                 env=None,
+                 decrease_threshold=False,
+                 winRateEdit = 0.8):
         super(EvalCallback, self).__init__(callback_on_new_best, verbose=verbose)
         self.n_eval_episodes = n_eval_episodes
         self.eval_freq = eval_freq
@@ -265,7 +268,10 @@ class EvalCallback(EventCallback):
         self.deterministic = deterministic
         self.render = render
         self.evaluate_policy_callback = evaluate_policy_callback
-
+        self.env = env
+        self.decrease_threshold = decrease_threshold
+        self.winRateEdit=winRateEdit
+        self.decrease_rate=1
         # Convert to VecEnv for consistency
         if not isinstance(eval_env, VecEnv):
             eval_env = DummyVecEnv([lambda: eval_env])
@@ -333,7 +339,16 @@ class EvalCallback(EventCallback):
                 # Trigger callback if needed
                 if self.callback is not None:
                     return self._on_event()
-            self.evaluate_policy_callback.print()
+            winRate = self.evaluate_policy_callback.print()
+
+            #If RL agent is winning some high enough percentage of the time
+            #Decrease the number of random moves of the Simple Agent by n*0.1
+            if winRate>self.winRateEdit and self.decrease_threshold:
+                self.env.game.agent.threshold = self.env.game.agent.threshold - (self.decrease_rate)*0.1
+                self.eval_env.game.agent.threshold = self.eval_env.game.agent.threshold - (self.decrease_rate)*0.1
+                print("RL Agent Win Rate >{}".format(self.winRateEdit))
+                print("Decreasing Simple Agent's Proportion of Random Moves by 0.1")
+                print("Simple Agent Random Move Proportion: {}".format(self.env.game.agent.threshold))
         return True
 
 
