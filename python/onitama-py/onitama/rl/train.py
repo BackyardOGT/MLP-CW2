@@ -17,6 +17,10 @@ def train_rl(seed, isDQN, isRandom, decrease_threshold):
     agent_type = RandomAgent if isRandom else SimpleAgent
     env = gym.make("Onitama-v0", seed=seed, agent_type=agent_type, verbose=False)
     eval_env = gym.make("Onitama-v0", seed=seed, agent_type=agent_type, verbose=False)
+    
+    #Only decrease threshold if playing SimpleAgent
+    assert not isRandom and decrease_threshold
+    
     if not isRandom and decrease_threshold:
         env.game.agent.threshold = 1
         eval_env.game.agent.threshold=1
