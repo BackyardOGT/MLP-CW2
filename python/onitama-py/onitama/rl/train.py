@@ -71,7 +71,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--seed', default=12314, type=int)
-    parser.add_argument('--DQN', default=True, action="store_true", help="Use DQN")
+    parser.add_argument('--DQN', default=False, action="store_true", help="Use DQN")
     parser.add_argument('--random', default=False, action="store_true", help="Use random agent")
     parser.add_argument('--decrease_threshold', default=False, action="store_true", help="Decrease number of Simple Agent random moves as RL agent improves")
     args = parser.parse_args()

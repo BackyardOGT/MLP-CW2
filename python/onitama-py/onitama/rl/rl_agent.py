@@ -1,5 +1,5 @@
 from onitama.rl import DQNMaskedCNNPolicy, get_mask, SimpleAgent, actionToMove
-from onitama.rl.env import _get_obs
+from onitama.rl.env import _get_obs, get_reward
 from stable_baselines import DQN, PPO2
 
 import numpy as np

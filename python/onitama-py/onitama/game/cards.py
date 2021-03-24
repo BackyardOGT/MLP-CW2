@@ -114,9 +114,9 @@ def seed_cards(seed):
 
 def get_init_cards(do_shuffle=True, simple_cards=False, custom_cards=None):
     if simple_cards:
-        cards = [[simple_card, simple_card],
-                 [simple_card, simple_card],
-                 [simple_card]]
+        cards = [simple_card, simple_card,
+                 simple_card, simple_card,
+                 simple_card]
     elif custom_cards is not None:
         cards = custom_cards
     else:

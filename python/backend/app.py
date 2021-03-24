@@ -10,9 +10,13 @@ seed = 12442
 
 twoPlayer = PvP(seed)
 againstBot = PvBot(SimpleAgent(seed), seed)
+
 botVsBot = BotVsBot(RandomAgent(seed, isPlayer1=True),
-                    SimpleAgent(seed, isPlayer1=False),
+                    RLAgent(seed, "../onitama-py/onitama/rl/logs/dqn-tb/2021_03_24-12_06_17_PM/best_model.zip", algorithm="DQN", isPlayer1=False),
                     seed)
+# botVsBot = BotVsBot(RandomAgent(seed, isPlayer1=True),
+#                     SimpleAgent(seed, isPlayer1=False),
+#                     seed)
 # botVsBot = BotVsBot(SimpleAgent(seed, isPlayer1=True, isVerbose=True),
 #                     SimpleAgent(seed, isPlayer1=False, isVerbose=True),
 #                     seed)

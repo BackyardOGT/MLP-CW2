@@ -148,6 +148,9 @@ def get_reward(game, isPlayer1, sparse=False):
     player = game.player1 if isPlayer1 else game.player2
     opponent = game.player2 if isPlayer1 else game.player1
 
+    next_moves = game.get_valid_moves(player, isPlayer1, show_overlapping_moves=True)
+    opp_moves = game.get_valid_moves(opponent, not isPlayer1, show_overlapping_moves=True)
+
     # We have a winner
     reward_win = 0
     if game.winner is not Winner.noWin:
@@ -162,9 +165,9 @@ def get_reward(game, isPlayer1, sparse=False):
 
     if sparse: return reward_win
 
+    # Get number of rows moved
     move_forwards = 0
     move_pawn_forwards = 0
-    # Get number of rows moved
     if player.last_move is not None:
         rows_moved = player.last_move.pos[0] - player.last_pos[0]
         row_orientation = 1 if not isPlayer1 else -1
@@ -172,37 +175,50 @@ def get_reward(game, isPlayer1, sparse=False):
         if not player.last_move.isKing:
             move_pawn_forwards = move_forwards
 
-    next_moves = game.get_valid_moves(player, isPlayer1, show_overlapping_moves=True)
-    opp_moves = game.get_valid_moves(opponent, not isPlayer1, show_overlapping_moves=True)
+    # Threatening a win by king move
+    shrine_win_possible = 0
+    enemy_home = [0, 2] if isPlayer1 else [4, 2]
+    if player.last_move is not None:
+        for move in next_moves:
+            if move.isKing and move.pos == enemy_home:
+                shrine_win_possible = 1
 
-    # Move went to an attackable square that is not defended
-    attackable_squares = [move.pos for move in opp_moves]
-    unsafe_move = 0
-    if player.last_move.pos in attackable_squares and player.last_move.pos not in [move.pos for move in next_moves]:
-        unsafe_move = -1
+    # King went to an attackable square
+    unsafe_king_move = 0
+    if player.last_move is not None:
+        if player.last_move.pos in [move.pos for move in opp_moves] and player.last_move.isKing:
+            unsafe_king_move = 1
 
-    # Move went to a defendable square
+    # There is an undefended attackable pawn
+    undefended_attackable_pawn_penalty = 0
+    for pawn in player.pawns:
+        if pawn.pos in [move.pos for move in opp_moves] and pawn.pos not in [move.pos for move in next_moves]:
+            undefended_attackable_pawn_penalty = 1
+
+    # Pawn went to a defendable square (without sacrificing defense of another pawn)
     defendable_squares = [move.pos for move in next_moves]
-    defended_move = 0
-    if player.last_move.pos in defendable_squares:
-        defended_move = 1
-
-    # Move threatens a king capture on the next move
-    opponent_king_attacked = 0
-    if opponent.king.pos in [move.pos for move in next_moves]:
-        opponent_king_attacked = 1
+    defended_pawn_move = 0
+    if player.last_move is not None:
+        if player.last_move.pos in defendable_squares and not player.last_move.isKing:
+            defended_pawn_move = 1
 
     # Threatened pawn capture
     threatened_pawn_captures = 0
-    for pawn in opponent.pawns:
-        if pawn.pos in [move.pos for move in next_moves]:
-            threatened_pawn_captures = 1
+    if player.last_move is not None:
+        for pawn in opponent.pawns:
+            if pawn.pos in [move.pos for move in next_moves]:
+                threatened_pawn_captures = 1
 
-    # There is a threatened safe pawn captures
+    # Threatened safe pawn captures
     safe_threatened_pawn_captures = 0
     for pawn in opponent.pawns:
         if pawn.pos in [move.pos for move in next_moves] and pawn.pos not in [move.pos for move in opp_moves]:
             safe_threatened_pawn_captures += 1
+
+    # Move threatens a king capture on the next move
+    threatened_king_capture = 0
+    if opponent.king.pos in [move.pos for move in next_moves]:
+        threatened_king_capture = 1
 
     # Whether the move made resulted in a capture
     pawn_taken = 0
@@ -212,34 +228,90 @@ def get_reward(game, isPlayer1, sparse=False):
     # Whether a pawn was lost
     pawn_lost = 0
     if player.lost_pawn_last_move:
-        pawn_lost = -1
+        pawn_lost = 1
+
+    reward_weights_old = {
+        "move_forwards": 0.01,
+        "move_pawn_forwards": 0,
+        "defended_pawn_move": 0,
+        "unsafe_king_move": 0,
+        "undefended_attackable_pawn_penalty": 0,
+        "threatened_pawn_captures": 0,
+        "safe_threatened_pawn_captures": 0,
+        "threatened_king_capture": 0,
+        "pawn_taken": 0.1,
+        "pawn_lost": -0.1,
+        "shrine_win_possible": 0,
+        "win": 1,
+        "game_duration_penalty": 0
+    }
+
+    # My best guess at a good weighting
+    reward_weights_v1 = {
+        "move_forwards": 0,
+        "move_pawn_forwards": 0.01,
+        "defended_pawn_move": 0,
+        "unsafe_king_move": -0.5,
+        "undefended_attackable_pawn_penalty": -0.05,
+        "threatened_pawn_captures": 0,
+        "safe_threatened_pawn_captures": 0.05,
+        "threatened_king_capture": 0.05,
+        "pawn_taken": 0.25,
+        "pawn_lost": -0.25,
+        "shrine_win_possible": 0.5,
+        "win": 1,
+        "game_duration_penalty": -0.01
+    }
+
+    # Alternative
+    reward_weights_v2 = {
+        "move_forwards": 0,
+        "move_pawn_forwards": 0.01,
+        "defended_pawn_move": 0.025,
+        "unsafe_king_move": -0.5,
+        "undefended_attackable_pawn_penalty": -0.05,
+        "threatened_pawn_captures": 0.025,
+        "safe_threatened_pawn_captures": 0.05,
+        "threatened_king_capture": 0.05,
+        "pawn_taken": 0.25,
+        "pawn_lost": -0.25,
+        "shrine_win_possible": 0.5,
+        "win": 1,
+        "game_duration_penalty": -0.01
+    }
 
     # Discuss weights assigned to each reward with team
     reward_weights = {
         "move_forwards": 0,
-        "move_pawn_forwards": 0.05,
-        "defended_move": 0.1,
-        "unsafe_move": 0.5,
-        "threatened_pawn_captures": 0.1,
-        "safe_threatened_pawn_captures": 0.25,
-        "pawn_taken": 1.0,
-        "pawn_lost": 1.0,
-        "win": 1.0,
+        "move_pawn_forwards": 0.01,
+        "defended_pawn_move": 0,
+        "unsafe_king_move": -0.5,
+        "undefended_attackable_pawn_penalty": -0.05,
+        "threatened_pawn_captures": 0,
+        "safe_threatened_pawn_captures": 0.05,
+        "threatened_king_capture": 0.05,
+        "pawn_taken": 0.25,
+        "pawn_lost": -0.25,
+        "shrine_win_possible": 0.5,
+        "win": 1,
+        "game_duration_penalty": -0.01
     }
+
     reward_dict = {
         "move_forwards": move_forwards,
         "move_pawn_forwards": move_pawn_forwards,
-        "unsafe_move": unsafe_move,
-        "defended_move": defended_move,
+        "unsafe_king_move": unsafe_king_move,
+        "undefended_attackable_pawn_penalty": undefended_attackable_pawn_penalty,
+        "defended_pawn_move": defended_pawn_move,
         "threatened_pawn_captures": threatened_pawn_captures,
         "safe_threatened_pawn_captures": safe_threatened_pawn_captures,
+        "threatened_king_capture": threatened_king_capture,
         "pawn_taken": pawn_taken,
         "pawn_lost": pawn_lost,
-        "win": reward_win
+        "shrine_win_possible": shrine_win_possible,
+        "win": reward_win,
+        "game_duration_penalty": 1
     }
-
-    if reward_dict["win"] != 1:
-        print(reward_dict)
 
     reward = 0
     for k, r in reward_dict.items():

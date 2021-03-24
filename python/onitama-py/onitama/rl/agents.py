@@ -35,7 +35,7 @@ class SimpleAgent:
     5) Attempts to move a random piece
     '''
 
-    def __init__(self, seed, isPlayer1=False, isVerbose=False, threshold = 0.):
+    def __init__(self, seed, isPlayer1=False, isVerbose=False, threshold=0.):
         self.isPlayer1 = isPlayer1
         self.isVerbose = isVerbose
         self.threshold = threshold
