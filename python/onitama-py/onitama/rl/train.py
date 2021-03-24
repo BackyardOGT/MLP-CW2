@@ -13,9 +13,9 @@ import onitama
 import gym
 
 
-def train_rl(seed, isDQN, isRandom, decrease_threshold,threshold_decrease_factor,win_rate_threshold):
+def train_rl(seed, isDQN, isRandom, decrease_threshold,threshold_decrease_factor,win_rate_threshold, reward_dict):
     agent_type = RandomAgent if isRandom else SimpleAgent
-    env = gym.make("Onitama-v0", seed=seed, agent_type=agent_type, verbose=False)
+    env = gym.make("Onitama-v0", seed=seed, agent_type=agent_type, verbose=False, reward_dict=reward_dict)
     eval_env = gym.make("Onitama-v0", seed=seed, agent_type=agent_type, verbose=False)
 
 
@@ -77,7 +77,8 @@ if __name__ == "__main__":
     parser.add_argument('--decrease_threshold', default=False, action="store_true", help="Decrease number of Simple Agent random moves as RL agent improves")
     parser.add_argument('--threshold_decrease_factor', default=1, type=float, help="How much to decrease proportion of random moves made by simple agent by. -(n * 0.1)")
     parser.add_argument('--win_rate_threshold', default=0.8, type=float, help="Proportion of wins by RL agent before decreasing Simple Agent Stochasicity")
+    parser.add_argument('--reward_dict', default=0, type=int, help="Which reward dict index to use.")
 
     args = parser.parse_args()
 
-    train_rl(args.seed, args.DQN, args.random, args.decrease_threshold, args.threshold_decrease_factor, args.win_rate_threshold)
+    train_rl(args.seed, args.DQN, args.random, args.decrease_threshold, args.threshold_decrease_factor, args.win_rate_threshold, args.reward_dict)

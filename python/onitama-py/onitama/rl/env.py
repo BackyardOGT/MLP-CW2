@@ -141,7 +141,7 @@ def get_game_maybe_flipped(game, isPlayer1):
     return game if isPlayer1 else flip_game_view(game)
 
 
-def get_reward(game, isPlayer1, sparse=False):
+def get_reward(game, isPlayer1, reward_dict_id,sparse=False):
     # can get game state by eg.
     # game.player1
 
@@ -229,8 +229,9 @@ def get_reward(game, isPlayer1, sparse=False):
     pawn_lost = 0
     if player.lost_pawn_last_move:
         pawn_lost = 1
-
-    reward_weights_old = {
+    reward_dicts=[
+    #reward_weights_old = 
+    {
         "move_forwards": 0.01,
         "move_pawn_forwards": 0,
         "defended_pawn_move": 0,
@@ -244,10 +245,11 @@ def get_reward(game, isPlayer1, sparse=False):
         "shrine_win_possible": 0,
         "win": 1,
         "game_duration_penalty": 0
-    }
+    },
 
     # My best guess at a good weighting
-    reward_weights_v1 = {
+    #reward_weights_v1 = 
+    {
         "move_forwards": 0,
         "move_pawn_forwards": 0.01,
         "defended_pawn_move": 0,
@@ -261,10 +263,11 @@ def get_reward(game, isPlayer1, sparse=False):
         "shrine_win_possible": 0.5,
         "win": 1,
         "game_duration_penalty": -0.01
-    }
+    },
 
     # Alternative
-    reward_weights_v2 = {
+    #reward_weights_v2 = 
+    {
         "move_forwards": 0,
         "move_pawn_forwards": 0.01,
         "defended_pawn_move": 0.025,
@@ -278,10 +281,11 @@ def get_reward(game, isPlayer1, sparse=False):
         "shrine_win_possible": 0.5,
         "win": 1,
         "game_duration_penalty": -0.01
-    }
+    },
 
     # Discuss weights assigned to each reward with team
-    reward_weights = {
+    #reward_weights = 
+    {
         "move_forwards": 0,
         "move_pawn_forwards": 0.01,
         "defended_pawn_move": 0,
@@ -295,9 +299,10 @@ def get_reward(game, isPlayer1, sparse=False):
         "shrine_win_possible": 0.5,
         "win": 1,
         "game_duration_penalty": -0.01
-    }
+    }]
 
-    reward_dict = {
+    reward_dict = { 
+    
         "move_forwards": move_forwards,
         "move_pawn_forwards": move_pawn_forwards,
         "unsafe_king_move": unsafe_king_move,
@@ -313,9 +318,11 @@ def get_reward(game, isPlayer1, sparse=False):
         "game_duration_penalty": 1
     }
 
+    reward_dict=reward_dicts[reward_dict_id]
+
     reward = 0
     for k, r in reward_dict.items():
-        reward += r * reward_weights[k]
+        reward += r * reward_dict[k]
     return reward
 
 
@@ -325,7 +332,7 @@ class OnitamaEnv(gym.Env):
     See README for obs and ac space definitions
     """
 
-    def __init__(self, seed, agent_type=SimpleAgent, isPlayer1=True, verbose=True):
+    def __init__(self, seed, agent_type=SimpleAgent, reward_dict=0, isPlayer1=True, verbose=True):
         super(OnitamaEnv, self).__init__()
         self.game = PvBot(agent_type(seed), seed, verbose=verbose)
         self.observation_space = gym.spaces.Box(np.zeros((5, 5, 59)), np.ones((5, 5, 59)))
@@ -333,6 +340,7 @@ class OnitamaEnv(gym.Env):
         self.mask_shape = (5, 5, 50)
         self.isPlayer1 = isPlayer1
         self._seed = seed
+        self.reward_dict = reward_dict
 
     def step(self, ac):
         ac = np.squeeze(ac)
@@ -351,7 +359,7 @@ class OnitamaEnv(gym.Env):
             info["winner"] = self.game.winner.value
             # success if controlled winning player
             info["is_success"] = self.game.winner.value == (1 + int(not self.isPlayer1))
-        return self.get_obs(), get_reward(self.game, self.isPlayer1), done, info
+        return self.get_obs(), get_reward(self.game, self.isPlayer1, reward_dict_id=self.reward_dict), done, info
 
     def reset(self):
         self.game.reset()
@@ -378,7 +386,7 @@ class OnitamaSelfPlayEnv(gym.Env):
     Assume p1 to be the main player for training
     """
 
-    def __init__(self, seed, verbose=True, deterministicSelfPlay=False):
+    def __init__(self, seed, verbose=True, deterministicSelfPlay=False, reward_dict=0):
         super(OnitamaSelfPlayEnv, self).__init__()
         self.game = PvP(seed, verbose=verbose)
         self.observation_space = gym.spaces.Box(np.zeros((5, 5, 59)), np.ones((5, 5, 59)))
@@ -389,6 +397,7 @@ class OnitamaSelfPlayEnv(gym.Env):
         self.selfPlayModel = None
         self.deterministicSelfPlay = deterministicSelfPlay
         self.isPlayer1 = True
+        self.reward_dict=reward_dict
 
     def step(self, ac):
         # run the training model action
@@ -407,7 +416,7 @@ class OnitamaSelfPlayEnv(gym.Env):
             info["winner"] = self.game.winner.value
             # success if controlled winning player
             info["is_success"] = self.game.winner.value == (1 + int(not self.isPlayer1))
-        return self.get_obs(), get_reward(self.game, self.isPlayer1, sparse=True), done, info
+        return self.get_obs(), get_reward(self.game, self.isPlayer1, reward_dict_id=self.reward_dict,sparse=True), done, info
 
     def getMove(self, ac):
         ac = np.squeeze(ac)
