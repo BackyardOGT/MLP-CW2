@@ -259,7 +259,8 @@ class EvalCallback(EventCallback):
                  evaluate_policy_callback=None,
                  env=None,
                  decrease_threshold=False,
-                 winRateEdit = 0.8):
+                 threshold_decrease_factor=1,
+                 win_rate_threshold = 0.8):
         super(EvalCallback, self).__init__(callback_on_new_best, verbose=verbose)
         self.n_eval_episodes = n_eval_episodes
         self.eval_freq = eval_freq
@@ -270,8 +271,8 @@ class EvalCallback(EventCallback):
         self.evaluate_policy_callback = evaluate_policy_callback
         self.env = env
         self.decrease_threshold = decrease_threshold
-        self.winRateEdit=winRateEdit
-        self.decrease_rate=1
+        self.win_rate_threshold=win_rate_threshold
+        self.threshold_decrease_factor=threshold_decrease_factor
         # Convert to VecEnv for consistency
         if not isinstance(eval_env, VecEnv):
             eval_env = DummyVecEnv([lambda: eval_env])
@@ -343,9 +344,9 @@ class EvalCallback(EventCallback):
 
             #If RL agent is winning some high enough percentage of the time
             #Decrease the number of random moves of the Simple Agent by n*0.1
-            if winRate>self.winRateEdit and self.decrease_threshold:
-                self.env.game.agent.threshold = self.env.game.agent.threshold - (self.decrease_rate)*0.1
-                self.eval_env.game.agent.threshold = self.eval_env.game.agent.threshold - (self.decrease_rate)*0.1
+            if winRate>self.win_rate_threshold and self.decrease_threshold:
+                self.env.game.agent.threshold = self.env.game.agent.threshold - (threshold_decrease_factor)*0.1
+                self.eval_env.game.agent.threshold = self.eval_env.game.agent.threshold - (threshold_decrease_factor)*0.1
                 print("RL Agent Win Rate >{}".format(self.winRateEdit))
                 print("Decreasing Simple Agent's Proportion of Random Moves by 0.1")
                 print("Simple Agent Random Move Proportion: {}".format(self.env.game.agent.threshold))

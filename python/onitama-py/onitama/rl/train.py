@@ -13,7 +13,7 @@ import onitama
 import gym
 
 
-def train_rl(seed, isDQN, isRandom, decrease_threshold):
+def train_rl(seed, isDQN, isRandom, decrease_threshold,threshold_decrease_factor,win_rate_threshold):
     agent_type = RandomAgent if isRandom else SimpleAgent
     env = gym.make("Onitama-v0", seed=seed, agent_type=agent_type, verbose=False)
     eval_env = gym.make("Onitama-v0", seed=seed, agent_type=agent_type, verbose=False)
@@ -53,7 +53,8 @@ def train_rl(seed, isDQN, isRandom, decrease_threshold):
                                  log_path=logdir, eval_freq=500, n_eval_episodes=20,
                                  deterministic=True, render=False,
                                  evaluate_policy_callback=eval_policy_cb, env=env,
-                                 decrease_threshold=decrease_threshold)
+                                 decrease_threshold=decrease_threshold,
+                                 )
     callback = CallbackList([checkpoint_callback, eval_callback])
     policy.learn(int(1e6), callback=callback, log_interval=100 if isDQN else 10)
 
@@ -74,6 +75,9 @@ if __name__ == "__main__":
     parser.add_argument('--DQN', default=False, action="store_true", help="Use DQN")
     parser.add_argument('--random', default=False, action="store_true", help="Use random agent")
     parser.add_argument('--decrease_threshold', default=False, action="store_true", help="Decrease number of Simple Agent random moves as RL agent improves")
+    parser.add_argument('--threshold_decrease_factor', default=1, type=float, help="How much to decrease proportion of random moves made by simple agent by. -(n * 0.1)")
+    parser.add_argument('--win_rate_threshold', default=0.8, type=float, help="Proportion of wins by RL agent before decreasing Simple Agent Stochasicity")
+
     args = parser.parse_args()
 
-    train_rl(args.seed, args.DQN, args.random, args.decrease_threshold)
+    train_rl(args.seed, args.DQN, args.random, args.decrease_threshold, args.threshold_decrease_factor, args.win_rate_threshold)
