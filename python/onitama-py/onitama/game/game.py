@@ -381,5 +381,4 @@ class BotVsBot(PvP):
         agent = self.agent1 if self.isPlayer1 else self.agent2
         agentMove = agent.get_action(self)
         state = super(BotVsBot, self).step(agentMove)
-        print(get_reward(self, self.isPlayer1))
         return state

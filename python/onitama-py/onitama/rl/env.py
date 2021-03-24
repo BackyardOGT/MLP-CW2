@@ -162,6 +162,8 @@ def get_reward(game, isPlayer1, sparse=False):
 
     if sparse: return reward_win
 
+    move_forwards = 0
+    move_pawn_forwards = 0
     # Get number of rows moved
     if player.last_move is not None:
         rows_moved = player.last_move.pos[0] - player.last_pos[0]
@@ -170,8 +172,8 @@ def get_reward(game, isPlayer1, sparse=False):
         if not player.last_move.isKing:
             move_pawn_forwards = move_forwards
 
-    next_moves = game.get_valid_moves(player, game.isPlayer1, show_overlapping_moves=True)
-    opp_moves = game.get_valid_moves(opponent, not game.isPlayer1, show_overlapping_moves=True)
+    next_moves = game.get_valid_moves(player, isPlayer1, show_overlapping_moves=True)
+    opp_moves = game.get_valid_moves(opponent, not isPlayer1, show_overlapping_moves=True)
 
     # Move went to an attackable square that is not defended
     attackable_squares = [move.pos for move in opp_moves]
@@ -236,7 +238,8 @@ def get_reward(game, isPlayer1, sparse=False):
         "win": reward_win
     }
 
-    print(reward_dict)
+    if reward_dict["win"] != 1:
+        print(reward_dict)
 
     reward = 0
     for k, r in reward_dict.items():
