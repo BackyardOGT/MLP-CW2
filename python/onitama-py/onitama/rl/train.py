@@ -54,6 +54,8 @@ def train_rl(seed, isDQN, isRandom, decrease_threshold,threshold_decrease_factor
                                  deterministic=True, render=False,
                                  evaluate_policy_callback=eval_policy_cb, env=env,
                                  decrease_threshold=decrease_threshold,
+                                 threshold_decrease_factor=threshold_decrease_factor,
+                                 win_rate_threshold=win_rate_threshold
                                  )
     callback = CallbackList([checkpoint_callback, eval_callback])
     policy.learn(int(1e6), callback=callback, log_interval=100 if isDQN else 10)
