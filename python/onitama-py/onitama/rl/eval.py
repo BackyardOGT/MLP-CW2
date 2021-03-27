@@ -30,11 +30,14 @@ if __name__ == "__main__":
     parser.add_argument('model_path', type=str)
     parser.add_argument('--seed', default=12314, type=int)
     parser.add_argument('--DQN', action="store_true", help="Use DQN")
+    parser.add_argument('--simple_threshold', default=0.0, type=float, help="Threshold for simple agent")
     parser.add_argument('--random', action="store_true", help="Use random agent")
     args = parser.parse_args()
 
     agent_type = RandomAgent if args.random else SimpleAgent
     env = gym.make("Onitama-v0", seed=args.seed, agent_type=agent_type, verbose=False)
+    if not args.random:
+        env.game.agent.threshold = args.simple_threshold
     if args.DQN:
         policy = DQN.load(args.model_path)
     else:
