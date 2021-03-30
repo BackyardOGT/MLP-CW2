@@ -24,7 +24,7 @@ def getPolicy(isDQN, seed):
                      )
     else:
         basedir = "./logs/ppo-self-tb/"
-        env, logdir = setup_monitor(basedir, env, isDQN, seed)
+        env, logdir = setup_monitor(basedir, env)
         policy = PPO2(ACMaskedCNNPolicy,
                       env,
                       seed=seed,
