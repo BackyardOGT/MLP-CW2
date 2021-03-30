@@ -14,7 +14,7 @@ def getPolicy(isDQN, seed):
 
     if isDQN:
         basedir = "./logs/dqn-self-tb/"
-        env, logdir = setup_monitor(basedir, env, isDQN, seed)
+        env, logdir = setup_monitor(basedir, env)
         policy = DQN(DQNMaskedCNNPolicy,
                      env,
                      seed=seed,
