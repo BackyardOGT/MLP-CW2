@@ -289,6 +289,7 @@ class OnitamaSelfPlayEnv(gym.Env):
     def reset(self):
         assert self.selfPlayModel, "No model set"
         self.game.reset()
+        self.reset1 = self.game.isPlayer1
         # if it's not the rl's turn then let the self play opponent take it's turn
         if self.game.isPlayer1 != self.isPlayer1:
             # step the self play action

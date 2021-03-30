@@ -101,15 +101,15 @@ all_cards = [tiger, dragon, frog, rabbit,
 card_stamps={1:[tiger,rabbit,crab,goose,monkey,ox,crane,eel],
              2:[dragon,frog,elephant,rooster,mantis,horse,boar,cobra]}
 
+class Cards:
+    def __init__(self, seed):
+        self.inds = [i for i in range(len(all_cards))]
+        random.seed(seed)
 
-def seed_cards(seed):
-    random.seed(12312)
-
-
-def get_init_cards(do_shuffle=True):
-    if do_shuffle:
-        random.shuffle(all_cards)
-    return ([all_cards[0], all_cards[1]],
-            [all_cards[2], all_cards[3]],
-            [all_cards[4]])
+    def get_init_cards(self, do_shuffle=True):
+        if do_shuffle:
+            random.shuffle(self.inds)
+        return ([all_cards[self.inds[0]], all_cards[self.inds[3]]],
+                [all_cards[self.inds[1]], all_cards[self.inds[4]]],
+                [all_cards[self.inds[2]]])
 
