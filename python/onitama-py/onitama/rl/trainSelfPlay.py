@@ -62,44 +62,44 @@ if __name__ == "__main__":
     parser.add_argument('--random', action="store_true", help="Use random agent")
     args = parser.parse_args()
 
-    # train_rl(args.DQN, args.seed, args.random)
+    train_rl(args.DQN, args.seed, args.random)
 
 
-##########
-    env = gym.make("OnitamaSelfPlay-v0", seed=13909, verbose=False)
-
-
-    basedir = "./logs/ppo-self-tb/"
-    env, logdir = setup_monitor(basedir, env)
-    policy = PPO2(ACMaskedCNNPolicy,
-                  env,
-                  seed=13909,
-                  verbose=1,
-                  tensorboard_log=logdir,
-                  # n_steps=128, nminibatches=4,
-                  # lam=0.95, gamma=0.99, noptepochs=4, ent_coef=.01,
-                  # learning_rate=lambda f: f * 2.5e-4, cliprange=lambda f: f * 0.1
-                  )
-
-    env.setSelfPlayModel(policy)
-    from onitama.game.cards import all_cards
-    import pandas as pd
-    spares = []
-    p1s = []
-    resets = []
-    n = 1000
-    for _ in range(n):
-        env.reset()
-        resets.append(env.reset1)
-        for i, card in enumerate(all_cards):
-            if card == env.game.spare_card:
-                spares.append(i)
-            if card == env.game.player1.cards[0]:
-                p1s.append(i)
-    df = pd.Series(spares)
-    print("Spares")
-    print(df.value_counts(normalize=True))
-    df = pd.Series(p1s)
-    print("P1")
-    print(df.value_counts(normalize=True))
-    print("Player 1 : ", sum(resets) / n * 100, "%")
+##########  FOR CHECKING CARD SAMPLES
+    # env = gym.make("OnitamaSelfPlay-v0", seed=13909, verbose=False)
+    #
+    #
+    # basedir = "./logs/ppo-self-tb/"
+    # env, logdir = setup_monitor(basedir, env)
+    # policy = PPO2(ACMaskedCNNPolicy,
+    #               env,
+    #               seed=13909,
+    #               verbose=1,
+    #               tensorboard_log=logdir,
+    #               # n_steps=128, nminibatches=4,
+    #               # lam=0.95, gamma=0.99, noptepochs=4, ent_coef=.01,
+    #               # learning_rate=lambda f: f * 2.5e-4, cliprange=lambda f: f * 0.1
+    #               )
+    #
+    # env.setSelfPlayModel(policy)
+    # from onitama.game.cards import all_cards
+    # import pandas as pd
+    # spares = []
+    # p1s = []
+    # resets = []
+    # n = 1000
+    # for _ in range(n):
+    #     env.reset()
+    #     resets.append(env.reset1)
+    #     for i, card in enumerate(all_cards):
+    #         if card == env.game.spare_card:
+    #             spares.append(i)
+    #         if card == env.game.player1.cards[0]:
+    #             p1s.append(i)
+    # df = pd.Series(spares)
+    # print("Spares")
+    # print(df.value_counts(normalize=True))
+    # df = pd.Series(p1s)
+    # print("P1")
+    # print(df.value_counts(normalize=True))
+    # print("Player 1 : ", sum(resets) / n * 100, "%")
