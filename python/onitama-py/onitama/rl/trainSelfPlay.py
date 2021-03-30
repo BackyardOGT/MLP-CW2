@@ -14,7 +14,7 @@ def getPolicy(isDQN, seed):
 
     if isDQN:
         basedir = "./logs/dqn-self-tb/"
-        env, logdir = setup_monitor(basedir, env)
+        env, logdir = setup_monitor(basedir, env, isDQN, seed)
         policy = DQN(DQNMaskedCNNPolicy,
                      env,
                      seed=seed,
@@ -24,13 +24,15 @@ def getPolicy(isDQN, seed):
                      )
     else:
         basedir = "./logs/ppo-self-tb/"
-        env, logdir = setup_monitor(basedir, env)
+        env, logdir = setup_monitor(basedir, env, isDQN, seed)
         policy = PPO2(ACMaskedCNNPolicy,
                       env,
                       seed=seed,
                       verbose=1,
-                      tensorboard_log=logdir
-                      )
+                      tensorboard_log=logdir,
+                      n_steps=128, nminibatches=4,
+                      lam=0.95, gamma=0.99, noptepochs=4, ent_coef=.01,
+                      learning_rate=lambda f: f * 2.5e-4, cliprange=lambda f: f * 0.1)
 
     env.setSelfPlayModel(policy)
     return policy, logdir
@@ -46,11 +48,11 @@ def train_rl(isDQN, seed, isRandom):
                                              name_prefix='rl_model', verbose=2)
     eval_policy_cb = EvalCB(logdir)
     eval_callback = EvalCallback(eval_env, best_model_save_path=logdir,
-                                 log_path=logdir, eval_freq=1e3, n_eval_episodes=20,
+                                 log_path=logdir, eval_freq=1500, n_eval_episodes=20,
                                  deterministic=True, render=False,
                                  evaluate_policy_callback=eval_policy_cb)
     callback = CallbackList([checkpoint_callback, eval_callback])
-    policy.learn(int(1e6), callback=callback, log_interval=100 if isDQN else 10)
+    policy.learn(int(1e6) if isDQN else int(2e6), callback=callback)
 
 
 if __name__ == "__main__":

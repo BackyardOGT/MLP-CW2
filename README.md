@@ -74,8 +74,44 @@ Actions:
 * run with dense reward vs random agent PPO also try with PPO self play again after tweak here
 
 * how to improve ppo self play?
-    * parameters
-    * review behaviour
+    x Check training curves for last run
+    x parameters from rl zoo 
+          normalize: true
+          n_envs: 8
+          n_timesteps: !!float 2e6
+          policy: 'MlpPolicy'
+          n_steps: 2048
+          nminibatches: 128
+          lam: 0.95
+          gamma: 0.99
+          noptepochs: 10
+          ent_coef: 0.0
+          learning_rate: 2.5e-4
+          cliprange: 0.2
+        // BAD!
+    x parallelise env -> using 4
+    x Trying (also increased n_envs to 8)
+          n_steps=2048,
+          nminibatches=128,
+          lam=0.98,
+          ent_coef=0.01,
+      // 8/100
+    x Trying (also increased n_envs to 8)
+          n_steps=2048,
+          nminibatches=128,
+          ent_coef=0.025,
+        // 2/100 at 1M steps
+    x One vec env
+        n_steps=2048,
+        nminibatches=128,
+    x try adding other player's mask (as well as this player's mask) as an input to see where to avoid
+        and used the same detault setup that worked before (was it the default tho?)
+        also expanded the number of filters in CNN layers
+    x back to sparse reward and original architecture, but fixed player start cards to be more 50/50
+    x try just this player's masks back as inputs?
+    x tried DQN again with mask inputs for both players
+    * running with stable baselines run_atari hparams
+* review behaviour
 
 
 PPO self play later on gets quite high win rate learns to beat itself despite updates - need to train the p2 as well?
@@ -202,3 +238,32 @@ Std episode length: 3.954984197187139
 Min episode length: 2
 Max episode length: 23
 Won 78 / 100
+
+
+
+## server
+
+ppo-tb/
+* 2021_03_25-0* is 1st in Gus's experiments bash file onwards
+* 2021_03_26-* is 4th in Gus's experiments bash file onwards
+
+in order of Gus's bash script
+thresholds to get 50/100 vs simpleagent (1.0 = random agent) 
+1 1.0
+2 1.0
+3 1.0 (froze I think)
+4 x
+5 1.0
+6 1.0
+7  (froze)
+
+(selfplay.zip on laptop)
+(`git reset --hard 0e5bb4e17e99cedcc9884476fa5e043988bf05fb`) // need to go to that commit on 18th March
+ppo-self-tb/
+* 2021_03_18-12_58_55_PM/best_model.zip
+    12/100 vs simple
+
+(random.zip on laptop)
+(`git reset --hard 0e5bb4e17e99cedcc9884476fa5e043988bf05fb`) // need to go to that commit on 18th March
+ppo-tb/
+* 2021_03_18-07_25_17_PM/best_model.zip
