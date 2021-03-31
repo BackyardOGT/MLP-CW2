@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 import tensorflow.contrib.layers as tf_layers
-from stable_baselines.common.tf_layers import conv, conv_to_fc, linear
+from stable_baselines.common.tf_layers import conv, conv_to_fc, linear, mlp
 from stable_baselines.deepq.policies import DQNPolicy
 from stable_baselines.common.policies import ActorCriticPolicy
 from stable_baselines.common.distributions import ProbabilityDistributionType, CategoricalProbabilityDistribution
@@ -28,7 +28,9 @@ def cnn_extractor_onitama(scaled_images, n_obs, n_filters_out=50, filter_size=3,
     layer_3 = activ(conv(layer_2, 'c3', n_filters=n_filters_out, filter_size=filter_size, stride=1, pad='SAME',
                          init_scale=np.sqrt(2), **kwargs))
     layer_3_flat = conv_to_fc(layer_3)
-    return layer_3_flat
+    layer_4 = mlp(layer_3_flat)
+    layer_5 = linear(layer_4)
+    return layer_5
 
 
 def apply_mask(values, mask_flat, mask_to=tf.float32.min):
