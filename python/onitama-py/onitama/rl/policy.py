@@ -21,7 +21,7 @@ def cnn_extractor_onitama(scaled_images, n_obs, n_filters_out=50, filter_size=3,
     if n_obs != -1:
         scaled_images = scaled_images[:, :, :, :n_obs]
     layer_1 = activ(
-        conv(scaled_images, 'c1', n_filters=32, filter_size=filter_size, stride=1, pad='SAME', init_scale=np.sqrt(2), **kwargs))
+        conv(scaled_images, 'c1', n_filters=32, filter_size=5, stride=1, pad='SAME', init_scale=np.sqrt(2), **kwargs))
     layer_2 = activ(
         conv(layer_1, 'c2', n_filters=64, filter_size=filter_size, stride=1, pad='SAME', init_scale=np.sqrt(2),
              **kwargs))
