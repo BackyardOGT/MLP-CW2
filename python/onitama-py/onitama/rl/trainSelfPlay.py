@@ -29,10 +29,10 @@ def getPolicy(isDQN, seed):
                       env,
                       seed=seed,
                       verbose=1,
-                      tensorboard_log=logdir,
-                      n_steps=128, nminibatches=4,
-                      lam=0.95, gamma=0.99, noptepochs=4, ent_coef=.01,
-                      learning_rate=lambda f: f * 2.5e-4, cliprange=lambda f: f * 0.1)
+                      tensorboard_log=logdir)
+                      # n_steps=128, nminibatches=4,
+                      # lam=0.95, gamma=0.99, noptepochs=4, ent_coef=.01,
+                      # learning_rate=lambda f: f * 2.5e-4, cliprange=lambda f: f * 0.1)
 
     env.setSelfPlayModel(policy)
     return policy, logdir
@@ -57,7 +57,7 @@ def train_rl(isDQN, seed, isRandom):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--seed', default=13909, type=int)
+    parser.add_argument('--seed', default=4243, type=int)
     parser.add_argument('--DQN', action="store_true", help="Use DQN")
     parser.add_argument('--random', action="store_true", help="Use random agent")
     args = parser.parse_args()

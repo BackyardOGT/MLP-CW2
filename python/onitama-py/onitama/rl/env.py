@@ -197,7 +197,7 @@ class OnitamaEnv(gym.Env):
     def __init__(self, seed, agent_type=SimpleAgent, isPlayer1=True, verbose=True):
         super(OnitamaEnv, self).__init__()
         self.game = PvBot(agent_type(seed), seed, verbose=verbose)
-        self.observation_space = gym.spaces.Box(np.zeros((5, 5, 59)), np.ones((5, 5, 59)))
+        self.observation_space = gym.spaces.Box(np.zeros((5, 5, 109)), np.ones((5, 5, 109)))
         self.action_space = gym.spaces.Discrete(5 * 5 * 25 * 2)
         self.mask_shape = (5, 5, 50)
         self.isPlayer1 = isPlayer1
@@ -235,7 +235,9 @@ class OnitamaEnv(gym.Env):
         Observation and mask for valid actions
         :return:
         """
-        return np.concatenate([_get_obs(self.game, self.isPlayer1), get_mask(self.game, self.isPlayer1)], -1)
+        return np.concatenate([_get_obs(self.game, self.isPlayer1),
+                               get_mask(self.game, not self.game.isPlayer1),
+                               get_mask(self.game, self.isPlayer1)], -1)
 
     def seed(self, seed):
         self._seed = seed
@@ -251,7 +253,7 @@ class OnitamaSelfPlayEnv(gym.Env):
     def __init__(self, seed, verbose=True, deterministicSelfPlay=False):
         super(OnitamaSelfPlayEnv, self).__init__()
         self.game = PvP(seed, verbose=verbose)
-        self.observation_space = gym.spaces.Box(np.zeros((5, 5, 59)), np.ones((5, 5, 59)))
+        self.observation_space = gym.spaces.Box(np.zeros((5, 5, 109)), np.ones((5, 5, 109)))
         self.action_space = gym.spaces.Discrete(5 * 5 * 25 * 2)
         self.mask_shape = (5, 5, 50)
         self._seed = seed
@@ -306,7 +308,9 @@ class OnitamaSelfPlayEnv(gym.Env):
         Observation and mask for valid actions
         :return:
         """
-        return np.concatenate([_get_obs(self.game, self.game.isPlayer1), get_mask(self.game, self.game.isPlayer1)], -1)
+        return np.concatenate([_get_obs(self.game, self.game.isPlayer1),
+                               get_mask(self.game, not self.game.isPlayer1),
+                               get_mask(self.game, self.game.isPlayer1)], -1)
 
     def seed(self, seed):
         self._seed = seed

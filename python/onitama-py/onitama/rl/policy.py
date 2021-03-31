@@ -157,11 +157,11 @@ class ACMaskedCNNPolicy(ActorCriticPolicy):
     def __init__(self, sess, ob_space, ac_space, n_env, n_steps, n_batch, reuse=False, layers=None, **kwargs):
         super(ACMaskedCNNPolicy, self).__init__(sess, ob_space, ac_space, n_env, n_steps, n_batch, reuse=reuse, scale=True)
 
-        self.n_obs = 9
+        self.n_obs = 59
 
         with tf.variable_scope("model", reuse=reuse):
             mask = self.processed_obs[:, :, :, self.n_obs:]
-            pi_latent = vf_latent = cnn_extractor_onitama(self.processed_obs, self.n_obs)
+            pi_latent = vf_latent = cnn_extractor_onitama(self.processed_obs, -1)
 
             self._value_fn = linear(vf_latent, 'vf', 1)
 
