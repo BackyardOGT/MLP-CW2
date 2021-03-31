@@ -7,7 +7,7 @@ from stable_baselines.common.policies import ActorCriticPolicy
 from stable_baselines.common.distributions import ProbabilityDistributionType, CategoricalProbabilityDistribution
 
 
-def cnn_extractor_onitama(scaled_images, n_obs, n_filters_out=50, filter_size=5, **kwargs):
+def cnn_extractor_onitama(scaled_images, n_obs, n_filters_out=50, filter_size=3, **kwargs):
     """
     CNN with 5 x 5 x 50 (50 = 25 x 2) outputs, that is masked by 2nd half of inputs
     :param scaled_images: (TensorFlow Tensor) Image input placeholder (Batch size x Obs shape)
@@ -23,9 +23,9 @@ def cnn_extractor_onitama(scaled_images, n_obs, n_filters_out=50, filter_size=5,
     layer_1 = activ(
         conv(scaled_images, 'c1', n_filters=32, filter_size=filter_size, stride=1, pad='SAME', init_scale=np.sqrt(2), **kwargs))
     layer_2 = activ(
-        conv(layer_1, 'c2', n_filters=64, filter_size=3, stride=1, pad='SAME', init_scale=np.sqrt(2),
+        conv(layer_1, 'c2', n_filters=64, filter_size=filter_size, stride=1, pad='SAME', init_scale=np.sqrt(2),
              **kwargs))
-    layer_3 = activ(conv(layer_2, 'c3', n_filters=n_filters_out, filter_size=3, stride=1, pad='SAME',
+    layer_3 = activ(conv(layer_2, 'c3', n_filters=n_filters_out, filter_size=filter_size, stride=1, pad='SAME',
                          init_scale=np.sqrt(2), **kwargs))
     layer_3_flat = conv_to_fc(layer_3)
     return layer_3_flat
