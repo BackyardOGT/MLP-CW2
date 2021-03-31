@@ -28,8 +28,8 @@ def cnn_extractor_onitama(scaled_images, n_obs, n_filters_out=50, filter_size=3,
     layer_3 = activ(conv(layer_2, 'c3', n_filters=n_filters_out, filter_size=filter_size, stride=1, pad='SAME',
                          init_scale=np.sqrt(2), **kwargs))
     layer_3_flat = conv_to_fc(layer_3)
-    layer_4 = mlp(layer_3_flat)
-    layer_5 = linear(layer_4)
+    layer_4 = mlp(layer_3_flat, [1025])
+    layer_5 = linear(layer_4, 'out', 1025)
     return layer_5
 
 
