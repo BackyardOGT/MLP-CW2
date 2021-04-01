@@ -183,11 +183,11 @@ def get_reward(game, isPlayer1, reward_dict_id,sparse=False):
             if move.isKing and move.pos == enemy_home:
                 shrine_win_possible = 1
 
-    # King went to an attackable square
-    unsafe_king_move = 0
-    if player.last_move is not None:
-        if player.last_move.pos in [move.pos for move in opp_moves] and player.last_move.isKing:
-            unsafe_king_move = 1
+    # King is attackable
+    unsafe_king = 0
+    if player.king.pos in [move.pos for move in opp_moves]:
+        unsafe_king = 1
+
 
     # There is an undefended attackable pawn
     undefended_attackable_pawn_penalty = 0
@@ -229,13 +229,13 @@ def get_reward(game, isPlayer1, reward_dict_id,sparse=False):
     pawn_lost = 0
     if player.lost_pawn_last_move:
         pawn_lost = 1
-    reward_dicts=[
-    #reward_weights_old = 
-    {
+
+    reward_weights=[
+    {   # old
         "move_forwards": 0.01,
         "move_pawn_forwards": 0,
         "defended_pawn_move": 0,
-        "unsafe_king_move": 0,
+        "unsafe_king": 0,
         "undefended_attackable_pawn_penalty": 0,
         "threatened_pawn_captures": 0,
         "safe_threatened_pawn_captures": 0,
@@ -247,13 +247,11 @@ def get_reward(game, isPlayer1, reward_dict_id,sparse=False):
         "game_duration_penalty": 0
     },
 
-    # My best guess at a good weighting
-    #reward_weights_v1 = 
-    {
+    {   # version 1
         "move_forwards": 0,
         "move_pawn_forwards": 0.01,
         "defended_pawn_move": 0,
-        "unsafe_king_move": -0.5,
+        "unsafe_king": -0.5,
         "undefended_attackable_pawn_penalty": -0.05,
         "threatened_pawn_captures": 0,
         "safe_threatened_pawn_captures": 0.05,
@@ -265,13 +263,11 @@ def get_reward(game, isPlayer1, reward_dict_id,sparse=False):
         "game_duration_penalty": -0.01
     },
 
-    # Alternative
-    #reward_weights_v2 = 
-    {
+    {   # version 2
         "move_forwards": 0,
         "move_pawn_forwards": 0.01,
         "defended_pawn_move": 0.025,
-        "unsafe_king_move": -0.5,
+        "unsafe_king": -0.5,
         "undefended_attackable_pawn_penalty": -0.05,
         "threatened_pawn_captures": 0.025,
         "safe_threatened_pawn_captures": 0.05,
@@ -281,31 +277,12 @@ def get_reward(game, isPlayer1, reward_dict_id,sparse=False):
         "shrine_win_possible": 0.5,
         "win": 1,
         "game_duration_penalty": -0.01
-    },
-
-    # Discuss weights assigned to each reward with team
-    #reward_weights = 
-    {
-        "move_forwards": 0,
-        "move_pawn_forwards": 0.01,
-        "defended_pawn_move": 0,
-        "unsafe_king_move": -0.5,
-        "undefended_attackable_pawn_penalty": -0.05,
-        "threatened_pawn_captures": 0,
-        "safe_threatened_pawn_captures": 0.05,
-        "threatened_king_capture": 0.05,
-        "pawn_taken": 0.25,
-        "pawn_lost": -0.25,
-        "shrine_win_possible": 0.5,
-        "win": 1,
-        "game_duration_penalty": -0.01
     }]
 
-    reward_dict = { 
-    
+    reward_dict = {
         "move_forwards": move_forwards,
         "move_pawn_forwards": move_pawn_forwards,
-        "unsafe_king_move": unsafe_king_move,
+        "unsafe_king": unsafe_king,
         "undefended_attackable_pawn_penalty": undefended_attackable_pawn_penalty,
         "defended_pawn_move": defended_pawn_move,
         "threatened_pawn_captures": threatened_pawn_captures,
@@ -318,11 +295,11 @@ def get_reward(game, isPlayer1, reward_dict_id,sparse=False):
         "game_duration_penalty": 1
     }
 
-    reward_dict=reward_dicts[reward_dict_id]
+    reward_weights = reward_weights[reward_dict_id]
 
     reward = 0
     for k, r in reward_dict.items():
-        reward += r * reward_dict[k]
+        reward += r * reward_weights[k]
     return reward
 
 

@@ -13,7 +13,7 @@ import onitama
 import gym
 
 
-def train_rl(seed, eval_freq, total_timesteps, isDQN, isRandom, decrease_threshold, threshold_decrease_factor, win_rate_threshold, reward_dict):
+def train_rl(seed, eval_freq, total_timesteps, isDQN, isRandom, decrease_threshold, threshold_decrease_factor, win_rate_threshold, reward_dict, initial_threshold=0.0):
     agent_type = RandomAgent if isRandom else SimpleAgent
     env = gym.make("Onitama-v0", seed=seed, agent_type=agent_type, verbose=False, reward_dict=reward_dict)
     eval_env = gym.make("Onitama-v0", seed=seed, agent_type=agent_type, verbose=False)
@@ -21,6 +21,10 @@ def train_rl(seed, eval_freq, total_timesteps, isDQN, isRandom, decrease_thresho
 
     #Only decrease threshold if playing SimpleAgent
     assert not isRandom or not decrease_threshold
+
+    if initial_threshold > 0:
+        env.game.agent.threshold = initial_threshold
+        eval_env.game.agent.threshold = initial_threshold
 
     if not isRandom and decrease_threshold:
         env.game.agent.threshold = 1
@@ -82,7 +86,8 @@ if __name__ == "__main__":
     parser.add_argument('--threshold_decrease_factor', default=1, type=float, help="How much to decrease proportion of random moves made by simple agent by. -(n * 0.1)")
     parser.add_argument('--win_rate_threshold', default=0.8, type=float, help="Proportion of wins by RL agent before decreasing Simple Agent Stochasicity")
     parser.add_argument('--reward_dict', default=0, type=int, help="Which reward dict index to use.")
+    parser.add_argument('--initial_threshold', default=0.0, type=float, help="Set fixed random/simple blend")
 
     args = parser.parse_args()
 
-    train_rl(args.seed, args.eval_freq, args.total_timesteps, args.DQN, args.random, args.decrease_threshold, args.threshold_decrease_factor, args.win_rate_threshold, args.reward_dict)
+    train_rl(args.seed, args.eval_freq, args.total_timesteps, args.DQN, args.random, args.decrease_threshold, args.threshold_decrease_factor, args.win_rate_threshold, args.reward_dict, args.initial_threshold)
